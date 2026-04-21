@@ -1,0 +1,12 @@
+# umumiy
+.env
+.DS_Store
+
+# frontend (minna-web)
+minna-web/node_modules
+minna-web/.next
+minna-web/.env
+
+# backend (minna-api)
+minna-api/vendor
+minna-api/.env
