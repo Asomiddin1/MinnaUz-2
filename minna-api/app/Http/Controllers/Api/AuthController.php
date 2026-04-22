@@ -24,13 +24,14 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
 
-            $$allowedAdmins = explode(',', env('ADMIN_EMAILS', ''));
+            // Typo to'g'rilandi: $$ o'rniga bitta $ 
+            $allowedAdmins = explode(',', env('ADMIN_EMAILS', ''));
 
             $user = User::where('email', $googleUser->getEmail())->first();
             $role = in_array($googleUser->getEmail(), $allowedAdmins) ? 'admin' : 'user';
 
             if (!$user) {
-                // Agar umuman bazada yo'q bo'lsa
+                // Agar umuman bazada yo'q bo'lsa (Birinchi marta Google orqali kirdi)
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
@@ -43,12 +44,24 @@ class AuthController extends Controller
                     'email_verified_at' => Carbon::now(),
                 ]);
             } else {
-                // Foydalanuvchi bazada bor bo'lsa (OTP bilan kirgan bo'lsa)
+                // Foydalanuvchi bazada bor bo'lsa (Oldin OTP yoki Google bilan kirgan)
                 $user->google_id = $googleUser->getId();
-                $user->avatar = $googleUser->getAvatar();
                 
-                // YANGI: Email qismini Googledagi haqiqiy ismiga almashtiramiz
-                $user->name = $googleUser->getName(); 
+                // MANTIQIY TEKSHIRUV:
+                // Emailning '@' dan oldingi qismini ajratib olamiz (OTP ro'yxatdan o'tkazgan taxminiy ism)
+                $emailPrefix = explode('@', $user->email)[0];
+                
+                // Agar foydalanuvchi ismi bo'sh bo'lsa Yoki ism OTP yaratgan "email-ism" ga teng bo'lsa,
+                // demak u hali haqiqiy ismini kiritmagan. Shundagina Google ismiga almashtiramiz.
+                if (empty($user->name) || $user->name === $emailPrefix) {
+                    $user->name = $googleUser->getName(); 
+                }
+                
+                // Agar foydalanuvchida umuman rasm (avatar) bo'lmasa, Google rasmini qo'yamiz.
+                // Bu degani: agar u o'z profiliga boshqa rasm yuklagan bo'lsa, Google uni ustidan yozib yubormaydi (eslab qoladi).
+                if (empty($user->avatar)) {
+                    $user->avatar = $googleUser->getAvatar();
+                }
                 
                 $user->email_verified_at = Carbon::now();
                 
@@ -72,7 +85,7 @@ class AuthController extends Controller
             $user->last_login_at = $now;
             $user->save(); 
 
-            // YANGI: Barcha eski tokenlarni o'chirib yuboramiz (Bazani toza saqlash uchun)
+            // Barcha eski tokenlarni o'chirib yuboramiz (Bazani toza saqlash uchun)
             $user->tokens()->delete();
 
             // Yagona yangi token yaratamiz

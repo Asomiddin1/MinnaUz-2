@@ -5,15 +5,26 @@ import { getToken } from "next-auth/jwt"
 export async function middleware(req: NextRequest) {
   const token = await getToken({ req })
 
-  const isAuthPage = req.nextUrl.pathname.startsWith("/auth")
-  const isDashboard = req.nextUrl.pathname.startsWith("/dashboard")
+  const path = req.nextUrl.pathname;
+  
+  const isAuthPage = path.startsWith("/auth");
+  const isDashboard = path.startsWith("/dashboard");
+  
+  // Admin sahifalari qaysi yo'lda ekanligini belgilaymiz (o'zingizning proyektga moslang)
+  const isAdminPage = path.startsWith("/dashboard/admin") || path.startsWith("/admin");
 
-  // ❌ login bo‘lmagan user dashboardga kira olmaydi
-  if (isDashboard && !token) {
+  // 1. Login bo‘lmagan user dashboard yoki admin sahifaga kira olmaydi
+  if ((isDashboard || isAdminPage) && !token) {
     return NextResponse.redirect(new URL("/auth/login", req.url))
   }
 
-  // ❌ login bo‘lgan user auth page ko‘rmasin
+  // 2. ❌ Oddiy user (roli admin bo'lmaganlar) admin sahifaga kirmasligi kerak
+  if (isAdminPage && token?.role !== "admin") {
+    // Ularni oddiy dashboard sahifasiga qaytarib yuboramiz
+    return NextResponse.redirect(new URL("/dashboard", req.url))
+  }
+
+  // 3. Login bo‘lgan user auth (login/register) sahifalarini ko‘rmasin
   if (isAuthPage && token) {
     return NextResponse.redirect(new URL("/dashboard", req.url))
   }
@@ -22,5 +33,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/:path*"],
+  // matcher ro'yxatiga admin yo'lini ham qo'shib qo'yamiz
+  matcher: ["/dashboard/:path*", "/auth/:path*", "/admin/:path*"],
 }

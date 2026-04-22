@@ -45,7 +45,7 @@ export const authOptions: NextAuthOptions = {
             email: data.user.email,
             role: data.user.role,
             token: data.access_token,
-            image: data.user?.image || null,
+            image: data.user?.avatar || null, 
           }
         }
 
@@ -80,16 +80,18 @@ export const authOptions: NextAuthOptions = {
 
             if (res.ok && data.access_token) {
               token.accessToken = data.access_token
+              // 🛠 O'ZGARISH: Middleware o'qiy olishi uchun rolni root tokenga saqlaymiz
+              token.role = data.user?.role || "user"
 
-              // fallback safe user mapping
               token.user = {
                 name: data.user?.name || user.name,
                 email: data.user?.email || user.email,
-                image: data.user?.image || user.image,
+                image: data.user?.avatar || user.image, // 🛠 avatar
                 role: data.user?.role || "user",
               }
             } else {
               // ⚠️ fallback agar backend ishlamasa
+              token.role = "user"
               token.user = {
                 name: user.name,
                 email: user.email,
@@ -99,8 +101,8 @@ export const authOptions: NextAuthOptions = {
             }
           } catch (error) {
             console.error("Google login error:", error)
-
             // fallback
+            token.role = "user"
             token.user = {
               name: user.name,
               email: user.email,
@@ -113,6 +115,8 @@ export const authOptions: NextAuthOptions = {
         // 🟡 CREDENTIALS LOGIN
         if (account.provider === "credentials") {
           token.accessToken = (user as any).token
+          // 🛠 O'ZGARISH: Middleware uchun rol
+          token.role = (user as any).role 
           token.user = user
         }
       }
