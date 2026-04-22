@@ -4,6 +4,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { AuthProvider } from "@/components/providers/AuthProvider"
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -36,7 +37,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
+            <AuthProvider>
             {children}
+            </AuthProvider>
           </TooltipProvider>
         </ThemeProvider>
       </body>

@@ -15,8 +15,24 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('google_id')->nullable();
+            
+            // QO'SHILDI: Google profil rasmi va OTP uchun kerakli maydonlar
+            $table->string('avatar')->nullable(); 
+            $table->string('otp_code')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
+
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable(); // OTP yoki Google bilan kirganda parol shart emas, shuning uchun nullable yaxshi
+            
+            // Rol (Foydalanuvchi huquqlari)
+            $table->string('role')->default('user'); // 'user', 'admin', 'teacher' va hokazo.
+            
+            // Gamifikatsiya (O'yinlashtirish) qismi
+            $table->integer('coins')->default(0); 
+            $table->integer('streak')->default(0); 
+            $table->timestamp('last_login_at')->nullable(); 
+            
             $table->rememberToken();
             $table->timestamps();
         });

@@ -3,21 +3,21 @@ import { Button } from "@/components/ui/button"
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
+    <div className="flex min-h-svh items-center justify-center p-6">
+      <div className="flex max-w-md min-w-0 flex-col gap-6 text-center text-sm leading-loose">
         <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
+          <h1 className="text-3xl font-bold mb-2">Yapon tilini biz bilan o'rganing!</h1>
+          <p className="text-muted-foreground mb-6">
+            Platformamizga xush kelibsiz. O'z bilimingizni oshiring, kunlik streaklarni saqlang va tangalar yig'ing.
+          </p>
 
-          <Button asChild className="mt-2">
-            <Link href="/dashboard">Dashboard</Link>
+          <Button asChild className="w-full text-lg py-6 mt-2">
+            <Link href="/auth/login">Platformaga kirish</Link>
           </Button>
-
         </div>
 
         <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
+          (Press <kbd className="bg-muted px-1 rounded">d</kbd> to toggle dark mode)
         </div>
       </div>
     </div>

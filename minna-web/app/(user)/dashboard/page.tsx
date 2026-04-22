@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Copy, Gamepad2, BookOpen, GraduationCap, ShoppingCart, Languages, Sparkles, Gem, Layers } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 // Ma'lumotlarni bitta joyda saqlaymiz
 const MENU_ITEMS = [
@@ -18,6 +19,7 @@ const MENU_ITEMS = [
 ]
 
 export default function DashboardPage() {
+   const { data: session, status } = useSession()
   return (
     <div className="w-full">
       
@@ -32,11 +34,11 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <div className="w-[46px] h-[46px] rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm bg-blue-100 dark:bg-slate-800 flex-shrink-0 transition-colors">
               {/* O'zingizning haqiqiy rasmingiz yoki avatarni shu yerga qo'yasiz */}
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" className="w-full h-full object-cover" />
+              {session?.user?.image && <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />}
             </div>
             <div className="flex flex-col">
               <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">こんにちは</span>
-              <span className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">Asomiddin Qarshiyev</span>
+              <span className="text-[15px] font-bold text-slate-900 dark:text-white leading-tight">{session?.user?.name }</span>
             </div>
           </div>
           
