@@ -166,7 +166,6 @@ class AuthController extends Controller
         $user->otp_code = null;
         $user->save();
 
-        // YANGI: OTP bilan kirganda ham eski tokenlarni o'chiramiz
         $user->tokens()->delete();
 
         $token = $user->createToken('auth_token')->plainTextToken;

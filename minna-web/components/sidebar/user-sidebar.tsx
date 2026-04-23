@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton" // ✅ Skeleton import
 
 import {
   Home,
@@ -127,41 +128,56 @@ export function UserSidebar() {
           )}
         </SidebarMenu>
 
-        {/* USER INFO */}
-       {/* USER INFO */}
-<div className="mt-auto border-t border-slate-200/60 p-4 dark:border-slate-800/80">
-  <div className={`flex items-center pt-4 ${collapsed ? "justify-center" : "gap-3"}`}>
+        {/* USER INFO (Skeleton bilan) */}
+        <div className="mt-auto border-t border-slate-200/60 p-4 dark:border-slate-800/80">
+          <div className={`flex items-center  ${collapsed ? "justify-center" : "gap-3"}`}>
 
-    {/* Avatar */}
-    {session?.user?.image ? (
-      <img
-        src={session.user.image}
-        alt="avatar"
-        className="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
-      />
-    ) : (
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-white font-bold">
-        {userName?.charAt(0)?.toUpperCase() || "U"}
-      </div>
-    )}
+            {/* Loading holatida avatar skeleton */}
+            {status === "loading" ? (
+              <Skeleton className="h-9 w-9 rounded-full" />
+            ) : (
+              // Avatar (yuklanganda)
+              session?.user?.image ? (
+                <img
+                  src={session.user.image}
+                  alt="avatar"
+                  className="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-white font-bold">
+                  {userName?.charAt(0)?.toUpperCase() || "U"}
+                </div>
+              )
+            )}
 
-    {!collapsed && (
-      <div className="flex flex-col">
-        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-          {status === "loading" ? "Loading..." : userName}
-        </span>
+            {!collapsed && (
+              <div className="flex flex-col space-y-1.5">
+                {status === "loading" ? (
+                  // Skeleton matnlar
+                  <>
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                  </>
+                ) : (
+                  // Haqiqiy ma'lumotlar
+                  <>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      {userName}
+                    </span>
+                    {userEmail && (
+                      <span className="text-xs text-slate-500">
+                        {userEmail}
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
-        {userEmail && (
-          <span className="text-xs text-slate-500">
-            {userEmail}
-          </span>
-        )}
-      </div>
-    )}
-  </div>
-</div>
         {/* LOGOUT */}
-        <div className="border-t border-slate-200/60 pt-3 dark:border-slate-800/80">
+        <div className="border-t border-slate-200/60 px-2 pb-3 dark:border-slate-800/80">
           <button
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
             className={`flex h-10 w-full items-center rounded-xl text-red-500 hover:bg-red-500/10 dark:text-red-400

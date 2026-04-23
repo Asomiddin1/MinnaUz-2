@@ -1,97 +1,168 @@
-"use client" // usePathname ishlatganimiz uchun bu shart
+"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { signOut } from "next-auth/react"
-import { 
-  LayoutDashboard, 
-  Users, 
-  Settings, 
-  LogOut 
-} from "lucide-react"
-
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuButton,
+  useSidebar,
 } from "@/components/ui/sidebar"
-
-// Menyular ro'yxati (kodni toza saqlash uchun alohida yozamiz)
-const menuItems = [
-  {
-    title: "Dashboard",
-    url: "/admin/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Foydalanuvchilar",
-    url: "/admin/users",
-    icon: Users,
-  },
-  {
-    title: "Sozlamalar",
-    url: "/admin/settings",
-    icon: Settings,
-  },
-]
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Home,
+  Users,
+  PanelLeftClose,
+  PanelLeft,
+  LogOut,
+} from "lucide-react"
+import { signOut, useSession } from "next-auth/react"
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const { state, toggleSidebar } = useSidebar()
+  const collapsed = state === "collapsed"
+  const { data: session, status } = useSession()
+
+  const menuItems = [
+    { name: "Dashboard", href: "/admin", icon: Home },
+    {name: "Users", href:'/admin/users' , icon: Users}
+  ]
+
+  const userName = session?.user?.name || "Guest User"
+  const userEmail = session?.user?.email || ""
 
   return (
-    <Sidebar>
-      {/* 1. Sidebar Tepa qismi (Logotip yoki Sarlavha) */}
-      <SidebarHeader className="p-4 border-b">
-        <h2 className="text-xl font-bold tracking-tight">Admin Panel</h2>
-      </SidebarHeader>
+    <Sidebar collapsible="icon">
+      <SidebarContent className="flex h-full flex-col overflow-hidden">
+        {/* LOGO */}
+        <div
+          className={`mb-2 flex items-center p-6 ${
+            collapsed ? "justify-center px-2" : "justify-between"
+          }`}
+        >
+          {!collapsed ? (
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border bg-background font-semibold">
+                M
+              </div>
+              <span className="text-sm font-medium tracking-wide">
+                MinnaUz Admin
+              </span>
+            </div>
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border bg-background font-semibold">
+              M
+            </div>
+          )}
 
-      {/* 2. Asosiy Menyular */}
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Asosiy menyu</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => {
-                // Hozirgi URL menyu URL iga tengmi yoki yo'qmi tekshiramiz
-                const isActive = pathname === item.url || pathname.startsWith(`${item.url}/`)
+          <button
+            onClick={toggleSidebar}
+            className={`text-muted-foreground transition-colors hover:text-foreground ${
+              collapsed ? "hidden" : "block"
+            }`}
+          >
+            <PanelLeftClose size={20} />
+          </button>
+        </div>
 
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
-                      <Link href={item.url}>
-                        <item.icon className="w-4 h-4 mr-2" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+        {/* COLLAPSED TOGGLE */}
+        {collapsed && (
+          <button
+            onClick={toggleSidebar}
+            className="mx-auto mb-4 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <PanelLeft size={20} />
+          </button>
+        )}
 
-      {/* 3. Sidebar Pastki qismi (Chiqib ketish tugmasi) */}
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              <span>Tizimdan chiqish</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+        {/* MENU */}
+        <SidebarMenu
+          className={`flex-1 space-y-1 px-3 ${
+            collapsed ? "items-center px-2" : ""
+          }`}
+        >
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href
+
+            return (
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton asChild isActive={isActive} tooltip={item.name}>
+                  <Link
+                    href={item.href}
+                    className={`flex h-10 items-center  rounded-md transition-colors ${
+                      collapsed ? "w-10 justify-center" : "w-full gap-3 px-3"
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {!collapsed && <span>{item.name}</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
-      </SidebarFooter>
+
+        {/* USER INFO */}
+        <div className="mt-auto border-t p-3">
+          <div
+            className={`flex items-center ${
+              collapsed ? "justify-center" : "gap-3"
+            }`}
+          >
+            {status === "loading" ? (
+              <>
+                <Skeleton className="h-9 w-9 rounded-full" />
+                {!collapsed && (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {session?.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt="avatar"
+                    className="h-9 w-9 rounded-full border object-cover"
+                  />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                {!collapsed && (
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">{userName}</span>
+                    {userEmail && (
+                      <span className="text-xs text-muted-foreground">
+                        {userEmail}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* LOGOUT */}
+        <div className="border-t px-3 pb-3 pt-2">
+          <button
+            onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            className={`flex h-10 w-full items-center rounded-md text-destructive transition-colors hover:bg-destructive/10 ${
+              collapsed ? "justify-center" : "gap-3 px-3"
+            }`}
+          >
+            <LogOut className="h-5 w-5" />
+            {!collapsed && <span className="font-medium">Logout</span>}
+          </button>
+        </div>
+      </SidebarContent>
     </Sidebar>
   )
 }

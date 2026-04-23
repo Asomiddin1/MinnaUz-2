@@ -8,15 +8,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <AdminSidebar />
 
       <SidebarInset>
-
-        <header className="flex h-14 items-center border-b px-4">
-          <SidebarTrigger />
-        </header>
-
         <main className="p-6">
           {children}
         </main>
-
       </SidebarInset>
 
     </SidebarProvider>

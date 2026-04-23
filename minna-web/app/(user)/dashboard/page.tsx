@@ -22,10 +22,6 @@ export default function DashboardPage() {
    const { data: session, status } = useSession()
   return (
     <div className="w-full">
-      
-      {/* ========================================================= */}
-      {/* 📱 MOBILE VIEW: XUDDI RASMDAGI KABI (md:hidden)           */}
-      {/* ========================================================= */}
       <div className="md:hidden space-y-6">
         
         {/* 0. PROFIL VA TANGALAR */}
@@ -47,7 +43,7 @@ export default function DashboardPage() {
             <div className="w-[18px] h-[18px] rounded-full bg-[#FFB800] flex items-center justify-center text-white text-[10px] shadow-inner">
               🪙
             </div>
-            <span className="font-bold text-[13px] text-slate-800 dark:text-slate-200">1000</span>
+            <span className="font-bold text-[13px] text-slate-800 dark:text-slate-200"></span>
           </div>
         </header>
 

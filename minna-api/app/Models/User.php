@@ -19,18 +19,18 @@ class User extends Authenticatable
         'email',
         'password',
         'google_id',
-        'avatar',              // <-- QO'SHILDI (Rasm uchun)
+        'avatar',
         'role',
         'coins',
         'streak',
         'last_login_at',
         'otp_code',
         'otp_expires_at',
-        'email_verified_at',   // <-- QO'SHILDI (Create ichida xato bermasligi uchun)
+        'email_verified_at',
     ];
 
     /**
-     * Hidden fields
+     * Hidden fields (API response’da ko‘rinmaydi)
      */
     protected $hidden = [
         'password',
@@ -39,7 +39,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Casts
+     * Casts (data type larni to‘g‘rilaydi)
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
@@ -47,4 +47,5 @@ class User extends Authenticatable
         'otp_expires_at' => 'datetime',
         'password' => 'hashed',
     ];
+
 }
