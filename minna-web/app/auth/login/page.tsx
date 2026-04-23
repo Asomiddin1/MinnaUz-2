@@ -38,7 +38,6 @@ export default function LoginPage() {
     setError("")
 
     try {
-      // 1-O'ZGARISH: /api/auth/register o'rniga /api/auth/send-otp
       const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },

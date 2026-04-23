@@ -34,10 +34,6 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      {/* O'ZGARISH: 
-        1. h-[100dvh] - ekranga qat'iy moslashadi (Safari/Chrome manzil qatorini inobatga oladi).
-        2. overflow-hidden - butun ekran qimirlashini bloklaydi.
-      */}
       <div className="flex h-[100dvh] w-full bg-[#F8FAFC] dark:bg-slate-950 relative overflow-hidden transition-colors duration-300">
         
         {/* ✨ TARQOQ KICHIK DOIRALAR */}
@@ -60,12 +56,6 @@ export default function DashboardLayout({
         <div className="hidden md:block h-full z-20">
           <UserSidebar />
         </div>
-        
-        {/* O'ZGARISH: 
-          1. h-full - O'ziga berilgan joyni to'liq egallaydi.
-          2. overflow-y-auto - Faqat shu quti ichkarisi skroll bo'ladi.
-          3. pb-[90px] - Kontent pastki menyu orqasiga kirib ketib qolmasligi uchun joy tashlanadi.
-        */}
         <main className="flex-1 flex flex-col w-full h-full relative z-10 overflow-y-auto pb-[90px] md:pb-0">
           
           {/* 🍞 BREADCRUMBS */}
