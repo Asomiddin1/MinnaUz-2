@@ -104,7 +104,13 @@ export function AdminSidebar() {
             )
           })}
         </SidebarMenu>
-
+        {session?.user?.role === "admin" && (
+          <Link href={"/dashboard"} className="flex justify-center px-4 py-2">
+            <button className="w-full cursor-pointer rounded-2xl bg-[#4b4b4b] hover:bg-gray-700 transition-colors py-1.5 text-white text-sm font-medium">
+              {collapsed ? "D" : "Back to Dashboard"}
+            </button>
+          </Link>
+        )}
         {/* USER INFO */}
         <div className="mt-auto border-t p-3">
           <div

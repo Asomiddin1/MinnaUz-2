@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { Skeleton } from "@/components/ui/skeleton" // ✅ Skeleton import
+import { Skeleton } from "@/components/ui/skeleton"
 
 import {
   Home,
@@ -52,9 +52,10 @@ export function UserSidebar() {
       className="border-r border-slate-200 bg-gradient-to-b from-[#f5f7fa] to-[#e0e4ea] dark:border-slate-800 dark:bg-slate-900 dark:bg-none"
     >
       <SidebarContent className="flex h-full flex-col overflow-hidden">
-
         {/* LOGO */}
-        <div className={`mb-2 flex items-center p-6 ${collapsed ? "justify-center px-2" : "justify-between"}`}>
+        <div
+          className={`mb-2 flex items-center p-6 ${collapsed ? "justify-center px-2" : "justify-between"}`}
+        >
           {!collapsed ? (
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-400 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
@@ -89,22 +90,26 @@ export function UserSidebar() {
         )}
 
         {/* MENU */}
-        <SidebarMenu className={`flex-1 space-y-2 px-4 ${collapsed ? "items-center px-2" : ""}`}>
+        <SidebarMenu
+          className={`flex-1 space-y-2 px-4 ${collapsed ? "items-center px-2" : ""}`}
+        >
           {menuItems.map((item) => {
             const isActive = pathname === item.href
 
             return (
               <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton asChild isActive={isActive} tooltip={item.name}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  tooltip={item.name}
+                >
                   <Link
                     href={item.href}
-                    className={`flex h-11 items-center rounded-xl transition-all
-                      ${collapsed ? "w-11 justify-center" : "w-full gap-3 px-4"}
-                      ${
-                        isActive
-                          ? "bg-white text-slate-900 shadow-sm border border-slate-200 dark:bg-slate-800 dark:text-white dark:border-slate-700"
-                          : "text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800/50"
-                      }`}
+                    className={`flex h-11 items-center rounded-xl transition-all ${collapsed ? "w-11 justify-center" : "w-full gap-3 px-4"} ${
+                      isActive
+                        ? "border border-slate-200 bg-white text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        : "text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800/50"
+                    }`}
                   >
                     <item.icon className="h-5 w-5" />
                     {!collapsed && <span>{item.name}</span>}
@@ -128,26 +133,34 @@ export function UserSidebar() {
           )}
         </SidebarMenu>
 
-        {/* USER INFO (Skeleton bilan) */}
-        <div className="mt-auto border-t border-slate-200/60 p-4 dark:border-slate-800/80">
-          <div className={`flex items-center  ${collapsed ? "justify-center" : "gap-3"}`}>
+        {/* ADMIN PANEL BUTTON - ROLE ORQALI TEKSHIRISH */}
+        {session?.user?.role === "admin" && (
+          <Link href={"/admin"} className="flex justify-center px-4 py-2">
+            <button className="w-full cursor-pointer rounded-2xl bg-[#4b4b4b] hover:bg-gray-700 transition-colors py-1.5 text-white text-sm font-medium">
+              {collapsed ? "A" : "Admin Panel"}
+            </button>
+          </Link>
+        )}
 
+        {/* USER INFO */}
+        <div className="mt-auto border-t border-slate-200/60 p-4 dark:border-slate-800/80">
+          <div
+            className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}
+          >
             {/* Loading holatida avatar skeleton */}
             {status === "loading" ? (
               <Skeleton className="h-9 w-9 rounded-full" />
+            ) : // Avatar (yuklanganda)
+            session?.user?.image ? (
+              <img
+                src={session.user.image}
+                alt="avatar"
+                className="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-slate-700"
+              />
             ) : (
-              // Avatar (yuklanganda)
-              session?.user?.image ? (
-                <img
-                  src={session.user.image}
-                  alt="avatar"
-                  className="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-slate-700"
-                />
-              ) : (
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-white font-bold">
-                  {userName?.charAt(0)?.toUpperCase() || "U"}
-                </div>
-              )
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 font-bold text-white">
+                {userName?.charAt(0)?.toUpperCase() || "U"}
+              </div>
             )}
 
             {!collapsed && (
@@ -180,14 +193,12 @@ export function UserSidebar() {
         <div className="border-t border-slate-200/60 px-2 pb-3 dark:border-slate-800/80">
           <button
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
-            className={`flex h-10 w-full items-center rounded-xl text-red-500 hover:bg-red-500/10 dark:text-red-400
-              ${collapsed ? "justify-center" : "gap-3 px-4"}`}
+            className={`flex h-10 w-full items-center rounded-xl text-red-500 hover:bg-red-500/10 dark:text-red-400 ${collapsed ? "justify-center" : "gap-3 px-4"}`}
           >
             <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="font-medium">Logout - test</span>}
+            {!collapsed && <span className="font-medium">Logout</span>}
           </button>
         </div>
-
       </SidebarContent>
     </Sidebar>
   )
