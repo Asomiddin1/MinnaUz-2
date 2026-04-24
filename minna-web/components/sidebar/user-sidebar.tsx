@@ -184,7 +184,7 @@ export function UserSidebar() {
               ${collapsed ? "justify-center" : "gap-3 px-4"}`}
           >
             <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="font-medium">Logout</span>}
+            {!collapsed && <span className="font-medium">Logout - test</span>}
           </button>
         </div>
 
