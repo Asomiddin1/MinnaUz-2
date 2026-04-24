@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { es } from "date-fns/locale"
+import { es } from "date-fns/locale" // Agar ispan tili kerak bo'lsa
 
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent } from "@/components/ui/card"
@@ -17,11 +17,11 @@ export function StreakCalendar() {
   )
 
   return (
-    <Card className="mx-auto w-fit p-0">
-      <CardContent className="p-0">
+    // Kalendar to'liq moslashuvchan bo'lishi uchun lg:w-fit ishlatdik
+    <Card className="w-full lg:w-fit p-1 border-none shadow-sm dark:bg-slate-900 rounded-2xl">
+      <CardContent className="p-0 flex justify-center">
         <Calendar
           mode="single"
-          // Import qilingan tilni (es - ispan tili) shu yerda ulaysiz:
           locale={es} 
           defaultMonth={date}
           selected={date}
@@ -33,6 +33,7 @@ export function StreakCalendar() {
           modifiersClassNames={{
             booked: "[&>button]:line-through opacity-100",
           }}
+          className="rounded-xl"
         />
       </CardContent>
     </Card>

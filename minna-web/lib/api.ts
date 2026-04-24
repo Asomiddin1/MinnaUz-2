@@ -33,7 +33,13 @@ apiClient.interceptors.request.use((config) => {
 });
 
 export const userAPI = {
+  // profile
   getProfile: (): Promise<AxiosResponse> => apiClient.get('/user'),
+  // admin users
+  getAllUsers: (page: number = 1, search: string = '') => 
+    apiClient.get(`/users?page=${page}&search=${search}`),  
+  updateUser: (id: number, data: any) => apiClient.put(`/users/${id}`, data),
+  deleteUser: (id: number) => apiClient.delete(`/users/${id}`),
 };
 
 export default apiClient;

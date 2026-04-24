@@ -1,18 +1,32 @@
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AdminSidebar } from "@/components/sidebar/admin-sidebar"
+import { AdminSidebar } from "@/components/sidebar/admin-sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <SidebarProvider>
-
+      {/* Yon panel (Desktopda doim turadi, mobilda yashirinadi) */}
       <AdminSidebar />
 
-      <SidebarInset>
-        <main className="p-6">
+      {/* Asosiy qism */}
+      <div className="flex w-full flex-1 flex-col">
+        
+        {/* MOBIL UCHUN HEADER VA OCHISH TUGMASI (Faqat telefonda chiqadi) */}
+        <header className="flex h-14 items-center gap-4 border-b bg-background px-4 md:hidden">
+          <SidebarTrigger /> {/* <--- Shu tugma yon panelni ochib beradi */}
+          <span className="font-semibold">MinnaUz Admin</span>
+        </header>
+
+        {/* Asosiy sahifa (Sahifalar shu yerda render bo'ladi) */}
+        <main className="flex-1 overflow-auto bg-gray-50/50">
           {children}
         </main>
-      </SidebarInset>
-
+        
+      </div>
     </SidebarProvider>
-  )
+  );
 }

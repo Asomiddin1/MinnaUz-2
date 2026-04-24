@@ -59,7 +59,7 @@ export default function DashboardLayout({
         <main className="flex-1 flex flex-col w-full h-full relative z-10 overflow-y-auto pb-[90px] md:pb-0">
           
           {/* 🍞 BREADCRUMBS */}
-          <div className="px-6 pt-4 pb-2 hidden md:block">
+          <div className="px-6  pb-2 pt-2 hidden md:block">
             <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/dashboard" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
                 <span>Bosh sahifa</span>
@@ -83,7 +83,7 @@ export default function DashboardLayout({
           </div>
 
           {/* 🖥️ ASOSIY SAHIFA KONTENTI */}
-          <div className="p-4 md:p-6 pt-2">
+          <div className="px-4">
             {children}
           </div>
 
