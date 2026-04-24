@@ -27,6 +27,7 @@ class User extends Authenticatable
         'otp_code',
         'otp_expires_at',
         'email_verified_at',
+        'is_premium', // ✅ premium flag
     ];
 
     /**
@@ -45,7 +46,25 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
         'otp_expires_at' => 'datetime',
+        'is_premium' => 'boolean', // ✅ muhim
         'password' => 'hashed',
     ];
 
+    /**
+     * 🔥 DEVICE LIMIT (ENG MUHIM FUNKSIYA)
+     * Free → 2 device
+     * Premium → 5 device
+     */
+    public function deviceLimit(): int
+    {
+        return $this->is_premium ? 5 : 2;
+    }
+
+    /**
+     * (Optional) User premium ekanligini tekshirish
+     */
+    public function isPremium(): bool
+    {
+        return $this->is_premium;
+    }
 }

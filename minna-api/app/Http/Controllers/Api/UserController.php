@@ -1,29 +1,56 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    // =========================
+    // USERS LIST
+    // =========================
     public function index(Request $request)
-{
-    $query = User::query();
+    {
+        $query = User::query();
 
-    // Agar so'rovda 'search' bo'lsa, ism yoki email bo'yicha izlash
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where('name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%");
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        $users = $query->latest()->paginate(10);
+
+        return response()->json([
+            'data' => $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'coins' => $user->coins,
+                    'streak' => $user->streak,
+                    'avatar' => $user->avatar,
+                    'is_premium' => $user->is_premium,
+                    'device_limit' => $user->deviceLimit(),
+                ];
+            }),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'total' => $users->total(),
+            ]
+        ]);
     }
 
-    // Eng oxirgi qo'shilganlarni birinchi chiqarish va sahifalash
-    return UserResource::collection($query->latest()->paginate(10));
-}
-
-    // Foydalanuvchini yangilash (Role, Coins, Name va h.k.)
+    // =========================
+    // UPDATE USER (SAFE)
+    // =========================
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
@@ -31,17 +58,37 @@ class UserController extends Controller
             'role' => 'sometimes|string|in:user,admin,teacher',
             'coins' => 'sometimes|integer|min:0',
             'streak' => 'sometimes|integer|min:0',
+            'is_premium' => 'sometimes|boolean',
         ]);
 
         $user->update($validated);
 
-        return new UserResource($user);
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'coins' => $user->coins,
+                'streak' => $user->streak,
+                'avatar' => $user->avatar, // 🔥 YO‘QOLMAYDI
+                'is_premium' => $user->is_premium,
+                'device_limit' => $user->deviceLimit(),
+            ]
+        ]);
     }
 
-    // Foydalanuvchini o'chirish (agar kerak bo'lsa)
+    // =========================
+    // DELETE USER
+    // =========================
     public function destroy(User $user)
     {
         $user->delete();
-        return response()->json(['message' => 'Foydalanuvchi o‘chirildi']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted'
+        ]);
     }
 }

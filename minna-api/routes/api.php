@@ -14,13 +14,26 @@ Route::prefix('auth')->group(function () {
 
 // Himoyalangan yo'llar (Token kerak)
 Route::middleware('auth:sanctum')->group(function () {
-    // Profilni olish
+
+    // Profilni olish (FIXED VERSION)
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return response()->json([
+            'user' => [
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
+                'email' => $request->user()->email,
+                'avatar' => $request->user()->avatar,
+                'role' => $request->user()->role,
+                'coins' => $request->user()->coins,
+                'streak' => $request->user()->streak,
+                'is_premium' => $request->user()->is_premium,
+                'device_limit' => $request->user()->deviceLimit(),
+            ]
+        ]);
     });
 
-    // Foydalanuvchilar CRUDi
-    Route::get('/users', [UserController::class, 'index']);          // Ro'yxat
-    Route::put('/users/{user}', [UserController::class, 'update']);  // Tahrirlash (Next.js dagi Modal uchun)
-    Route::delete('/users/{user}', [UserController::class, 'destroy']); // O'chirish
+    // Users CRUD
+    Route::get('/users', [UserController::class, 'index']);
+    Route::put('/users/{user}', [UserController::class, 'update']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
 });

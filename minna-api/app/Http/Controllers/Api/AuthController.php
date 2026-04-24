@@ -14,24 +14,33 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+
+   public function me(Request $request)
+{
+    return response()->json([
+        'success' => true,
+        'user' => $request->user()
+    ]);
+}
     // ==========================================
-    // 1. GOOGLE ORQALI KIRISH (Ismni yangilash, Avatar va Token tozalash)
+    // 1. GOOGLE LOGIN
     // ==========================================
     public function googleLogin(Request $request)
     {
         $request->validate(['token' => 'required|string']);
 
         try {
-            $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
+            $googleUser = Socialite::driver('google')
+                ->stateless()
+                ->userFromToken($request->token);
 
-            // Typo to'g'rilandi: $$ o'rniga bitta $ 
             $allowedAdmins = explode(',', env('ADMIN_EMAILS', ''));
 
             $user = User::where('email', $googleUser->getEmail())->first();
             $role = in_array($googleUser->getEmail(), $allowedAdmins) ? 'admin' : 'user';
 
+            // CREATE USER
             if (!$user) {
-                // Agar umuman bazada yo'q bo'lsa (Birinchi marta Google orqali kirdi)
                 $user = User::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
@@ -41,37 +50,33 @@ class AuthController extends Controller
                     'role' => $role,
                     'coins' => 0,
                     'streak' => 0,
+                    'is_premium' => false,
                     'email_verified_at' => Carbon::now(),
                 ]);
             } else {
-                // Foydalanuvchi bazada bor bo'lsa (Oldin OTP yoki Google bilan kirgan)
+
                 $user->google_id = $googleUser->getId();
-                
-                // MANTIQIY TEKSHIRUV:
-                // Emailning '@' dan oldingi qismini ajratib olamiz (OTP ro'yxatdan o'tkazgan taxminiy ism)
+
                 $emailPrefix = explode('@', $user->email)[0];
-                
-                // Agar foydalanuvchi ismi bo'sh bo'lsa Yoki ism OTP yaratgan "email-ism" ga teng bo'lsa,
-                // demak u hali haqiqiy ismini kiritmagan. Shundagina Google ismiga almashtiramiz.
+
                 if (empty($user->name) || $user->name === $emailPrefix) {
-                    $user->name = $googleUser->getName(); 
+                    $user->name = $googleUser->getName();
                 }
-                
-                // Agar foydalanuvchida umuman rasm (avatar) bo'lmasa, Google rasmini qo'yamiz.
-                // Bu degani: agar u o'z profiliga boshqa rasm yuklagan bo'lsa, Google uni ustidan yozib yubormaydi (eslab qoladi).
+
                 if (empty($user->avatar)) {
                     $user->avatar = $googleUser->getAvatar();
                 }
-                
+
                 $user->email_verified_at = Carbon::now();
-                
+
                 if ($role === 'admin' && $user->role !== 'admin') {
                     $user->role = 'admin';
                 }
             }
 
-            // Streak hisoblash
+            // STREAK LOGIC
             $now = Carbon::now();
+
             if ($user->last_login_at) {
                 if ($user->last_login_at->isYesterday()) {
                     $user->streak += 1;
@@ -83,13 +88,25 @@ class AuthController extends Controller
             }
 
             $user->last_login_at = $now;
-            $user->save(); 
+            $user->save();
 
-            // Barcha eski tokenlarni o'chirib yuboramiz (Bazani toza saqlash uchun)
-            $user->tokens()->delete();
+            // ==============================
+            // DEVICE LIMIT LOGIC 🔥
+            // ==============================
+            $limit = $user->deviceLimit(); // 2 free / 5 premium
 
-            // Yagona yangi token yaratamiz
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $currentTokens = $user->tokens()->count();
+
+            if ($currentTokens >= $limit) {
+                $user->tokens()
+                    ->orderBy('created_at', 'asc')
+                    ->first()
+                    ->delete();
+            }
+
+            $device = substr($request->header('User-Agent'), 0, 100) ?? 'unknown-device';
+
+            $token = $user->createToken($device)->plainTextToken;
 
             return response()->json([
                 'success' => true,
@@ -99,16 +116,16 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             Log::error("Google Login xatosi: " . $e->getMessage());
-            
+
             return response()->json([
-                'success' => false, 
-                'message' => 'Token yaroqsiz yoki xatolik yuz berdi: ' . $e->getMessage()
+                'success' => false,
+                'message' => 'Xatolik: ' . $e->getMessage()
             ], 401);
         }
     }
 
     // ==========================================
-    // 2. EMAIL ORQALI KOD YUBORISH
+    // 2. SEND OTP
     // ==========================================
     public function sendOtp(Request $request)
     {
@@ -116,16 +133,17 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        $otpCode = rand(100000, 999999); 
+        $otpCode = rand(100000, 999999);
 
         $user = User::firstOrCreate(
             ['email' => $request->email],
             [
                 'name' => explode('@', $request->email)[0],
-                'password' => Hash::make(uniqid()), 
-                'role' => 'user', 
+                'password' => Hash::make(uniqid()),
+                'role' => 'user',
                 'coins' => 0,
                 'streak' => 0,
+                'is_premium' => false,
             ]
         );
 
@@ -137,12 +155,12 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Emailingizga tasdiqlash kodi jo'natildi",
+            'message' => "Kod emailga yuborildi",
         ]);
     }
 
     // ==========================================
-    // 3. KODNI TASDIQLASH VA TOKEN BERISH
+    // 3. VERIFY OTP
     // ==========================================
     public function verifyOtp(Request $request)
     {
@@ -153,22 +171,34 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        Log::info("Verify urinishi:", [
-            'sent_code' => $request->otp_code,
-            'db_code' => $user ? $user->otp_code : 'user_not_found'
-        ]);
-
         if (!$user || (string)$user->otp_code !== (string)$request->otp_code) {
-            return response()->json(['success' => false, 'message' => 'Kod xato'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Kod noto‘g‘ri'
+            ], 401);
         }
 
         $user->email_verified_at = now();
         $user->otp_code = null;
         $user->save();
 
-        $user->tokens()->delete();
+        // ==============================
+        // DEVICE LIMIT LOGIC 🔥
+        // ==============================
+        $limit = $user->deviceLimit();
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $currentTokens = $user->tokens()->count();
+
+        if ($currentTokens >= $limit) {
+            $user->tokens()
+                ->orderBy('created_at', 'asc')
+                ->first()
+                ->delete();
+        }
+
+        $device = substr($request->header('User-Agent'), 0, 100) ?? 'unknown-device';
+
+        $token = $user->createToken($device)->plainTextToken;
 
         return response()->json([
             'success' => true,
