@@ -15,7 +15,7 @@ Route::prefix('auth')->group(function () {
 // Himoyalangan yo'llar (Token kerak)
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Profilni olish (FIXED VERSION)
+
     Route::get('/user', function (Request $request) {
         return response()->json([
             'user' => [
@@ -36,4 +36,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::put('/users/{user}', [UserController::class, 'update']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
+    // streak
+    Route::get('/user/streaks', [UserController::class, 'getStreaks']);
 });

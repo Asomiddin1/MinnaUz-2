@@ -1,65 +1,73 @@
-"use client"
-
-import * as React from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import React, { useState } from 'react'
+import { Calendar } from "@/components/ui/calendar"
+import { Card } from "@/components/ui/card"
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  type CarouselApi, 
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel"
+import { StreakCalendar } from './streak-calendar'
 
-export function BannerCarousel() {
-  const [api, setApi] = React.useState<CarouselApi>()
-  const [current, setCurrent] = React.useState(0)
-  const slideCount = 5
+const BannerCarousel = () => {
+  const [date, setDate] = useState<Date | undefined>(new Date())
 
-  React.useEffect(() => {
-    if (!api) return
-
-    setCurrent(api.selectedScrollSnap())
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap())
-    })
-  }, [api])
+  const banners = [
+    { 
+      id: 1, 
+      imageUrl: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80", 
+      alt: "Banner 1" 
+    },
+    { 
+      id: 2, 
+      imageUrl: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800&q=80", 
+      alt: "Banner 2" 
+    },
+    { 
+      id: 3, 
+      imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80", 
+      alt: "Banner 3" 
+    },
+  ]
 
   return (
-    <div className="w-full flex flex-col gap-3">
-      <Carousel setApi={setApi} className="w-full">
-        <CarouselContent>
-          {Array.from({ length: slideCount }).map((_, index) => (
-            <CarouselItem key={index}>
-              <div className="p-1">
-                <Card className="overflow-hidden border-none shadow-sm">
-                  {/* Balandlikni shu yerda chekladik: mobil uchun 160px, desktop uchun 240px */}
-                  <CardContent className="flex h-[160px] md:h-[320px] items-center justify-center p-0 relative rounded-2xl overflow-hidden">
-                    <img
-                      src={`https://picsum.photos/seed/${index + 10}/1200/400`}
-                      alt={`Banner rasm ${index + 1}`}
-                      className="w-full h-full object-cover"
+    <div className="w-full max-w-[1400px] mx-auto p-4 md:p-6">
+      
+      {/* Grid 10 ta ustunga bo'lindi (70/30 nisbatni chiqarish uchun) */}
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-stretch">
+        
+        {/* CHAP TARAF: Carousel (Katta ekranda 70% yoki 7 ta ustunni egallaydi) */}
+        <div className="lg:col-span-7 w-full">
+          <Carousel className="w-full h-full">
+            <CarouselContent className="h-full">
+              {banners.map((banner) => (
+                <CarouselItem key={banner.id} className="h-full">
+                  <div className="relative w-full h-full min-h-[300px] overflow-hidden rounded-xl shadow-md">
+                    <img 
+                      src={banner.imageUrl} 
+                      alt={banner.alt} 
+                      className="absolute inset-0 w-full h-full object-cover" 
                     />
-                  </CardContent>
-                </Card>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="hidden md:block">
+              <CarouselPrevious className="left-4" />
+              <CarouselNext className="right-4" />
+            </div>
+          </Carousel>
+        </div>
 
-      {/* Dots (Nuqtalar) qismi */}
-      <div className="flex justify-center gap-1.5 mt-1">
-        {Array.from({ length: slideCount }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => api?.scrollTo(index)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              current === index ? "w-6 bg-blue-600 dark:bg-blue-500" : "w-1.5 bg-slate-300 hover:bg-slate-400 dark:bg-slate-700"
-            }`}
-            aria-label={`Slayd ${index + 1} ga o'tish`}
-          />
-        ))}
+        {/* O'NG TARAF: Calendar (Katta ekranda 30% yoki 3 ta ustunni egallaydi) */}
+        <div className="hidden lg:block lg:col-span-3 w-full">
+          <StreakCalendar />
+        </div>
+
       </div>
     </div>
   )
 }
+
+export default BannerCarousel

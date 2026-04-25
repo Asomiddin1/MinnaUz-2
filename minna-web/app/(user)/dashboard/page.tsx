@@ -21,17 +21,37 @@ import {
   Layers,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { BannerCarousel } from "@/components/user-components/banner-carousel"
-import { StreakCalendar } from "@/components/user-components/streak-calendar"
+import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels"
+import BannerCarousel from "@/components/user-components/banner-carousel"
 
 const MENU_ITEMS = [
-  { id: "dictionary", label: "Lug'at", icon: Copy, href: "/dashboard/dictionary" },
+  {
+    id: "dictionary",
+    label: "Lug'at",
+    icon: Copy,
+    href: "/dashboard/dictionary",
+  },
   { id: "games", label: "O'yinlar", icon: Gamepad2, href: "/dashboard/games" },
   { id: "books", label: "Kitoblar", icon: BookOpen, href: "/dashboard/books" },
-  { id: "kanji", label: "Kanji", icon: GraduationCap, href: "/dashboard/kanji" },
+  {
+    id: "kanji",
+    label: "Kanji",
+    icon: GraduationCap,
+    href: "/dashboard/kanji",
+  },
   { id: "shop", label: "Do'kon", icon: ShoppingCart, href: "/dashboard/shop" },
-  { id: "translator", label: "Tarjimon", icon: Languages, href: "/dashboard/translator" },
-  { id: "ai", label: "Sun'iy intellekt", icon: Sparkles, href: "/dashboard/ai" },
+  {
+    id: "translator",
+    label: "Tarjimon",
+    icon: Languages,
+    href: "/dashboard/translator",
+  },
+  {
+    id: "ai",
+    label: "Sun'iy intellekt",
+    icon: Sparkles,
+    href: "/dashboard/ai",
+  },
   {
     id: "premium",
     label: "Premium",
@@ -47,9 +67,9 @@ export default function DashboardPage() {
   return (
     <div className="w-full">
       {/* 📱 MOBIL KO'RINISh */}
-      <div className="space-y-6 md:hidden pt-2">
+      <div className="space-y-6 pt-2 md:hidden">
         <header className="flex items-center justify-between pb-1">
-          <Link href={'/dashboard/profile'} className="flex items-center gap-3">
+          <Link href={"/dashboard/profile"} className="flex items-center gap-3">
             <div className="h-[46px] w-[46px] flex-shrink-0 overflow-hidden rounded-full border-2 border-white bg-blue-100 shadow-sm transition-colors dark:border-slate-800 dark:bg-slate-800">
               {session?.user?.image && (
                 <img
@@ -107,30 +127,10 @@ export default function DashboardPage() {
 
         {/* MOBIL UCHUN KALENDAR VA JLPT */}
         <div className="flex flex-col gap-4">
-          <div className="w-full">
-            <h3 className="px-1 mb-3 text-[18px] font-bold text-slate-900 transition-colors dark:text-white">
-              Sizning natijalaringiz
-            </h3>
-            <StreakCalendar />
-          </div>
-
-          <div className="space-y-3 pt-2">
-            <h3 className="px-1 text-[18px] font-bold text-slate-900 transition-colors dark:text-white">
-              JLPT darajalari
-            </h3>
-            <div className="relative h-[180px] w-full overflow-hidden rounded-[28px] border border-white bg-gradient-to-br from-blue-100 via-teal-50 to-indigo-100 shadow-sm transition-colors dark:border-slate-800 dark:from-blue-900/30 dark:via-teal-900/20 dark:to-indigo-900/30">
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                <span className="mb-2 rounded-full bg-white/60 px-4 py-1.5 text-xs font-bold text-indigo-500 backdrop-blur-sm transition-colors dark:bg-slate-900/60 dark:text-indigo-300">
-                  Minna.uz
-                </span>
-                <h4 className="text-2xl leading-tight font-black text-indigo-900 transition-colors dark:text-indigo-100">
-                  Hiragana
-                  <br />
-                  Katakana
-                </h4>
-              </div>
+            <div className="px-4">
+               <h1 className="text-[24px] font-semibold">Jlpt darajalari</h1>
             </div>
-          </div>
+            <JlptLevels />
         </div>
       </div>
 
@@ -158,17 +158,17 @@ export default function DashboardPage() {
           </TabsList>
 
           {/* BANNER VA KALENDAR TAB KONTENTI (Desktop) */}
-          <TabsContent value="jlpt" className="w-full mt-4">
-            {/* O'zgarish shu yerda: flex-row qat'iy qo'yildi va hech qachon pastga tushmaydi */}
-            <div className="flex flex-row items-start gap-4 w-full">
-              <div className="flex-1 w-full min-w-0">
+          <TabsContent value="jlpt" className="mt-4 w-full outline-none">
+            {/* Flex-row qat'iy saqlanadi */}
+            <div className="flex w-full flex-row items-start gap-4">
+              {/* 1. Banner qismi: flex-1 va overflow-hidden qo'shildi (toshmasligi uchun) */}
+              <div className="w-full min-w-0 flex-1 overflow-hidden">
                 <BannerCarousel />
               </div>
-              
-              {/* O'zgarish: md (kichik noutbuk) da yashiriladi, lg da 90% kichikroq bo'lib chiqadi, xl da to'liq 100% o'lchamda chiqadi */}
-              <div className="hidden lg:block shrink-0 origin-top lg:scale-90 xl:scale-100 transition-transform duration-300">
-                <StreakCalendar />
-              </div>
+            </div>
+
+            <div className="mt-6">
+              <JlptLevels />
             </div>
           </TabsContent>
 

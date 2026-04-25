@@ -67,4 +67,8 @@ class User extends Authenticatable
     {
         return $this->is_premium;
     }
+    public function loginHistories()
+    {
+        return $this->hasMany(LoginHistory::class);
+    }
 }
