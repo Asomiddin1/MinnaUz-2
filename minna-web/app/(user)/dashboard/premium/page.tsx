@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { userAPI } from "@/lib/api"; // O'zingizning API yo'lingiz
+// import { userAPI } from "@/lib/api"; // O'zingizning API yo'lingiz
 import { Crown, Check } from "lucide-react";
 
 type User = {
@@ -12,6 +12,11 @@ type User = {
   device_limit: number;
 };
 
+// Fake API - testing uchun (O'zingiznikiga almashtirasiz)
+const mockUserAPI = {
+  getProfile: () => Promise.resolve({ data: { user: { id: 1, name: "Test", email: "test@test.com", is_premium: false, device_limit: 2 } } })
+}
+
 const PremiumPage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +25,8 @@ const PremiumPage = () => {
   const fetchUser = async () => {
     try {
       setLoading(true);
-      const res = await userAPI.getProfile();
+      // const res = await userAPI.getProfile();
+      const res = await mockUserAPI.getProfile(); // O'zingiznikini yoqing
       setUser(res.data.user);
     } catch (err) {
       console.error(err);
@@ -40,7 +46,7 @@ const PremiumPage = () => {
       limit: 2,
       desc: "Basic access for free users",
       features: ["2 devices", "Limited features", "Ads supported"],
-      defaultBorder: "border-gray-300"
+      defaultBorder: "border-slate-200 dark:border-slate-700" // Dark mode border qo'shildi
     },
     {
       name: "Premium",
@@ -48,7 +54,7 @@ const PremiumPage = () => {
       limit: 5,
       desc: "Best for students & power users",
       features: ["5 devices", "No ads", "Priority support"],
-      defaultBorder: "border-yellow-400"
+      defaultBorder: "border-yellow-400 dark:border-yellow-500/50" // Dark mode border qo'shildi
     }
   ];
 
@@ -65,23 +71,23 @@ const PremiumPage = () => {
 
       {/* HEADER */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold flex items-center justify-center gap-2">
+        <h1 className="text-3xl font-bold flex items-center justify-center gap-2 text-slate-900 dark:text-white transition-colors">
           <Crown className="text-yellow-500" />
           Premium Plan
         </h1>
 
-        <p className="text-gray-500">
+        <p className="text-slate-500 dark:text-slate-400 transition-colors">
           Upgrade your account for more devices & features
         </p>
 
         {/* STATUS */}
-        <div>
+        <div className="pt-2">
           {user?.is_premium ? (
-            <span className="text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full">
+            <span className="text-green-600 dark:text-green-400 font-semibold bg-green-50 dark:bg-green-500/10 px-4 py-1.5 rounded-full transition-colors border border-green-200 dark:border-green-500/20">
               You are Premium User 💎
             </span>
           ) : (
-            <span className="text-gray-600 font-medium bg-gray-100 px-3 py-1 rounded-full">
+            <span className="text-slate-600 dark:text-slate-300 font-medium bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-full transition-colors border border-slate-200 dark:border-slate-700">
               Free Plan
             </span>
           )}
@@ -90,14 +96,14 @@ const PremiumPage = () => {
 
       {/* CURRENT LIMIT */}
       <div className="grid md:grid-cols-2 gap-4">
-        <div className="p-5 border rounded-xl bg-white shadow-sm">
-          <p className="text-gray-500 text-sm">Current Device Limit</p>
-          <p className="text-2xl font-bold">📱 {user?.device_limit}</p>
+        <div className="p-5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50 shadow-sm backdrop-blur-sm transition-colors">
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Current Device Limit</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">📱 {user?.device_limit}</p>
         </div>
 
-        <div className="p-5 border rounded-xl bg-white shadow-sm">
-          <p className="text-gray-500 text-sm">Account Type</p>
-          <p className="text-2xl font-bold">
+        <div className="p-5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50 shadow-sm backdrop-blur-sm transition-colors">
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Account Type</p>
+          <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
             {user?.is_premium ? "💎 Premium" : "🆓 Free"}
           </p>
         </div>
@@ -114,10 +120,10 @@ const PremiumPage = () => {
           return (
             <div
               key={i}
-              className={`relative border-2 rounded-xl p-6 transition-all ${
+              className={`relative border-2 rounded-xl p-6 transition-all duration-300 ${
                 isCurrentPlan 
-                  ? "border-green-500 bg-green-50/30 shadow-md ring-4 ring-green-500/10" 
-                  : `${plan.defaultBorder} shadow-sm bg-white`
+                  ? "border-green-500 dark:border-green-500/70 bg-green-50/50 dark:bg-green-900/10 shadow-md ring-4 ring-green-500/10 dark:ring-green-500/5" 
+                  : `${plan.defaultBorder} shadow-sm bg-white dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-600 backdrop-blur-sm`
               }`}
             >
               {/* 2. Joriy plan uchun maxsus "Badge" */}
@@ -127,24 +133,24 @@ const PremiumPage = () => {
                 </div>
               )}
 
-              <h2 className="text-xl font-bold flex items-center gap-2">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900 dark:text-white">
                 {plan.name === "Premium" && (
                   <Crown className="text-yellow-500 w-5 h-5" />
                 )}
                 {plan.name}
               </h2>
 
-              <p className="text-gray-500">{plan.desc}</p>
-              <p className="text-3xl font-bold mt-3">{plan.price}</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-slate-500 dark:text-slate-400 mt-1">{plan.desc}</p>
+              <p className="text-3xl font-bold mt-4 text-slate-900 dark:text-white">{plan.price}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
                 📱 Devices: {plan.limit}
               </p>
 
               {/* FEATURES */}
-              <ul className="mt-4 space-y-2">
+              <ul className="mt-6 space-y-3">
                 {plan.features.map((f, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500" />
+                  <li key={idx} className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                    <Check className="w-4 h-4 text-green-500 dark:text-green-400 shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -152,12 +158,12 @@ const PremiumPage = () => {
 
               {/* 3. BUTTON MANTIQI */}
               <button
-                className={`w-full mt-5 p-2 rounded-lg font-medium transition-all ${
+                className={`w-full mt-6 p-2.5 rounded-lg font-medium transition-all duration-200 ${
                   isCurrentPlan
-                    ? "bg-green-100 text-green-700 cursor-not-allowed" // Agar foydalanuvchining o'z plani bo'lsa
+                    ? "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 cursor-not-allowed" 
                     : plan.name === "Premium"
-                    ? "bg-yellow-500 text-white hover:bg-yellow-600 shadow-sm" // Agar Premiumga o'tish kerak bo'lsa
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200" // Agar Premium bo'lib turib Free ni ko'rayotgan bo'lsa
+                    ? "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-500 shadow-sm hover:shadow" 
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700" 
                 }`}
                 disabled={isCurrentPlan}
               >
@@ -174,7 +180,7 @@ const PremiumPage = () => {
       </div>
 
       {/* INFO */}
-      <div className="text-center text-gray-500 text-sm">
+      <div className="text-center text-slate-500 dark:text-slate-400 text-sm pb-8">
         Upgrade qilish orqali siz ko‘proq device va feature olasiz 🚀
       </div>
 

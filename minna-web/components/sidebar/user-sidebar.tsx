@@ -118,19 +118,6 @@ export function UserSidebar() {
               </SidebarMenuItem>
             )
           })}
-
-          {/* THEME */}
-          {!collapsed && (
-            <div className="flex items-center gap-1 px-2 pt-2">
-              <ModeToggle />
-              <span
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="cursor-pointer text-[14px]"
-              >
-                {theme === "dark" ? "Tungi rejim" : "Kundizgi rejim"}
-              </span>
-            </div>
-          )}
         </SidebarMenu>
 
         {/* ADMIN PANEL BUTTON - ROLE ORQALI TEKSHIRISH */}

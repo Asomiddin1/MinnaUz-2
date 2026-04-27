@@ -172,7 +172,7 @@ export default function DashboardPage() {
             </div>
           </TabsContent>
 
-          {/* QOLGAN TABLAR */}
+          
           {MENU_ITEMS.map((tab) => (
             <TabsContent key={tab.id} value={tab.id} className="mt-4">
               <Card className="border-none shadow-sm transition-colors dark:bg-slate-900 dark:text-white">
