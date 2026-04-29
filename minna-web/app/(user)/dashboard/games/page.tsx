@@ -1,7 +1,10 @@
+import Games from "@/components/user-components/home-fuctions/games"
 
 const GamesPage = () => {
   return (
-    <div>GamesPage</div>
+    <div>
+      <Games />
+    </div>
   )
 }
 
