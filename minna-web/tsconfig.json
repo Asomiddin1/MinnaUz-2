@@ -28,6 +28,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "app/(user)/dashboard/games/soz-bogi"  ],
   "exclude": ["node_modules"]
 }

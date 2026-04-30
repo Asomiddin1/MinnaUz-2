@@ -39,9 +39,9 @@ const FloatingClouds = () => {
             delay: Math.random() * 10,
           }}
         >
-          <div className="w-16 h-8 sm:w-24 sm:h-12 bg-white/80 rounded-full relative shadow-sm">
-            <div className="absolute w-10 h-10 sm:w-16 sm:h-16 bg-white/80 rounded-full -top-4 sm:-top-6 left-2"></div>
-            <div className="absolute w-8 h-8 sm:w-12 sm:h-12 bg-white/80 rounded-full -top-3 sm:-top-4 left-8 sm:left-10"></div>
+          <div className="w-16 h-8 sm:w-24 sm:h-12 bg-white/80 dark:bg-white/10 rounded-full relative shadow-sm">
+            <div className="absolute w-10 h-10 sm:w-16 sm:h-16 bg-white/80 dark:bg-white/10 rounded-full -top-4 sm:-top-6 left-2"></div>
+            <div className="absolute w-8 h-8 sm:w-12 sm:h-12 bg-white/80 dark:bg-white/10 rounded-full -top-3 sm:-top-4 left-8 sm:left-10"></div>
           </div>
         </motion.div>
       ))}
@@ -90,7 +90,7 @@ const Bubble = ({ bubble, handlePop, removeBubble }: any) => {
         border-2 border-white/60
         shadow-[inset_0_5px_15px_rgba(255,255,255,0.4),0_10px_25px_rgba(0,0,0,0.2)] 
         text-white text-2xl sm:text-4xl font-black 
-        hover:scale-105 active:scale-90 transition-transform`}
+        active:scale-90 transition-transform`}
       style={{ left: bubble.left, top: "100%" }} 
     >
       <div className="absolute top-2 left-4 w-5 h-3 bg-white/40 rounded-full blur-[1px] rotate-[-30deg]"></div>
@@ -107,7 +107,6 @@ export default function PopTheWordStage2() {
   const [lives, setLives] = useState(3);
   const [gameOver, setGameOver] = useState(false);
   const [victory, setVictory] = useState(false);
-  const [isStarted, setIsStarted] = useState(false);
 
   useEffect(() => {
     if (score >= 100) {
@@ -182,13 +181,13 @@ export default function PopTheWordStage2() {
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-100px)] min-h-[500px] bg-gradient-to-b from-indigo-300 via-purple-100 to-white dark:from-slate-900 dark:to-slate-800 overflow-hidden rounded-[30px] border border-slate-200 dark:border-slate-700 shadow-inner">
+    <div className="relative w-full h-[calc(100vh-100px)] min-h-[500px] bg-gradient-to-b from-indigo-300 via-purple-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-hidden rounded-[30px] border border-slate-200 dark:border-slate-700 shadow-inner">
       <FloatingClouds />
 
       {/* HUD: Saytbar va mobilga moslashuvchan */}
       <div className="absolute top-2 sm:top-6 left-2 sm:left-6 right-2 sm:right-6 
         flex justify-between items-center bg-white/30 dark:bg-black/30 backdrop-blur-xl 
-        px-3 py-2 sm:px-8 sm:py-4 rounded-xl sm:rounded-[30px] shadow-2xl z-20 border border-white/40">
+        px-3 py-2 sm:px-8 sm:py-4 rounded-xl sm:rounded-[30px] shadow-2xl z-20 border border-white/40 dark:border-white/10">
         
         <div className="flex gap-0.5 sm:gap-2 text-xl sm:text-3xl min-w-[60px] sm:min-w-[120px]">
           {[...Array(3)].map((_, i) => (
@@ -203,7 +202,7 @@ export default function PopTheWordStage2() {
           </div>
         </div>
 
-        <div className="bg-white/50 dark:bg-white/10 px-2 py-1 sm:px-6 sm:py-2 rounded-lg sm:rounded-2xl border border-white/50 shadow-inner min-w-[70px] sm:min-w-[100px] text-right">
+        <div className="bg-white/50 dark:bg-white/10 px-2 py-1 sm:px-6 sm:py-2 rounded-lg sm:rounded-2xl border border-white/50 dark:border-white/10 shadow-inner min-w-[70px] sm:min-w-[100px] text-right">
           <span className="hidden sm:inline text-xs font-bold text-purple-900/60 dark:text-white/60 mr-1 uppercase">Ball:</span>
           <span className="text-sm sm:text-2xl font-black text-purple-600 dark:text-purple-400">{score}/500</span>
         </div>
