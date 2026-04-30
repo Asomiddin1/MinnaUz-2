@@ -3,13 +3,6 @@
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   Copy,
   Gamepad2,
   BookOpen,
@@ -23,6 +16,7 @@ import {
 import { useSession } from "next-auth/react"
 import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels"
 import BannerCarousel from "@/components/user-components/banner-carousel"
+import GamesList from "@/components/user-components/home-fuctions/games"
 
 const MENU_ITEMS = [
   {
@@ -172,29 +166,12 @@ export default function DashboardPage() {
             </div>
           </TabsContent>
 
+           <TabsContent value="games" className="mt-4 w-full outline-none">
+              <GamesList />
+          </TabsContent>
+
           
-          {MENU_ITEMS.map((tab) => (
-            <TabsContent key={tab.id} value={tab.id} className="mt-4">
-              <Card className="border-none shadow-sm transition-colors dark:bg-slate-900 dark:text-white">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <tab.icon
-                      className={`h-6 w-6 ${tab.color ? tab.color : "text-blue-600 dark:text-blue-400"}`}
-                    />
-                    {tab.label}
-                  </CardTitle>
-                  <CardDescription className="dark:text-slate-400">
-                    Ushbu bo'lim {tab.label.toLowerCase()} uchun ajratilgan.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-slate-600 dark:text-slate-300">
-                    {tab.label} bo'limi kontenti shu yerda shakllantiriladi.
-                  </p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          ))}
+          
         </Tabs>
       </div>
     </div>
