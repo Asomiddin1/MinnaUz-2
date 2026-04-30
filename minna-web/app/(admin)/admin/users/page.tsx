@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { userAPI } from "@/lib/api";
+import { adminAPI } from "@/lib/api";
 
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
@@ -52,7 +52,8 @@ const UsersPage = () => {
   const fetchUsers = async (search = "") => {
     try {
       setLoading(true);
-      const response = await userAPI.getAllUsers(1, search);
+      // userAPI o'rniga adminAPI ishlatamiz
+      const response = await adminAPI.getAllUsers(1, search); 
       setUsers(response.data.data || response.data);
     } finally {
       setLoading(false);
@@ -88,7 +89,8 @@ const UsersPage = () => {
     if (!editingUser) return;
 
     try {
-      await userAPI.updateUser(editingUser.id, formData);
+      // userAPI o'rniga adminAPI ishlatamiz
+      await adminAPI.updateUser(editingUser.id, formData);
       setEditingUser(null);
       fetchUsers(searchQuery);
     } catch {

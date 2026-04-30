@@ -7,6 +7,7 @@ declare module "next-auth" {
     user: {
       id?: string;
       role?: string; // Mana shu role xatolikni yo'q qiladi
+      is_premium?: boolean; // 👈 MANA SHU YERGA QO'SHILDI
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -17,6 +18,7 @@ declare module "next-auth" {
   interface User {
     id?: string;
     role?: string;
+    is_premium?: boolean; // 👈 MANA SHU YERGA QO'SHILDI
     token?: string;
   }
 }
@@ -26,5 +28,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     accessToken?: string;
     role?: string;
+    is_premium?: boolean; // 👈 MANA SHU YERGA QO'SHILDI
   }
 }

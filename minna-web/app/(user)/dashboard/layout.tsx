@@ -23,23 +23,7 @@ export default function DashboardLayout({
     setMounted(true);
   }, []);
 
-  
-  const generateBreadcrumbs = () => {
-    const paths = pathname.split('/').filter(path => path !== '')
-    
-    const breadcrumbs = paths.map((path, index) => {
-      const href = '/' + paths.slice(0, index + 1).join('/')
-      const label = path
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, char => char.toUpperCase())
-      
-      return { href, label }
-    })
-    
-    return breadcrumbs
-  }
-  
-  const breadcrumbs = generateBreadcrumbs()
+
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 

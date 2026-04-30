@@ -5,18 +5,18 @@ import CredentialsProvider from "next-auth/providers/credentials"
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    // 🔵 GOOGLE LOGIN (popup uchun sozlangan)
+    // 🔵 GOOGLE LOGIN
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       authorization: {
         params: {
-          prompt: "select_account", // 👈 Har safar akkaunt tanlashni so'raydi
+          prompt: "select_account", 
         },
       },
     }),
 
-    // 🟡 OTP LOGIN (sizning mavjud kodingiz)
+    // 🟡 OTP LOGIN
     CredentialsProvider({
       name: "OTP",
       credentials: {
@@ -24,7 +24,6 @@ export const authOptions: NextAuthOptions = {
         otp_code: { label: "OTP Code", type: "text" },
       },
       async authorize(credentials) {
-        // ... sizning authorize logikangiz o'zgarishsiz qoladi
         if (!credentials?.email || !credentials?.otp_code) return null
 
         const res = await fetch(
@@ -50,6 +49,7 @@ export const authOptions: NextAuthOptions = {
             name: data.user.name,
             email: data.user.email,
             role: data.user.role,
+            is_premium: data.user.is_premium, // 👈 QO'SHILDI
             token: data.access_token,
             image: data.user?.avatar || null,
           }
@@ -83,30 +83,35 @@ export const authOptions: NextAuthOptions = {
             if (res.ok && data.access_token) {
               token.accessToken = data.access_token
               token.role = data.user?.role || "user"
+              token.is_premium = data.user?.is_premium || false; // 👈 QO'SHILDI
               token.user = {
                 name: data.user?.name || user.name,
                 email: data.user?.email || user.email,
                 image: data.user?.avatar || user.image,
                 role: data.user?.role || "user",
+                is_premium: data.user?.is_premium || false, // 👈 QO'SHILDI
               }
             } else {
-              // fallback
               token.role = "user"
+              token.is_premium = false; // 👈 QO'SHILDI
               token.user = {
                 name: user.name,
                 email: user.email,
                 image: user.image,
                 role: "user",
+                is_premium: false, // 👈 QO'SHILDI
               }
             }
           } catch (error) {
             console.error("Google login error:", error)
             token.role = "user"
+            token.is_premium = false; // 👈 QO'SHILDI
             token.user = {
               name: user.name,
               email: user.email,
               image: user.image,
               role: "user",
+              is_premium: false, // 👈 QO'SHILDI
             }
           }
         }
@@ -114,6 +119,7 @@ export const authOptions: NextAuthOptions = {
         if (account.provider === "credentials") {
           token.accessToken = (user as any).token
           token.role = (user as any).role
+          token.is_premium = (user as any).is_premium // 👈 QO'SHILDI
           token.user = user
         }
       }
@@ -123,12 +129,18 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.user = token.user as any
       ;(session as any).accessToken = token.accessToken
+      // token dagi ma'lumotni session ga yozib qo'yamiz (TypeScript ga qulay bo'lishi uchun)
+      if (session.user) {
+        (session.user as any).role = token.role;
+        (session.user as any).is_premium = token.is_premium; // 👈 QO'SHILDI
+      }
+      
       return session
     },
   },
 
   pages: {
-    signIn: "/auth/login", // 👈 oddiy sahifaga yo'naltirish (agar popup ishlamasa)
+    signIn: "/auth/login", 
   },
 
   session: {

@@ -17,6 +17,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   LogOut,
+  GraduationCap
 } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 
@@ -28,6 +29,7 @@ export function AdminSidebar() {
 
   const menuItems = [
     { name: "Dashboard", href: "/admin", icon: Home },
+    {name: "Jlpt testlar", href:'/admin/tests' , icon: GraduationCap},
     {name: "Users", href:'/admin/users' , icon: Users}
   ]
 

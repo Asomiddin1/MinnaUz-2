@@ -62,7 +62,7 @@ const BannerCarousel = () => {
 
         {/* O'NG TARAF: Calendar (Katta ekranda 30% yoki 3 ta ustunni egallaydi) */}
         <div className="hidden lg:block lg:col-span-3 w-full">
-          <StreakCalendar />
+          {/* <StreakCalendar /> */}
         </div>
 
       </div>
