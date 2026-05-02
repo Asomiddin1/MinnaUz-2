@@ -13,19 +13,19 @@ class TestController extends Controller
     /**
      * Barcha testlarni ko'rish
      */
-   public function index(Request $request)
-{
-    $query = Test::withCount('sections')->latest();
-    if ($request->has('level')) {
-        $query->where('level', $request->level);
+    public function index(Request $request)
+    {
+        $query = Test::withCount('sections')->latest();
+        if ($request->has('level')) {
+            $query->where('level', $request->level);
+        }
+        return response()->json($query->paginate(15));
     }
-    return response()->json($query->paginate(15));
-}
 
     /**
      * Yangi test yaratish + 3 TA BO'LIMNI QO'SHISH
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $data = $request->validate([
             'title'      => 'required|string|max:255',
@@ -35,10 +35,9 @@ class TestController extends Controller
             'pass_score' => 'required',
         ]);
 
-        // DB::transaction - agar bitta section yaratilmay qolsa, hamma amalni bekor qiladi
         return DB::transaction(function () use ($data, $request) {
             
-            // 1. Testni yaratish
+            // Testni yaratish (BU YERDA TYPE YO'Q)
             $test = Test::create([
                 'title'      => $data['title'],
                 'level'      => $data['level'],
@@ -47,8 +46,7 @@ class TestController extends Controller
                 'pass_score' => (int) $data['pass_score'],
             ]);
 
-            // 2. JLPT uchun standart 3 ta bo'limni (Section) yaratish
-            // Bu bo'limlarsiz frontendda savol qo'shish tugmasi chiqmaydi!
+            // JLPT uchun 3 ta bo'limni (Section) yaratish
             $sections = [
                 ['name' => 'Moji-Goi (Vocabulary)', 'type' => 'vocabulary', 'order' => 1],
                 ['name' => 'Bunpou-Dokkai (Grammar & Reading)', 'type' => 'grammar_reading', 'order' => 2],
@@ -65,7 +63,6 @@ class TestController extends Controller
             ], 201);
         });
     }
-
     /**
      * Test tafsilotlari (Section va Savollar bilan birga)
      */
@@ -93,6 +90,7 @@ class TestController extends Controller
             'time'       => 'sometimes|numeric|min:1',
             'pass_score' => 'sometimes|numeric|min:1',
             'audio_file' => 'nullable|file|mimes:mp3,wav|max:40960',
+            'type'       => 'sometimes|string', // Tahrirlashda ham 'type' kiritilishi mumkin
         ]);
 
         if ($request->hasFile('audio_file')) {

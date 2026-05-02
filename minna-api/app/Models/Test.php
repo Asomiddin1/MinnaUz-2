@@ -12,15 +12,7 @@ class Test extends Model
     /**
      * Jadvalda to'ldirilishi mumkin bo'lgan ustunlar.
      */
-    protected $fillable = [
-    'title',
-    'level',
-    'is_premium',
-    'time',        // Migratsiyadagi 'time'
-    'pass_score',  // Migratsiyadagi 'pass_score'
-    'audio_url',
-    'description',
-];
+   protected $fillable = ['title', 'level', 'is_premium', 'time', 'pass_score', 'audio_url', 'description'];
 
     /**
      * Ma'lumotlarni o'z holatida konvertatsiya qilish (Casting).
