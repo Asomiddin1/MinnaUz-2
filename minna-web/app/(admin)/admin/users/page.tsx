@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Edit, Search, Crown, RefreshCcw } from "lucide-react";
-import { toast } from "sonner"; // Xabarlar uchun (ixtiyoriy)
+import { toast } from "sonner"; 
 
 // =====================
 // TYPE

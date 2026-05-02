@@ -1,388 +1,271 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { userAPI } from "@/lib/api";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Clock,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
   Send,
-  Lock,
+  Save,
+  ChevronRight,
+  Volume2,
 } from "lucide-react";
 
-// ---------- TYPELAR ----------
-interface Question {
-  id: number;
-  mondai_number: number;
-  question_number: number;
-  type: string;
-  question_text: string;
-  passage?: string;
-  options: string[];
-  points: number;
-}
-
-interface Section {
-  id: number;
-  name: string;
-  type: string;
-  time_limit: number | null;
-  questions: Question[];
-}
-
-interface Test {
-  id: number;
-  title: string;
-  level: string;
-  time: number;
-  pass_score: number;
-  sections: Section[];
-  is_premium?: boolean;
-  locked?: boolean;
-}
-
-interface UserAnswer {
-  question_id: number;
-  selected_option: string;
-}
-
-const formatTime = (seconds: number): string => {
-  const m = Math.floor(seconds / 60)
-    .toString()
-    .padStart(2, "0");
-  const s = (seconds % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
+// ---------- YORDAMCHI FUNKSIYALAR ----------
+const formatTime = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return {
+    h: h.toString().padStart(2, "0"),
+    m: m.toString().padStart(2, "0"),
+    s: s.toString().padStart(2, "0")
+  };
 };
 
-export default function TestPageOnly() {
+export default function TestPage() {
   const params = useParams();
   const router = useRouter();
   const testId = Number(params.id);
 
-  const [test, setTest] = useState<Test | null>(null);
+  const [test, setTest] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<UserAnswer[]>([]);
-
+  const [answers, setAnswers] = useState<{ question_id: number; selected_option: string }[]>([]);
   const [timeLeft, setTimeLeft] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const currentSection = test?.sections?.[currentSectionIndex];
-  const currentQuestion = currentSection?.questions?.[currentQuestionIndex];
-  const totalQuestions =
-    test?.sections?.reduce((acc, s) => acc + (s.questions?.length || 0), 0) || 0;
-  const answeredCount = answers.length;
+  // Audio URL generatsiyasi
+  const getAudioUrl = (path: string) => {
+    if (!path) return "";
+    if (path.startsWith('http')) return path;
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL 
+      ? process.env.NEXT_PUBLIC_API_URL.replace('/api', '') 
+      : "http://127.0.0.1:8000";
+    let cleanPath = path.includes('storage/') ? path : `storage/${path}`;
+    if (cleanPath.includes('audios') && !cleanPath.includes('audios/')) {
+        cleanPath = cleanPath.replace('audios', 'audios/');
+    }
+    return `${baseUrl}/${cleanPath.replace(/^\//, '')}`;
+  };
 
-  // ========== TESTNI YUKLASH ==========
   const fetchTest = useCallback(async () => {
-    if (!testId || isNaN(testId)) return;
     try {
       setLoading(true);
-      setError(null);
       const res = await userAPI.getTestDetails(testId);
-      const testData = res.data?.data || res.data;
-      if (!testData) throw new Error("Test topilmadi");
-
-      if (testData.locked) {
-        setError("Bu test faqat premium foydalanuvchilar uchun.");
-        return;
-      }
-
-      setTest(testData);
-      setTimeLeft(testData.time * 60);
+      const data = res.data?.data || res.data;
+      setTest(data);
+      setTimeLeft(data.time * 60);
     } catch (err: any) {
-      console.error("Test yuklashda xatolik:", err);
-      const msg =
-        err?.response?.data?.message || "Testni yuklab bo‘lmadi";
-      setError(msg);
-      toast.error(msg);
+      setError("Test yuklashda xatolik yuz berdi");
     } finally {
       setLoading(false);
     }
   }, [testId]);
 
-  useEffect(() => {
-    fetchTest();
-  }, [fetchTest]);
+  useEffect(() => { fetchTest(); }, [fetchTest]);
 
-  // ========== TIMER ==========
   useEffect(() => {
-    if (!test || loading || error) return;
+    if (!test || loading) return;
     timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          handleSubmit(true);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [test, loading, error]);
+    return () => clearInterval(timerRef.current!);
+  }, [test, loading]);
 
-  // ========== NAVIGATION ==========
-  const goToNext = () => {
-    if (!currentSection) return;
-    if (currentQuestionIndex < currentSection.questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
-    } else if (currentSectionIndex < test!.sections.length - 1) {
-      setCurrentSectionIndex((prev) => prev + 1);
-      setCurrentQuestionIndex(0);
-    }
-  };
+  // Savollarni Mondai bo'yicha guruhlash
+  const currentSection = test?.sections?.[currentSectionIndex];
+  const groupedQuestions = useMemo(() => {
+    if (!currentSection) return {};
+    return currentSection.questions.reduce((acc: any, q: any) => {
+      if (!acc[q.mondai_number]) acc[q.mondai_number] = [];
+      acc[q.mondai_number].push(q);
+      return acc;
+    }, {});
+  }, [currentSection]);
 
-  const goToPrevious = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
-    } else if (currentSectionIndex > 0) {
-      setCurrentSectionIndex((prev) => prev - 1);
-      const prevSection = test!.sections[currentSectionIndex - 1];
-      setCurrentQuestionIndex(prevSection.questions.length - 1);
-    }
-  };
-
-  // ========== JAVOBLARNI SAQLASH ==========
-  const handleAnswerChange = (value: string) => {
-    if (!currentQuestion) return;
-    setAnswers((prev) => {
-      const exists = prev.find((a) => a.question_id === currentQuestion.id);
-      if (exists) {
-        return prev.map((a) =>
-          a.question_id === currentQuestion.id
-            ? { ...a, selected_option: value }
-            : a
-        );
-      }
-      return [...prev, { question_id: currentQuestion.id, selected_option: value }];
+  const handleAnswer = (qId: number, val: string) => {
+    setAnswers(prev => {
+      const filtered = prev.filter(a => a.question_id !== qId);
+      return [...filtered, { question_id: qId, selected_option: val }];
     });
   };
 
-  const currentAnswer =
-    answers.find((a) => a.question_id === currentQuestion?.id)?.selected_option || "";
+  const isAnswered = (qId: number) => answers.some(a => a.question_id === qId);
 
-  // ========== TESTNI YUBORISH ==========
-  const handleSubmit = async (autoSubmit = false) => {
-    if (!test) return;
+  if (loading) return <div className="min-h-screen bg-white dark:bg-slate-950 p-10"><Skeleton className="h-full w-full" /></div>;
+  if (error) return <div className="text-center p-20">{error}</div>;
 
-    if (!autoSubmit) {
-      const unanswered = totalQuestions - answeredCount;
-      if (unanswered > 0) {
-        const ans = window.confirm(
-          `${unanswered} ta savolga javob bermadingiz. Haqiqatdan yakunlamoqchimisiz?`
-        );
-        if (!ans) return;
-      }
-    }
-
-    setSubmitting(true);
-    try {
-      const timeSpent = test.time * 60 - timeLeft;
-      const res = await userAPI.submitExam(test.id, answers, timeSpent);
-      const resultData = res.data?.data || res.data;
-
-      if (timerRef.current) clearInterval(timerRef.current);
-      toast.success("Test muvaffaqiyatli yakunlandi!");
-
-      const resultId = resultData?.id || resultData?.result_id;
-      // Asosiy yo‘naltirish shu yerda
-      router.push(
-        resultId
-          ? `/dashboard/jlpt/${test.id}/result/${resultId}`
-          : "/dashboard/jlpt"
-      );
-    } catch (err: any) {
-      console.error("Natija yuborilmadi:", err);
-      toast.error(err?.response?.data?.message || "Xatolik yuz berdi");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // ========== UI HOLATLAR ==========
-  if (loading) {
-    return (
-      <div className="max-w-3xl mx-auto p-6 space-y-6">
-        <Skeleton className="h-8 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <Skeleton className="h-60 w-full" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-6">
-        {error.includes("premium") ? (
-          <Lock className="h-12 w-12 text-amber-500" />
-        ) : (
-          <AlertCircle className="h-12 w-12 text-red-500" />
-        )}
-        <p className="text-lg font-medium text-muted-foreground">{error}</p>
-        <Button variant="outline" onClick={() => router.push("/dashboard/jlpt")}>
-          Testlarga qaytish
-        </Button>
-      </div>
-    );
-  }
-
-  if (!test) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 p-6">
-        <AlertCircle className="h-12 w-12 text-red-500" />
-        <p className="text-red-600 font-medium">Test topilmadi</p>
-        <Button variant="outline" onClick={() => router.push("/dashboard/jlpt")}>
-          Testlarga qaytish
-        </Button>
-      </div>
-    );
-  }
+  const time = formatTime(timeLeft);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold">{test.title}</h1>
-          <div className="flex gap-2 mt-1 flex-wrap">
-            <Badge className="bg-blue-600">{test.level}</Badge>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Clock className="w-3 h-3" /> {test.time} daqiqa
-            </Badge>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Qolgan vaqt</p>
-            <p
-              className={`text-xl font-mono font-bold ${
-                timeLeft < 60 ? "text-red-600 animate-pulse" : ""
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 transition-colors duration-300">
+      
+      {/* 1. TOP NAVIGATION (TABS) */}
+      <nav className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-[1400px] mx-auto px-6 flex items-center h-16 gap-6">
+          {test.sections.map((sec: any, idx: number) => (
+            <button
+              key={sec.id}
+              onClick={() => setCurrentSectionIndex(idx)}
+              className={`text-sm font-bold transition-all relative h-full px-4 ${
+                currentSectionIndex === idx 
+                ? "text-indigo-600 dark:text-indigo-400" 
+                : "text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
               }`}
             >
-              {formatTime(timeLeft)}
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => handleSubmit(false)}
-            disabled={submitting}
-          >
-            <Send className="w-4 h-4 mr-2" /> Yakunlash
-          </Button>
+              {sec.name}
+              {currentSectionIndex === idx && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.4)]" />
+              )}
+            </button>
+          ))}
         </div>
-      </div>
+      </nav>
 
-      {/* Progress */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>
-            {currentSectionIndex + 1}-bo‘lim, {currentQuestionIndex + 1}/
-            {currentSection?.questions.length || 0} savol
-          </span>
-          <span>
-            Jami javob berilgan: {answeredCount}/{totalQuestions}
-          </span>
-        </div>
-        <Progress value={(answeredCount / totalQuestions) * 100} />
-      </div>
-
-      {/* Savol */}
-      {currentQuestion ? (
-        <div className="bg-white dark:bg-gray-900 border rounded-xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Mondai {currentQuestion.mondai_number}</span>
-            <span>•</span>
-            <span>Savol {currentQuestion.question_number}</span>
-          </div>
-
-          {currentQuestion.passage && (
-            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border whitespace-pre-wrap text-sm leading-relaxed">
-              {currentQuestion.passage}
+      <main className="max-w-[1400px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* 2. LEFT: QUESTIONS AREA */}
+        <div className="lg:col-span-8 space-y-12">
+          
+          {/* Audio Player (Choukai) */}
+          {currentSection?.type === "listening" && test.audio_url && (
+            <div className="bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-500/30 rounded-2xl p-6 sticky top-20 z-10 backdrop-blur-md shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-indigo-600 p-2 rounded-lg">
+                  <Volume2 className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-indigo-900 dark:text-indigo-100 uppercase tracking-tight">Listening Section Audio</h3>
+              </div>
+              <audio src={getAudioUrl(test.audio_url)} controls className="w-full h-12 dark:invert-[0.9] dark:hue-rotate-180" />
             </div>
           )}
 
-          <h3 className="text-lg font-semibold">{currentQuestion.question_text}</h3>
-
-          <RadioGroup
-            value={currentAnswer}
-            onValueChange={handleAnswerChange}
-            className="space-y-3"
-          >
-            {currentQuestion.options.map((opt, idx) => (
-              <div
-                key={idx}
-                className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-              >
-                <RadioGroupItem value={opt} id={`opt-${idx}`} />
-                <Label
-                  htmlFor={`opt-${idx}`}
-                  className="flex-1 cursor-pointer font-medium"
-                >
-                  {opt}
-                </Label>
+          {/* Mondai Groups */}
+          {Object.entries(groupedQuestions).map(([mondaiNum, qs]: any) => (
+            <div key={mondaiNum} className="space-y-6 animate-in fade-in duration-500">
+              {/* Mondai Header - Rasmda ko'rsatilgan uslubda */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
+                <Badge className="bg-indigo-600 hover:bg-indigo-600 text-white mb-3 px-3 py-1">Mondai {mondaiNum}</Badge>
+                <div className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3">
+                  {qs[0]?.passage || "Quyidagi savollar uchun eng to'g'ri javobni tanlang."}
+                </div>
               </div>
-            ))}
-          </RadioGroup>
 
-          <div className="flex justify-between pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={goToPrevious}
-              disabled={currentSectionIndex === 0 && currentQuestionIndex === 0}
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" /> Oldingi
-            </Button>
-            <Button
-              onClick={goToNext}
-              disabled={
-                currentSectionIndex === test.sections.length - 1 &&
-                currentQuestionIndex === (currentSection?.questions?.length || 1) - 1
-              }
-            >
-              Keyingi <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="text-center py-12 text-muted-foreground">
-          Savollar topilmadi
-        </div>
-      )}
+              {/* Questions */}
+              <div className="space-y-8 pl-2">
+                {qs.map((q: any) => (
+                  <div key={q.id} id={`q-${q.id}`} className="space-y-5">
+                    <div className="flex gap-3 items-start">
+                      <span className="text-indigo-600 dark:text-indigo-500 font-mono font-bold text-lg">{q.mondai_number}.{q.question_number}</span>
+                      <h3 className="text-lg font-semibold leading-snug">{q.question_text}</h3>
+                    </div>
 
-      {/* Bo‘lim tanlash tugmalari */}
-      {test.sections.length > 1 && (
-        <div className="flex flex-wrap gap-2 justify-center">
-          {test.sections.map((sec, idx) => (
-            <Button
-              key={sec.id}
-              variant={idx === currentSectionIndex ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                setCurrentSectionIndex(idx);
-                setCurrentQuestionIndex(0);
-              }}
-            >
-              {sec.name}
-            </Button>
+                    <RadioGroup 
+                      onValueChange={(val) => handleAnswer(q.id, val)}
+                      value={answers.find(a => a.question_id === q.id)?.selected_option}
+                      className="grid grid-cols-1 gap-3 ml-8"
+                    >
+                      {q.options.map((opt: string, i: number) => (
+                        <Label
+                          key={i}
+                          className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer shadow-sm ${
+                            answers.find(a => a.question_id === q.id)?.selected_option === opt
+                              ? "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-500 text-indigo-700 dark:text-indigo-100"
+                              : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                          }`}
+                        >
+                          <RadioGroupItem value={opt} className="sr-only" />
+                          <div className={`w-6 h-6 rounded-full border flex items-center justify-center text-xs font-bold ${
+                               answers.find(a => a.question_id === q.id)?.selected_option === opt
+                               ? "border-indigo-600 bg-indigo-600 text-white"
+                               : "border-slate-300 dark:border-slate-600 text-slate-500"
+                          }`}>
+                            {i + 1}
+                          </div>
+                          <span className="text-[15px] font-medium">{opt}</span>
+                        </Label>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                ))}
+              </div>
+              <hr className="border-slate-200 dark:border-slate-800 mt-10" />
+            </div>
           ))}
         </div>
-      )}
+
+        {/* 3. RIGHT: SIDEBAR NAVIGATION */}
+        <div className="lg:col-span-4">
+          <div className="sticky top-24 space-y-6">
+            
+            {/* Timer & Controls */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-md">
+              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 text-center mb-4 font-bold">Time Remaining</p>
+              <div className="flex justify-center items-center gap-2 font-mono text-4xl font-black mb-8">
+                <div className="bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl text-slate-800 dark:text-slate-100">{time.h}</div>
+                <span className="text-indigo-500 animate-pulse">:</span>
+                <div className="bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl text-slate-800 dark:text-slate-100">{time.m}</div>
+                <span className="text-indigo-500 animate-pulse">:</span>
+                <div className="bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-xl text-indigo-600 dark:text-indigo-400">{time.s}</div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white h-12 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20">
+                  <Send className="w-4 h-4 mr-2" /> Submit Exam
+                </Button>
+                <Button variant="outline" className="w-full border-slate-200 dark:border-slate-800 h-12 rounded-xl font-bold">
+                  <Save className="w-4 h-4 mr-2" /> Save Progress
+                </Button>
+              </div>
+            </div>
+
+            {/* Question Map */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-md">
+              <h4 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase mb-6 flex items-center">
+                <ChevronRight className="w-4 h-4 mr-1 text-indigo-500" /> Question Navigator
+              </h4>
+              
+              <div className="h-[350px] overflow-y-auto pr-2 space-y-6 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+                {test.sections.map((sec: any) => (
+                  <div key={sec.id}>
+                    <p className="text-[10px] font-bold text-slate-400 mb-3 px-1">{sec.name}</p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {sec.questions.map((q: any, idx: number) => (
+                        <button
+                          key={q.id}
+                          onClick={() => {
+                            document.getElementById(`q-${q.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }}
+                          className={`h-10 w-10 rounded-lg text-xs font-bold transition-all border ${
+                            isAnswered(q.id)
+                              ? "bg-indigo-600 border-indigo-500 text-white shadow-md"
+                              : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-indigo-400"
+                          }`}
+                        >
+                          {idx + 1}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { adminAPI } from "@/lib/api";
+import { userAPI } from "@/lib/api";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +35,7 @@ export default function JlptPage() {
       setLoading(true);
       setError(null);
 
-      const res = await adminAPI.getTests();
+      const res = await userAPI.getTests();
 
       // Paginated javob: res.data.data yoki res.data
       const responseData = res.data?.data || res.data;

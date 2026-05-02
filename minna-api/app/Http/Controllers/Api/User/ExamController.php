@@ -7,35 +7,37 @@ use App\Models\Test;
 use App\Models\ExamResult;
 use App\Models\ExamResultAnswer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ExamController extends Controller
 {
-    // Test ro'yxati (premium tekshiruvi bilan)
-    // index metodini level filtrlash va locked maydoni bilan yangilang
-public function index(Request $request)
-{
-    $user = auth()->user();
-    $query = Test::withCount('sections');
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+        $query = Test::withCount('sections');
 
-    if ($request->has('level')) {
-        $query->where('level', $request->level);
+        if ($request->has('level')) {
+            $query->where('level', $request->level);
+        }
+
+        $tests = $query->get()->map(function ($test) use ($user) {
+            return [
+                'id' => $test->id,
+                'title' => $test->title,
+                'level' => $test->level,
+                'time' => $test->time,
+                'pass_score' => $test->pass_score,
+                // Audio URL ni to'liq formatda qaytaramiz
+                'audio_url' => $test->audio_url ? asset('storage/' . str_replace('storage/', '', $test->audio_url)) : null,
+                'is_premium' => (bool)$test->is_premium,
+                'locked' => $test->is_premium && !$user->is_premium,
+                'sections_count' => $test->sections_count,
+            ];
+        });
+
+        return response()->json($tests);
     }
 
-    $tests = $query->get()->map(function ($test) use ($user) {
-        return [
-            'id' => $test->id,
-            'title' => $test->title,
-            'level' => $test->level,
-            'is_premium' => $test->is_premium,
-            'locked' => $test->is_premium && !$user->is_premium,
-            'sections_count' => $test->sections_count, // bo‘limlar soni
-        ];
-    });
-
-    return response()->json($tests);
-}
-
-    // Test ma'lumotlari (bo'lim va savollar bilan)
     public function show($id)
     {
         $user = auth()->user();
@@ -45,17 +47,16 @@ public function index(Request $request)
             return response()->json(['message' => 'Bu premium test, obuna bo‘ling!'], 403);
         }
 
-        // Savollarda correct_answer ni yashirish (xavfsizlik)
+        // Xavfsizlik: To'g'ri javoblarni yashiramiz
         $test->sections->each(function ($section) {
             $section->questions->each(function ($question) {
                 $question->makeHidden('correct_answer');
             });
         });
 
-        return response()->json($test);
+        return response()->json(['data' => $test]);
     }
 
-    // Test javoblarini qabul qilish va natijani saqlash
     public function submit(Request $request, $testId)
     {
         $user = auth()->user();
@@ -71,153 +72,101 @@ public function index(Request $request)
             'answers.*.selected_option' => 'nullable|string',
         ]);
 
-        $answers = $request->input('answers');
+        $userAnswers = collect($request->input('answers'));
         $questions = $test->sections->pluck('questions')->flatten()->keyBy('id');
 
         $total = count($questions);
-        $correct = 0;
-        $wrong = 0;
-        $unanswered = 0;
-        $points = 0;
-
-        $resultAnswers = [];
+        $correct = 0; $wrong = 0; $unanswered = 0; $totalPoints = 0;
+        $insertData = [];
 
         foreach ($questions as $question) {
-            $selected = null;
-            $userAnswer = collect($answers)->firstWhere('question_id', $question->id);
-            if ($userAnswer && isset($userAnswer['selected_option'])) {
-                $selected = $userAnswer['selected_option'];
-            }
-
-            $isCorrect = $selected === $question->correct_answer;
+            $userAns = $userAnswers->firstWhere('question_id', $question->id);
+            $selected = $userAns['selected_option'] ?? null;
+            $isCorrect = ($selected !== null && $selected === $question->correct_answer);
 
             if ($selected === null) {
                 $unanswered++;
             } elseif ($isCorrect) {
                 $correct++;
-                $points += $question->points;
+                $totalPoints += $question->points;
             } else {
                 $wrong++;
             }
 
-            $resultAnswers[] = [
+            $insertData[] = [
                 'question_id' => $question->id,
                 'selected_option' => $selected,
                 'correct_option' => $question->correct_answer,
                 'is_correct' => $isCorrect,
                 'points' => $isCorrect ? $question->points : 0,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
         }
 
         $score = $total > 0 ? round(($correct / $total) * 100) : 0;
-        $passed = $score >= 50; // oddiy shart
+        // JLPT bo'yicha o'tish ballini pass_score dan olsak ham bo'ladi
+        $passed = $score >= ($test->pass_score ?? 50);
 
-        $examResult = ExamResult::create([
-            'user_id' => $user->id,
-            'test_id' => $test->id,
-            'total_questions' => $total,
-            'correct_count' => $correct,
-            'wrong_count' => $wrong,
-            'unanswered_count' => $unanswered,
-            'score' => $score,
-            'passed' => $passed,
-            'time_spent' => $request->input('time_spent', 0),
-        ]);
-
-        foreach ($resultAnswers as $ans) {
-            $ans['exam_result_id'] = $examResult->id;
-            ExamResultAnswer::create($ans);
-        }
-
-        return response()->json([
-            'message' => 'Test topshirildi',
-            'data' => [
-                'id' => $examResult->id,
-                'score' => $score,
-                'passed' => $passed,
+        // Tranzaksiya ishlatish tavsiya etiladi
+        $examResult = DB::transaction(function () use ($user, $test, $total, $correct, $wrong, $unanswered, $score, $passed, $request, $insertData) {
+            $result = ExamResult::create([
+                'user_id' => $user->id,
+                'test_id' => $test->id,
+                'total_questions' => $total,
                 'correct_count' => $correct,
                 'wrong_count' => $wrong,
                 'unanswered_count' => $unanswered,
-                'total_questions' => $total,
-            ]
-        ]);
-    }
+                'score' => $score,
+                'passed' => $passed,
+                'time_spent' => $request->input('time_spent', 0),
+            ]);
 
-    // Natijani ko'rish
-    public function result($resultId)
-    {
-        $user = auth()->user();
-        $examResult = ExamResult::with(['test', 'answers.question'])->where('user_id', $user->id)->findOrFail($resultId);
+            // Mass Insert - unumdorlik uchun
+            foreach ($insertData as &$data) {
+                $data['exam_result_id'] = $result->id;
+            }
+            ExamResultAnswer::insert($insertData);
 
-        $detailedAnswers = $examResult->answers->map(function ($answer) {
-            $question = $answer->question;
-            return [
-                'question_id' => $question->id,
-                'question_text' => $question->question_text,
-                'passage' => $question->passage,
-                'options' => $question->options,
-                'type' => $question->type,
-                'audio_url' => $question->audio_path ? asset('storage/' . $question->audio_path) : null,
-                'selected_option' => $answer->selected_option,
-                'correct_option' => $answer->correct_option,
-                'is_correct' => $answer->is_correct,
-                'points' => $answer->points,
-            ];
+            return $result;
         });
 
         return response()->json([
-            'data' => [
-                'id' => $examResult->id,
-                'test_id' => $examResult->test_id,
-                'test_title' => $examResult->test->title,
-                'level' => $examResult->test->level,
-                'total_questions' => $examResult->total_questions,
-                'correct_count' => $examResult->correct_count,
-                'wrong_count' => $examResult->wrong_count,
-                'unanswered_count' => $examResult->unanswered_count,
-                'score_percentage' => $examResult->score,
-                'passed' => $examResult->passed,
-                'time_spent' => $examResult->time_spent,
-                'answers' => $detailedAnswers,
-            ]
+            'message' => 'Test topshirildi',
+            'data' => $examResult
         ]);
     }
 
-   public function history()
-{
-    $user = auth()->user();
+    public function history()
+    {
+        $user = auth()->user();
 
-    // Barcha natijalarni yangi birinchi olib kelamiz
-    $allResults = ExamResult::where('user_id', $user->id)
-        ->latest()
-        ->get();
+        // 1. Eskilarini tozalash (agar 7 tadan oshsa)
+        $allResults = ExamResult::where('user_id', $user->id)->latest()->get();
+        
+        if ($allResults->count() > 7) {
+            $deleteIds = $allResults->slice(7)->pluck('id');
+            ExamResult::whereIn('id', $deleteIds)->delete();
+        }
 
-    // Agar 7 tadan ko'p bo'lsa, ortib qolganlarini o'chiramiz
-    if ($allResults->count() > 7) {
-        $keepIds = $allResults->take(7)->pluck('id');
-        ExamResult::where('user_id', $user->id)
-            ->whereNotIn('id', $keepIds)
-            ->delete();
+        // 2. Qolgan 7 tasini qaytarish
+        $results = ExamResult::with('test:id,title,level')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->take(7)
+            ->get()
+            ->map(function ($result) {
+                return [
+                    'id' => $result->id,
+                    'test_id' => $result->test_id,
+                    'test_title' => $result->test->title,
+                    'level' => $result->test->level ?? '-',
+                    'score' => $result->score,
+                    'passed' => $result->passed,
+                    'created_at' => $result->created_at->diffForHumans(), // O'qishga osonroq
+                ];
+            });
+
+        return response()->json($results);
     }
-
-    // Endi faqat qolgan (eng ko'pi 7 ta) natijani qaytaramiz
-    $results = ExamResult::with('test:id,title,level')
-        ->where('user_id', $user->id)
-        ->latest()
-        ->take(7)
-        ->get()
-        ->map(function ($result) {
-            return [
-                'id' => $result->id,
-                'test_id' => $result->test_id,
-                'test_title' => $result->test->title,
-                'level' => $result->test->level,
-                'score' => $result->score,
-                'passed' => $result->passed,
-                'created_at' => $result->created_at->toDateTimeString(),
-            ];
-        });
-
-    return response()->json($results);
-}
 }

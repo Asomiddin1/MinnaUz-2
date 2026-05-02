@@ -114,8 +114,18 @@ export const adminAPI = {
   createTest: (data: any): Promise<AxiosResponse> =>
     apiClient.post("/admin/tests", data),
 
-  updateTest: (id: number, data: any): Promise<AxiosResponse> =>
-    apiClient.put(`/admin/tests/${id}`, data),
+updateTest: (id: number, data: any): Promise<AxiosResponse> => {
+  // Agar ma'lumot fayl (FormData) ko'rinishida bo'lsa
+  if (data instanceof FormData) {
+    data.append("_method", "PUT"); // Laravel PUT ekanini tushunishi uchun
+    return apiClient.post(`/admin/tests/${id}`, data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  }
+  
+  // Oddiy JSON bo'lsa (faylsiz)
+  return apiClient.put(`/admin/tests/${id}`, data);
+},
 
   deleteTest: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/tests/${id}`),
