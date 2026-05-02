@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Play, Target, Zap, Trophy, LayoutGrid, ChevronRight, Sparkles } from "lucide-react";
+import { Play, Target, Zap, Trophy, LayoutGrid, ChevronRight, Sparkles, ArrowLeft } from "lucide-react";
 
 const GamesList = () => {
   return (
@@ -11,11 +11,18 @@ const GamesList = () => {
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-400/20 dark:bg-indigo-600/20 rounded-full blur-[100px] sm:blur-[120px] pointer-events-none"></div>
 
       <div className="relative z-10 max-w-6xl mx-auto">
-        
+        <div className="">
+          <Link href={'/dashboard'} className="inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors mb-4">
+             <ArrowLeft />
+            <button className= "font-bold text-lg">orqaga qaytish</button>
+          </Link>
+        </div>
         {/* Sarlavha qismi */}
         <div className="mb-10 sm:mb-14">
+          
           <div className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 bg-blue-100/80 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-full transition-colors">
             <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+           
             <span className="text-blue-600 dark:text-blue-400 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em]">
               Premium Mini Games
             </span>
@@ -163,6 +170,69 @@ const GamesList = () => {
               </div>
             </div>
           </div>
+          {/* 3. KANJI BUILDER - YANGI KARTA */}
+<div className="group flex flex-col sm:flex-row bg-white/70 dark:bg-[#131b2f]/80 backdrop-blur-xl rounded-[28px] border border-purple-200/80 dark:border-purple-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-2xl overflow-hidden hover:border-purple-400/50 hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] transition-all duration-500">
+  
+  {/* Rasm qismi - Kanji vizualizatsiyasi */}
+  <div className="w-full sm:w-2/5 relative bg-gradient-to-br from-purple-500 via-violet-600 to-fuchsia-700 p-6 flex items-center justify-center overflow-hidden min-h-[200px] sm:min-h-full">
+    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+    
+    {/* Suzib yurgan radikallar */}
+    <div className="absolute w-10 h-10 bg-white/20 backdrop-blur-md rounded-lg border border-white/40 top-8 right-8 flex items-center justify-center transform rotate-12 animate-bounce">
+       <span className="text-white/90 font-bold text-lg">人</span>
+    </div>
+    <div className="absolute w-10 h-10 bg-white/20 backdrop-blur-md rounded-lg border border-white/40 bottom-10 left-8 flex items-center justify-center transform -rotate-12">
+       <span className="text-white/90 font-bold text-lg">木</span>
+    </div>
+    
+    {/* Asosiy Natija Kanji */}
+    <div className="relative z-10 w-24 h-24 bg-gradient-to-tr from-white/90 to-white/10 backdrop-blur-lg rounded-3xl border-2 border-white/50 shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+       <span className="text-purple-700 font-black text-6xl drop-shadow-sm">休</span>
+    </div>
+  </div>
+
+  {/* Ma'lumot qismi */}
+  <div className="w-full sm:w-3/5 p-6 sm:p-8 flex flex-col justify-between relative">
+    <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
+    
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors tracking-tight">
+          Kanji Builder
+        </h2>
+        <span className="bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Logic</span>
+      </div>
+      
+      <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 line-clamp-2 transition-colors">
+        Kanji qismlarini (radikallarni) birlashtirib, iyerogliflar yasang. Yozuv sirlarini mantiqiy yo'l bilan o'rganing!
+      </p>
+
+      {/* Statistika Paneli */}
+      <div className="flex items-center justify-between bg-slate-100/50 dark:bg-black/20 rounded-[16px] p-3.5 mb-6 border border-slate-200/50 dark:border-white/5 shadow-inner transition-colors">
+        <div className="flex flex-col items-center gap-1 w-1/2">
+          <LayoutGrid className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+          <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">N5-N1</span>
+        </div>
+        <div className="w-px h-8 bg-slate-200 dark:bg-white/10 transition-colors"></div>
+        <div className="flex flex-col items-center gap-1 w-1/2">
+          <Zap className="w-4 h-4 text-fuchsia-500 dark:text-fuchsia-400" />
+          <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">Ieroglif</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Tugmalar */}
+    <div className="flex items-center gap-3">
+      <Link 
+        href="/dashboard/games/kanji" 
+        className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-violet-700 hover:from-purple-700 hover:to-violet-800 dark:hover:from-purple-500 dark:hover:to-violet-600 text-white px-5 py-3.5 rounded-[16px] font-black text-sm uppercase tracking-wider shadow-[0_8px_20px_rgba(147,51,234,0.2)] dark:shadow-[0_0_20px_rgba(147,51,234,0.3)] active:scale-95 transition-all duration-300 group/btn"
+      >
+        O'ynash
+        <Play className="w-4 h-4 fill-current group-hover/btn:translate-x-1 transition-transform" />
+      </Link>
+    </div>
+  </div>
+</div>
 
         </div>
       </div>
