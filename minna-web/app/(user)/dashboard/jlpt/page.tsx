@@ -2,208 +2,172 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { adminAPI, userAPI } from "@/lib/api"; // userAPI qo'shildi
-import { useSession } from "next-auth/react";
+import { adminAPI } from "@/lib/api";
+import { toast } from "sonner";
 
-import { 
-  Lock, Clock, Target, ChevronRight, Image as ImageIcon, Loader2, 
-  HelpCircle, Crown 
-} from "lucide-react";
-
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Clock, BookOpen, AlertCircle } from "lucide-react";
 
-const jlptLevels = ["N5", "N4", "N3", "N2", "N1"];
+interface Test {
+  id: number;
+  title: string;
+  level: string;
+  time: number;
+  pass_score: number;
+  is_premium: boolean;
+  sections_count?: number;
+}
 
-const JlptPage = () => {
+const JLPT_LEVELS = ["N5", "N4", "N3", "N2", "N1"];
+
+export default function JlptPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
-  
-  const [tests, setTests] = useState<any[]>([]);
+  const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // 🚀 Premium holatini ishonchli ushlash
-  const [isPremium, setIsPremium] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState<string>("all");
 
-  // =====================
-  // 1. SESSION VA BAZADAN PREMIUM HOLATINI TEKSHIRISH
-  // =====================
-  useEffect(() => {
-    // 1-qadam: Session'dan darhol olish (tezlik uchun)
-    if (session?.user) {
-       setIsPremium((session.user as any)?.is_premium === true);
+  const fetchTests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await adminAPI.getTests();
+
+      // Paginated javob: res.data.data yoki res.data
+      const responseData = res.data?.data || res.data;
+      const testsList = responseData?.data || responseData;
+      const allTests = Array.isArray(testsList) ? testsList : [];
+
+      // Tanlangan darajaga qarab filter
+      const filteredTests =
+        selectedLevel === "all"
+          ? allTests
+          : allTests.filter((test) => test.level === selectedLevel);
+
+      setTests(filteredTests);
+    } catch (err: any) {
+      console.error("Testlarni yuklashda xato:", err);
+      setError("Testlarni yuklab bo'lmadi");
+      toast.error("Xatolik yuz berdi");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    // 2-qadam: Orqa fonda Bazadan aniq holatni so'rash (is_premium yangilangan bo'lsa darhol sezish uchun)
-    if (status === "authenticated") {
-        userAPI.getProfile().then(res => {
-            const backendUser = res.data.user || res.data;
-            if (backendUser && backendUser.is_premium !== undefined) {
-               setIsPremium(backendUser.is_premium === true);
-            }
-        }).catch(err => console.error("Profile o'qishda xatolik:", err));
-    }
-  }, [session, status]);
-
-  // =====================
-  // 2. TESTLARNI OLISH
-  // =====================
   useEffect(() => {
-    const fetchTests = async () => {
-      try {
-        setLoading(true);
-        const res = await adminAPI.getTests();
-        setTests(res.data.data || res.data || []);
-      } catch (err) {
-        console.error("Testlarni yuklashda xatolik:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchTests();
-  }, []);
+  }, [selectedLevel]);
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8 w-full font-sans transition-colors duration-200">
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8">
-        
-        {/* CHAP TOMON: TESTLAR */}
-        <div className="flex-1 min-w-0">
-          <Tabs defaultValue="N5" className="w-full">
-            
-            <TabsList className="mb-6 flex gap-3 md:gap-4 bg-transparent border-none justify-start p-0 h-auto overflow-x-auto no-scrollbar">
-              {jlptLevels.map((level) => (
-                <TabsTrigger
-                  key={level}
-                  value={level}
-                  className="w-10 h-10 md:w-12 md:h-12 rounded-full text-base md:text-lg font-medium text-slate-400 
-                  data-[state=active]:bg-slate-700 data-[state=active]:text-white 
-                  transition-all border-none bg-white shadow-sm hover:text-slate-600"
-                >
-                  {level}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {jlptLevels.map((level) => {
-              const levelTests = tests.filter((test) => test.level === level);
-
-              return (
-                <TabsContent key={level} value={level} className="mt-0 focus-visible:outline-none">
-                  
-                  <div className="flex justify-between items-center mb-5">
-                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">
-                      {level} Exam List
-                    </h2>
-                    <Badge variant="outline" className="text-slate-500">
-                      {levelTests.length} ta mavjud
-                    </Badge>
-                  </div>
-
-                  {loading ? (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <Skeleton key={i} className="h-32 w-full rounded-2xl" />
-                      ))}
-                    </div>
-                  ) : levelTests.length > 0 ? (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-5">
-                      {levelTests.map((test) => {
-                        
-                        // 👈 QULFLASH MANTIG'I
-                        const isLocked = test.is_premium && !isPremium;
-
-                        return (
-                          <div 
-                            key={test.id} 
-                            className={`bg-white dark:bg-slate-800 border rounded-2xl p-5 md:p-6 flex flex-col justify-between transition-all ${
-                              isLocked 
-                                ? "border-slate-100 dark:border-slate-700 opacity-90 grayscale-[10%]" 
-                                : "border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md"
-                            }`}
-                          >
-                            <div>
-                              <div className="flex items-start justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 line-clamp-2 pr-2">
-                                  {test.title}
-                                </h3>
-                                {test.is_premium && (
-                                  <Badge className="bg-amber-100 text-amber-600 hover:bg-amber-200 border-none px-2 shadow-none shrink-0 flex items-center gap-1">
-                                    <Crown className="w-3 h-3" /> Premium
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between mt-2">
-                              <div className="flex items-center gap-4 text-slate-400 text-sm font-medium">
-                                <div className="flex items-center gap-1.5">
-                                  <Clock className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                                  <span>{test.time || 105} min</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <Target className="w-[18px] h-[18px]" strokeWidth={1.5} />
-                                  <span>Min. {test.pass_score || 50}%</span>
-                                </div>
-                              </div>
-
-                              <Button 
-                                onClick={() => {
-                                  if (isLocked) {
-                                    router.push("/dashboard/premium");
-                                  } else {
-                                    router.push(`/dashboard/jlpt/${test.id}`);
-                                  }
-                                }}
-                                className={`rounded-xl px-5 h-10 font-medium flex items-center gap-2 transition-all ${
-                                  isLocked 
-                                    ? "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-700/50 dark:text-slate-400 dark:hover:bg-slate-700" 
-                                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                                }`}
-                              >
-                                {isLocked ? (
-                                  <>
-                                    Qulf <Lock className="w-4 h-4 ml-1 opacity-70" />
-                                  </>
-                                ) : (
-                                  "Start"
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="py-20 text-center text-slate-400 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl">
-                      <HelpCircle className="w-10 h-10 mx-auto mb-2 opacity-20" />
-                      Hozircha bu darajada testlar yo'q.
-                    </div>
-                  )}
-                </TabsContent>
-              );
-            })}
-          </Tabs>
+    <div className="max-w-7xl mx-auto px-4 py-10 space-y-8">
+      {/* Sarlavha va Navbar ko'rinishidagi daraja tugmalari */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">JLPT Testlar</h1>
+          <p className="text-muted-foreground mt-1">
+            O'z darajangizga mos testni tanlang va bilimingizni sinab ko'ring
+          </p>
         </div>
-
-        {/* O'NG TOMON: REKLAMA */}
-        <aside className="w-full lg:w-[320px] flex-shrink-0 flex flex-col gap-6 mt-8 lg:mt-[80px]">
-          <div className="w-full h-[250px] bg-white dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center text-slate-400">
-            <ImageIcon className="w-10 h-10 mb-2 opacity-20" />
-            <p className="text-sm">Ad Space</p>
-          </div>
-        </aside>
-
+        {/* --- Navbar uslubidagi daraja tanlash --- */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant={selectedLevel === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedLevel("all")}
+          >
+            Barchasi
+          </Button>
+          {JLPT_LEVELS.map((level) => (
+            <Button
+              key={level}
+              variant={selectedLevel === level ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedLevel(level)}
+            >
+              {level}
+            </Button>
+          ))}
+        </div>
       </div>
+
+      {/* Yuklanmoqda */}
+      {loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-1/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Xatolik */}
+      {!loading && error && (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+          <p className="text-red-600 font-medium">{error}</p>
+          <Button variant="outline" onClick={() => fetchTests()} className="mt-4">
+            Qayta urinish
+          </Button>
+        </div>
+      )}
+
+      {/* Bo'sh ro'yxat */}
+      {!loading && !error && tests.length === 0 && (
+        <div className="text-center py-16 bg-gray-50 dark:bg-gray-900 rounded-xl border border-dashed">
+          <p className="text-muted-foreground text-lg">Hozircha testlar mavjud emas</p>
+          <p className="text-muted-foreground text-sm mt-1">
+            Tanlangan darajada test topilmadi yoki hali qo'shilmagan
+          </p>
+        </div>
+      )}
+
+      {/* Testlar ro'yxati */}
+      {!loading && !error && tests.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tests.map((test) => (
+            <Card
+              key={test.id}
+              className="hover:shadow-lg transition cursor-pointer"
+              onClick={() => router.push(`/dashboard/jlpt/${test.id}`)}
+            >
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <Badge variant={test.is_premium ? "default" : "outline"}>
+                    {test.is_premium ? "Premium" : "Bepul"}
+                  </Badge>
+                  <Badge className="bg-blue-600 text-white">{test.level}</Badge>
+                </div>
+                <CardTitle className="text-xl mt-2 line-clamp-2">{test.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>{test.time} daqiqa</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  <span>O'tish ball: {test.pass_score}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Bo'limlar:</span>
+                  <span>{test.sections_count ?? 3} ta</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
-};
-
-export default JlptPage;
+}

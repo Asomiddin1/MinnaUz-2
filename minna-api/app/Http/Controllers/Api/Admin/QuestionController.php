@@ -3,118 +3,96 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Question;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 
 class QuestionController extends Controller
 {
-    // 📋 1. Hamma savollar (yoki filtrlangan)
+    /**
+     * Savollar ro'yxatini olish (Zarur bo'lsa)
+     */
     public function index(Request $request)
     {
-        $query = Question::latest();
+        $query = Question::query();
 
-        // Agar test_id yuborilsa, faqat o'sha testga tegishli savollarni qaytaradi
-        if ($request->has('test_id')) {
-            $query->where('test_id', $request->test_id);
+        if ($request->has('section_id')) {
+            $query->where('section_id', $request->section_id);
         }
 
-        return response()->json([
-            'status' => true,
-            'data' => $query->get()
-        ]);
+        return response()->json($query->orderBy('mondai_number')->orderBy('question_number')->get());
     }
 
-    // ➕ 2. Yangi savol qo‘shish
+    /**
+     * Yangi savol yaratish (Store)
+     */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'test_id'   => 'required|exists:tests,id', // Test mavjudligini tekshirish
-            'type'      => 'required|string',
-            'question'  => 'required|string',
-            'options'   => 'required|array', // Massiv bo'lishi shart
-            'answer'    => 'required|string',
-            'level'     => 'nullable|string',
+        // Frontend yuborgan FormData/JSON ma'lumotlarini tekshirish
+        $data = $request->validate([
+            'section_id'      => 'required|exists:sections,id',
+            'mondai_number'   => 'required|numeric',
+            'question_number' => 'required|numeric',
+            'type'            => 'required|string',
+            'question_text'   => 'required|string',
+            'passage'         => 'nullable|string',
+            'options'         => 'required|array|size:4', // 4 ta variant bo'lishi shart
+            'correct_answer'  => 'required|string',
+            'points'          => 'required|numeric',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $question = Question::create([
-            'test_id'   => $request->test_id,
-            'type'      => $request->type,
-            'level'     => $request->level,
-            'question'  => $request->question,
-            'options'   => $request->options, // Modelda $casts ichida 'array' bo'lishi kerak
-            'answer'    => $request->answer,
-            'text'      => $request->text,
-            'audio_url' => $request->audio_url,
-            'time'      => $request->time,
-        ]);
+        // Modelga ma'lumotlarni yozish
+        $question = Question::create($data);
 
         return response()->json([
-            'status' => true,
             'message' => 'Savol muvaffaqiyatli qo\'shildi',
             'data' => $question
         ], 201);
     }
 
-    // 👁 3. Bitta savolni ko'rish
+    /**
+     * Bitta savol ma'lumotlarini olish
+     */
     public function show($id)
     {
-        $question = Question::find($id);
+        $question = Question::findOrFail($id);
+        return response()->json($question);
+    }
 
-        if (!$question) {
-            return response()->json(['status' => false, 'message' => 'Topilmadi'], 404);
-        }
+    /**
+     * Savolni tahrirlash (Update)
+     */
+    public function update(Request $request, $id)
+    {
+        $question = Question::findOrFail($id);
+
+        $data = $request->validate([
+            'mondai_number'   => 'sometimes|numeric',
+            'question_number' => 'sometimes|numeric',
+            'type'            => 'sometimes|string',
+            'question_text'   => 'sometimes|string',
+            'passage'         => 'nullable|string',
+            'options'         => 'sometimes|array|size:4',
+            'correct_answer'  => 'sometimes|string',
+            'points'          => 'sometimes|numeric',
+        ]);
+
+        $question->update($data);
 
         return response()->json([
-            'status' => true,
+            'message' => 'Savol muvaffaqiyatli yangilandi',
             'data' => $question
         ]);
     }
 
-    // ✏️ 4. Savolni tahrirlash (Update)
-    public function update(Request $request, $id)
-{
-    $question = Question::find($id);
-    if (!$question) return response()->json(['status' => false, 'message' => 'Topilmadi'], 404);
-
-    // Faqat yuborilgan maydonlarni tekshirish (sometimes)
-    $validator = Validator::make($request->all(), [
-        'test_id'   => 'sometimes|required|exists:tests,id',
-        'type'      => 'sometimes|required|string',
-        'question'  => 'sometimes|required|string',
-        'options'   => 'sometimes|required|array',
-        'answer'    => 'sometimes|required|string',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-    }
-
-    $question->update($request->all());
-
-    return response()->json(['status' => true, 'data' => $question]);
-}
-
-    // ❌ 5. Savolni o'chirish
+    /**
+     * Savolni o'chirish (Destroy)
+     */
     public function destroy($id)
     {
-        $question = Question::find($id);
-
-        if (!$question) {
-            return response()->json(['status' => false, 'message' => 'Savol topilmadi'], 404);
-        }
-
+        $question = Question::findOrFail($id);
         $question->delete();
 
         return response()->json([
-            'status' => true,
             'message' => 'Savol muvaffaqiyatli o\'chirildi'
         ]);
     }

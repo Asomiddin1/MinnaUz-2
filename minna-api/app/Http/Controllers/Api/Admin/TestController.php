@@ -3,137 +3,130 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Test;
-use Illuminate\Support\Facades\Storage; // Storage uchun kerak
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB; // Tranzaksiyalar uchun kerak
 
 class TestController extends Controller
 {
     /**
-     * 1. Barcha testlarni olish (Ro'yxat)
+     * Barcha testlarni ko'rish
      */
-    public function index()
-    {
-        return response()->json(Test::latest()->get());
+   public function index(Request $request)
+{
+    $query = Test::withCount('sections')->latest();
+    if ($request->has('level')) {
+        $query->where('level', $request->level);
     }
+    return response()->json($query->paginate(15));
+}
 
     /**
-     * 2. Yangi test yaratish va Audio yuklash
+     * Yangi test yaratish + 3 TA BO'LIMNI QO'SHISH
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'title'      => 'required|string|max:255',
             'level'      => 'required|string',
-            'type'       => 'required|string',
-            'is_premium' => 'boolean',
-            'time'       => 'required|numeric|min:1', // 👈 Vaqt (min 1 daqiqa)
-            'pass_score' => 'required|numeric|min:1|max:100', // 👈 Ball (1 dan 100 gacha)
-            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:40960' 
+            'is_premium' => 'required',
+            'time'       => 'required', 
+            'pass_score' => 'required',
         ]);
 
-        $audioUrl = null;
-        if ($request->hasFile('audio_file')) {
-            $path = $request->file('audio_file')->store('audios', 'public');
-            $audioUrl = '/storage/' . $path; 
-        }
+        // DB::transaction - agar bitta section yaratilmay qolsa, hamma amalni bekor qiladi
+        return DB::transaction(function () use ($data, $request) {
+            
+            // 1. Testni yaratish
+            $test = Test::create([
+                'title'      => $data['title'],
+                'level'      => $data['level'],
+                'is_premium' => filter_var($request->is_premium, FILTER_VALIDATE_BOOLEAN),
+                'time'       => (int) $data['time'],
+                'pass_score' => (int) $data['pass_score'],
+            ]);
 
-        $test = new Test();
-        $test->title = $request->title;
-        $test->level = $request->level;
-        $test->type = $request->type;
-        $test->is_premium = $request->input('is_premium') == '1' ? true : false;
-        $test->time = $request->time;             // 👈 Saqlash
-        $test->pass_score = $request->pass_score; // 👈 Saqlash
-        $test->audio_url = $audioUrl;
-        $test->save();
+            // 2. JLPT uchun standart 3 ta bo'limni (Section) yaratish
+            // Bu bo'limlarsiz frontendda savol qo'shish tugmasi chiqmaydi!
+            $sections = [
+                ['name' => 'Moji-Goi (Vocabulary)', 'type' => 'vocabulary', 'order' => 1],
+                ['name' => 'Bunpou-Dokkai (Grammar & Reading)', 'type' => 'grammar_reading', 'order' => 2],
+                ['name' => 'Choukai (Listening)', 'type' => 'listening', 'order' => 3],
+            ];
 
-        return response()->json(['status' => true, 'message' => 'Yaratildi', 'data' => $test], 201);
-    }
-
-    public function update(Request $request, $id)
-    {
-        $test = Test::findOrFail($id);
-        
-        $request->validate([
-            'title'      => 'required|string|max:255',
-            'level'      => 'required|string',
-            'type'       => 'required|string',
-            'time'       => 'required|numeric|min:1',
-            'pass_score' => 'required|numeric|min:1|max:100',
-            'audio_file' => 'nullable|mimes:mp3,wav,ogg,m4a|max:40960'
-        ]);
-
-        $test->title = $request->title;
-        $test->level = $request->level;
-        $test->type = $request->type;
-        $test->is_premium = $request->input('is_premium') == '1' ? true : false;
-        $test->time = $request->time;             // 👈 Yangilash
-        $test->pass_score = $request->pass_score; // 👈 Yangilash
-
-        if ($request->hasFile('audio_file')) {
-            if ($test->audio_url) {
-                $oldPath = str_replace('/storage/', '', $test->audio_url);
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            foreach ($sections as $section) {
+                $test->sections()->create($section);
             }
-            $path = $request->file('audio_file')->store('audios', 'public');
-            $test->audio_url = '/storage/' . $path;
-        }
 
-        $test->save();
-
-        return response()->json(['status' => true, 'data' => $test]);
+            return response()->json([
+                'message' => 'Test va 3 ta bo\'lim yaratildi', 
+                'data' => $test->load('sections')
+            ], 201);
+        });
     }
 
     /**
-     * 4. O'chirish (Delete) va Audioni tozalash
+     * Test tafsilotlari (Section va Savollar bilan birga)
+     */
+    public function show($id)
+    {
+        // with(['sections.questions']) - Frontend ishlashi uchun juda muhim!
+        $test = Test::with(['sections.questions' => function($q) {
+            $q->orderBy('mondai_number')->orderBy('question_number');
+        }])->findOrFail($id);
+
+        return response()->json(['data' => $test]);
+    }
+
+    /**
+     * Testni tahrirlash
+     */
+    public function update(Request $request, $id)
+    {
+        $test = Test::findOrFail($id);
+
+        $data = $request->validate([
+            'title'      => 'sometimes|string|max:255',
+            'level'      => 'sometimes|in:N1,N2,N3,N4,N5',
+            'is_premium' => 'sometimes',
+            'time'       => 'sometimes|numeric|min:1',
+            'pass_score' => 'sometimes|numeric|min:1',
+            'audio_file' => 'nullable|file|mimes:mp3,wav|max:40960',
+        ]);
+
+        if ($request->hasFile('audio_file')) {
+            if ($test->audio_url) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $test->audio_url));
+            }
+            $path = $request->file('audio_file')->store('tests/audio', 'public');
+            $data['audio_url'] = '/storage/' . $path;
+        }
+
+        if (isset($data['is_premium'])) {
+            $data['is_premium'] = filter_var($request->is_premium, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $test->update($data);
+
+        return response()->json([
+            'message' => 'Test muvaffaqiyatli yangilandi',
+            'data' => $test
+        ]);
+    }
+
+    /**
+     * Testni o'chirish
      */
     public function destroy($id)
     {
         $test = Test::findOrFail($id);
-        
-        // Test o'chirilganda, serverdagi MP3 faylni ham o'chirib yuboramiz
+
         if ($test->audio_url) {
-            $oldPath = str_replace('/storage/', '', $test->audio_url);
-            Storage::disk('public')->delete($oldPath);
+            Storage::disk('public')->delete(str_replace('/storage/', '', $test->audio_url));
         }
-        
+
         $test->delete();
-        return response()->json(['status' => true, 'message' => 'Test muvaffaqiyatli o\'chirildi']);
-    }
-
-    /**
-     * 5. Bitta testni ko'rish (Show)
-     */
-    public function show($id)
-    {
-        $test = Test::find($id);
-
-        if (!$test) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Test topilmadi'
-            ], 404);
-        }
-
-        return response()->json($test, 200);
-    }
-
-    /**
-     * 6. Testga tegishli savollarni olish
-     */
-    public function getQuestions($testId)
-    {
-        $test = Test::with('questions')->find($testId);
-
-        if (!$test) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Test topilmadi'
-            ], 404);
-        }
-
-        // Faqat savollarni qaytarish
-        return response()->json($test->questions, 200);
+        return response()->json(['message' => 'O‘chirildi']);
     }
 }

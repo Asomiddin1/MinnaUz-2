@@ -4,15 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\LoginHistory; // 🔥 MUHIM: Yangi modelni chaqirib oldik
+use App\Models\LoginHistory; 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class UserController extends Controller
 {
-    // =========================
-    // USERS LIST
-    // =========================
     public function index(Request $request)
     {
         $query = User::query();
@@ -94,9 +91,7 @@ class UserController extends Controller
         ]);
     }
     
-    // =========================
-    // GET STREAKS (CALENDAR)
-    // =========================
+
     public function getStreaks(Request $request)
     {
         // 1. Frontenddan kelayotgan yil va oyni olamiz (jo'natilmasa joriy yil/oy ishlatiladi)

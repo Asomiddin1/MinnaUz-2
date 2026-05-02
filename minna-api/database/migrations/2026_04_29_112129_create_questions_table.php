@@ -6,34 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-      Schema::create('questions', function (Blueprint $table) {
-    $table->id();
-    // 👇 MANA BU SUTUN QO'SHILISHI SHART!
-    $table->foreignId('test_id')->constrained()->onDelete('cascade'); 
-    
-    $table->string('type'); 
-    $table->string('level'); 
-
-    $table->text('question');
-    $table->json('options');
-    $table->string('answer');
-
-    $table->text('text')->nullable();
-    $table->string('audio_url')->nullable();
-    $table->integer('time')->nullable(); 
-
-    $table->timestamps();
-});
+        Schema::create('questions', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('section_id')->constrained()->onDelete('cascade');
+            $table->integer('mondai_number');
+            $table->integer('question_number'); // <-- bu ustun yo'q edi, endi bor
+            $table->string('type'); // kanji_reading, vocabulary, grammar, reading, listening, star...
+            $table->text('question_text');
+            $table->text('passage')->nullable();
+            $table->text('audio_path')->nullable();
+            $table->text('image_path')->nullable();
+            $table->json('options'); // JSON ustuni (massiv saqlash uchun)
+            $table->string('correct_answer');
+            $table->integer('points')->default(2);
+            $table->timestamps();
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('questions');
