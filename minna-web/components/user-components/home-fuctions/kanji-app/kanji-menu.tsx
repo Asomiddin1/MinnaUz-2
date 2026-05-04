@@ -111,13 +111,6 @@ export default function KanjiMenu({
           {/* Secondary Actions (Premium Pill Container) */}
           <div className="flex items-center justify-center gap-1 mx-auto bg-white/40 dark:bg-slate-800/40 backdrop-blur-md p-1 rounded-full border border-white/60 dark:border-white/10 shadow-sm w-full max-w-[260px]">
              
-             <button 
-               onClick={onRestartScore} 
-               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full font-bold text-[9px] sm:text-[10px] tracking-widest text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200 hover:shadow-sm shadow-black/5 uppercase transition-all duration-200 active:scale-95"
-             >
-               <RotateCcw className="w-3 h-3" /> Nollash
-             </button>
-             
              <div className="w-px h-3.5 bg-slate-300 dark:bg-slate-700 rounded-full flex-none" />
              
              <button 

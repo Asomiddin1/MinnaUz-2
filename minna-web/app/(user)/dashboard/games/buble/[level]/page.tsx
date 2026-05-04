@@ -4,8 +4,8 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 
 // DIQQAT: O'zingiz yaratgan fayllar nomiga qarab bu yerda importlarni to'g'rilang
-import Level1Game from '@/components/user-components/home-fuctions/buble-game';
-import Level2Game from '@/components/user-components/home-fuctions/buble-game-2';
+import Level1Game from '@/components/user-components/home-fuctions/buble-app/buble-game';
+import Level2Game from '@/components/user-components/home-fuctions/buble-app/buble-game-2';
 
 const BublePage = () => {
   const params = useParams();

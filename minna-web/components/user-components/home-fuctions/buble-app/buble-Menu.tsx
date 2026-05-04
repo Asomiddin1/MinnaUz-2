@@ -27,7 +27,7 @@ export default function GameMenu({
   changeLevel
 }: any) {
   return (
-    <div className="max-md:fixed max-md:inset-0 max-md:z-[999] relative w-full h-[100dvh] md:h-[calc(100vh-80px)] md:min-h-[650px] flex flex-col items-center justify-center px-4 overflow-hidden md:rounded-[40px] bg-gradient-to-b from-[#1a3a6e] via-[#3a6fc4] to-[#7aa8d8] dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 border border-transparent dark:border-white/10 select-none">
+    <div className="max-md:fixed max-md:inset-0  max-md:z-[999] relative w-full h-[100dvh] md:h-[calc(100vh-80px)] md:min-h-[650px] flex flex-col items-center justify-center px-4 overflow-hidden md:rounded-[40px] bg_buble_image dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 border border-transparent dark:border-white/10 select-none">
       <FloatingClouds />
       
      {/* --- ORQA FONDAGI BEZAK SHARLAR --- */}
@@ -73,14 +73,14 @@ export default function GameMenu({
         initial={{ opacity: 0, scale: 0.95, y: 20 }} 
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-[340px] md:max-w-[750px] bg-[#3f67aa0d] dark:bg-black/30 backdrop-blur-[24px] border border-[#6b8ad71f] dark:border-white/10 rounded-[24px] md:rounded-[32px] p-6 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col md:flex-row md:items-center gap-8 md:gap-12 lg:gap-16">
+        className="relative z-10 w-full max-w-[340px] md:max-w-[750px] bg-[#35559143] dark:bg-black border border-[#1c74e0da] dark:border-white rounded-[24px] md:rounded-[32px] p-6 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex flex-col md:flex-row md:items-center gap-8 md:gap-12 lg:gap-16">
         
         {/* CHAP TARAFI - LOGO/SARLAVHA */}
         <div className="w-full md:w-[45%] flex flex-col items-center md:items-start text-center md:text-left">
           <h2 className="text-4xl md:text-[56px] font-black text-white leading-tight tracking-tight uppercase drop-shadow-lg mb-2">
             KANJI <br className="hidden md:block" /> POP
           </h2>
-          <p className="text-xs md:text-sm font-bold text-blue-200/80 dark:text-white/60 uppercase tracking-[0.2em] mb-4">
+          <p className="text-xs md:text-sm font-bold  dark:text-white uppercase tracking-[0.2em] mb-4">
             Yapon Tilini O'rganamiz
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full border border-white/20">
@@ -122,7 +122,7 @@ export default function GameMenu({
               className="flex flex-col sm:flex-row items-center justify-center gap-2 py-3 sm:py-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-xl sm:rounded-2xl text-red-200 hover:text-red-100 transition-all active:scale-95"
             >
               <LogOut className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="text-xs sm:text-sm font-bold uppercase tracking-wider">Quit</span>
+              <span className="text-xs sm:text-sm font-bold  uppercase tracking-wider">Quit</span>
             </Link>
           </div>
         </div>

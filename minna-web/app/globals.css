@@ -148,3 +148,28 @@
     @apply font-sans;
     }
 }
+
+
+.bg_game_list{
+  background-image: url('./img/image.png');
+  background-size: cover;
+  background-position: center;
+}
+.bg_buble_image {
+  /* 1200x o'rniga originals so'zi yozildi - bu rasmni maksimal tiniq qiladi */
+  background-image: url('./img/buble.png');
+  background-size: cover;
+  background-position: center;
+
+}
+.bg_buble_levle1{
+  background-image: url('./img/buble2.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.bg_buble_level2{
+  background-image: url('./img/buble2.png');
+  background-size: cover;
+  background-position: center;
+}

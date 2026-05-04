@@ -187,7 +187,7 @@ export default function PopTheWordStage2() {
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-100px)] min-h-[500px] bg-gradient-to-b from-indigo-300 via-purple-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-hidden rounded-[30px] border border-slate-200 dark:border-slate-700 shadow-inner">
+    <div className="relative w-full h-[calc(100vh-100px)] min-h-[500px] bg_buble_level2 from-indigo-300 via-purple-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-hidden rounded-[30px] border border-slate-200 dark:border-slate-700 shadow-inner">
       <FloatingClouds />
 
       {/* HUD: Saytbar va mobilga moslashuvchan */}

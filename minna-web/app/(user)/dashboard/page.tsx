@@ -14,7 +14,7 @@ import {
   Layers,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
-import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels"
+import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels/jlpt-levels"
 import BannerCarousel from "@/components/user-components/banner-carousel"
 import GamesList from "@/components/user-components/home-fuctions/games"
 

@@ -206,7 +206,7 @@ export default function CompleteGame() {
   // 2. ASOSIY O'YIN EKRANI
   // ==========================================
   return (
-   <div className="max-md:fixed max-md:inset-0 max-md:z-[999] relative w-full h-[100dvh] md:h-[calc(100vh-80px)] md:min-h-[650px] bg-gradient-to-b from-sky-400 via-sky-200 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-hidden md:rounded-[30px] border border-transparent dark:border-slate-700 shadow-inner transition-colors duration-500 select-none touch-none"> 
+   <div className="max-md:fixed max-md:inset-0 max-md:z-[999] relative w-full h-[100dvh] md:h-[calc(100vh-80px)] md:min-h-[650px] bg_buble_levle1 from-sky-400 via-sky-200 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-hidden md:rounded-[30px] border border-transparent dark:border-slate-700 shadow-inner transition-colors duration-500 select-none touch-none"> 
     <FloatingClouds />
 
       {/* TEPADAGI HUD */}
