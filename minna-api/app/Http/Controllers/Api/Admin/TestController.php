@@ -27,41 +27,57 @@ class TestController extends Controller
     /**
      * Yangi test yaratish + 3 ta JLPT bo'limini avtomatik qo'shish
      */
+      /**
+     * Yangi test yaratish + 3 ta JLPT bo'limini avtomatik qo'shish
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
             'title'      => 'required|string|max:255',
             'level'      => 'required|in:N1,N2,N3,N4,N5',
-            'is_premium' => 'required', // FormData orqali kelgani uchun string bo'lishi mumkin
-            'time'       => 'required|numeric|min:1', 
+            'is_premium' => 'required',
+            'time'       => 'required|numeric|min:1',
             'pass_score' => 'required|numeric|min:1',
-            'audio_file' => 'nullable|file|mimes:mp3,wav|max:40960', // 40MB max
+            'audio_file' => 'nullable|file|mimes:mp3,wav|max:40960',
         ]);
 
-        return DB::transaction(function () use ($request, $data) {
-            
-            // 1. Audio faylni yuklash (agar bo'lsa)
-            $audioUrl = null;
-            if ($request->hasFile('audio_file')) {
-                $path = $request->file('audio_file')->store('tests/audio', 'public');
-                $audioUrl = '/storage/' . $path;
-            }
+        $audioUrl = null;
 
-            // 2. Testni yaratish
+        // Fayl yuklashni DB::transaction dan TASHQARIDA bajaramiz
+        if ($request->hasFile('audio_file')) {
+            $path = $request->file('audio_file')->store('tests/audio', 'public');
+            $audioUrl = '/storage/' . $path;
+        }
+
+        return DB::transaction(function () use ($data, $audioUrl) {
+            
+            // test yaratish
             $test = Test::create([
                 'title'      => $data['title'],
                 'level'      => $data['level'],
-                'is_premium' => filter_var($request->is_premium, FILTER_VALIDATE_BOOLEAN),
+                'is_premium' => filter_var($data['is_premium'], FILTER_VALIDATE_BOOLEAN),
                 'time'       => (int) $data['time'],
                 'pass_score' => (int) $data['pass_score'],
                 'audio_url'  => $audioUrl,
             ]);
 
-            // 3. JLPT uchun standart 3 ta bo'limni (Section) yaratish
+            // standart bo‘limlar
             $sections = [
-                ['name' => 'Moji-Goi (Vocabulary)', 'type' => 'vocabulary', 'order' => 1],
-                ['name' => 'Bunpou-Dokkai (Grammar & Reading)', 'type' => 'grammar_reading', 'order' => 2],
-                ['name' => 'Choukai (Listening)', 'type' => 'listening', 'order' => 3],
+                [
+                    'name'  => 'Moji-Goi (Vocabulary)',
+                    'type'  => 'vocabulary',
+                    'order' => 1,
+                ],
+                [
+                    'name'  => 'Bunpou-Dokkai (Grammar & Reading)',
+                    'type'  => 'grammar_reading',
+                    'order' => 2,
+                ],
+                [
+                    'name'  => 'Choukai (Listening)',
+                    'type'  => 'listening',
+                    'order' => 3,
+                ],
             ];
 
             foreach ($sections as $section) {
@@ -69,12 +85,11 @@ class TestController extends Controller
             }
 
             return response()->json([
-                'message' => 'Test va 3 ta bo\'lim muvaffaqiyatli yaratildi', 
-                'data' => $test->load('sections')
+                'message' => 'Test muvaffaqiyatli yaratildi',
+                'data'    => $test->load('sections'),
             ], 201);
         });
     }
-
     /**
      * Test tafsilotlari (Bo'limlar va savollari bilan birga)
      */

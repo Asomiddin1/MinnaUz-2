@@ -36,8 +36,6 @@ const BannerCarousel = () => {
       
       {/* Grid 10 ta ustunga bo'lindi (70/30 nisbatni chiqarish uchun) */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-8 items-stretch">
-        
-        {/* CHAP TARAF: Carousel (Katta ekranda 70% yoki 7 ta ustunni egallaydi) */}
         <div className="lg:col-span-7 w-full">
           <Carousel className="w-full h-full">
             <CarouselContent className="h-full">

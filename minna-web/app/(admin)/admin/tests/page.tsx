@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { adminAPI } from "@/lib/api";
+import { adminAPI } from "@/lib/api"; // O'zingizning to'g'ri yo'lingizni tekshirib oling
 import { toast } from "sonner";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Edit, Search, Trash2, FileText, Music, Volume2, Crown, Clock, Target, Plus } from "lucide-react";
+import { Edit, Search, Trash2, FileText, Music, Crown, Clock, Target, Plus } from "lucide-react";
 
 type Test = {
   id: number;
@@ -92,14 +92,19 @@ const TestsPage = () => {
       is_premium: !!test.is_premium,
       time: test.time || 105,
       pass_score: test.pass_score || 80,
-      audio_file: null
+      audio_file: null // Edit paytida eski audio ko'rsatilmaydi, faqat yangilash uchun yuklanadi
     });
     setIsModalOpen(true);
   };
 
+  // ✅ TO'G'RILANGAN HANDLE_CHANGE
   const handleChange = (key: string, value: any) => {
     setForm(prev => {
-      const newData = { ...prev, [key]: value };
+      const newData = { ...prev };
+      
+      // TypeScript xatolik bermasligi uchun typeof bilan qiymatni saqlaymiz
+      // @ts-ignore (Kichik tipik xatolikni chetlab o'tish uchun)
+      newData[key] = value;
 
       // Level o'zgarganda standartlarni yangilash
       if (key === "level") {
@@ -120,30 +125,32 @@ const TestsPage = () => {
   };
 
   // =====================
-  // SUBMIT (FIXED 422 ERROR HANDLING)
+  // SUBMIT
   // =====================
   const handleSubmit = async () => {
+    // 1. Eng muhim maydonlar bo'sh emasligini tekshiramiz
     if (!form.title) return toast.warning("Test nomini kiriting!");
-    
+    if (!form.level) return toast.warning("Darajani (Level) tanlang!");
+    if (!form.time || form.time < 1) return toast.warning("Vaqt kamida 1 daqiqa bo'lishi kerak!");
+    if (!form.pass_score || form.pass_score < 1) return toast.warning("O'tish balli kamida 1 bo'lishi kerak!");
+
     try {
       setSubmitting(true);
       const formData = new FormData();
       
-      // FormData uchun qiymatlarni tayyorlash
       formData.append("title", form.title);
-      formData.append("level", form.level);
-      // Laravel boolean'ni string "1"/"0" ko'rinishida yaxshi tushunadi
+      formData.append("level", form.level); 
       formData.append("is_premium", form.is_premium ? "1" : "0");
-      // Sonlar NaN bo'lmasligi uchun default 0
-      formData.append("time", (form.time || 0).toString());
-      formData.append("pass_score", (form.pass_score || 0).toString());
       
-      if (form.audio_file) {
+      formData.append("time", form.time.toString());
+      formData.append("pass_score", form.pass_score.toString());
+      
+      // ✅ FAYL QO'SHISH (Faqatgina rostdan ham fayl bo'lsa)
+      if (form.audio_file instanceof File) {
         formData.append("audio_file", form.audio_file);
       }
 
       if (editId) {
-        // Laravel PUT + FormData uchun _method spoofing kerak
         formData.append("_method", "PUT"); 
         await adminAPI.updateTest(editId, formData); 
         toast.success("Test muvaffaqiyatli yangilandi");
@@ -155,7 +162,8 @@ const TestsPage = () => {
       setIsModalOpen(false);
       fetchTests();
     } catch (err: any) {
-      // Laravel 422 Validation xatolarini ko'rsatish
+      console.error("LARAVEL XATOSI:", err.response?.data?.errors);
+
       const validationErrors = err.response?.data?.errors;
       if (validationErrors) {
         const firstMessage = Object.values(validationErrors)[0] as string;
@@ -264,7 +272,6 @@ const TestsPage = () => {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>{editId ? "Testni tahrirlash" : "Yangi Test yaratish"}</DialogTitle>
-            {/* Accessibility Warning Fix */}
             <DialogDescription className="sr-only">
               JLPT imtihoni uchun asosiy ma'lumotlarni kiriting.
             </DialogDescription>
@@ -303,7 +310,6 @@ const TestsPage = () => {
                 <Label className="flex items-center gap-2"><Clock className="w-4 h-4" /> Vaqt (min)</Label>
                 <Input 
                   type="number" 
-                  // NaN xatasini oldini olish
                   value={isNaN(form.time) ? "" : form.time} 
                   onChange={(e) => {
                     const val = parseInt(e.target.value);
@@ -339,9 +345,15 @@ const TestsPage = () => {
               <Label className="flex items-center gap-2"><Music className="w-4 h-4 text-blue-500" /> Audio fayl</Label>
               <Input
                 type="file" 
-                accept="audio/*" 
+                accept=".mp3,.wav" 
                 onChange={(e) => {
-                  if (e.target.files?.[0]) handleChange("audio_file", e.target.files[0]);
+                  // ✅ FAYL KELISHINI ANIQLASH VA SAQLASH
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleChange("audio_file", file);
+                  } else {
+                    handleChange("audio_file", null);
+                  }
                 }}
                 className="bg-white cursor-pointer"
               />

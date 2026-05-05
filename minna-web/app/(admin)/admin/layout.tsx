@@ -46,17 +46,6 @@ export default function AdminLayout({
 
             {/* O'ng tomon: Qidiruv, Til va Dark Mode */}
             <div className="flex items-center gap-2 sm:gap-4">
-              
-              {/* Qidiruv */}
-              <div className="relative hidden sm:block w-full max-w-[200px] lg:max-w-xs group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" />
-                <input 
-                  type="text"  
-                  placeholder="Qidirish..."
-                  className="w-full pl-9 pr-4 py-1.5 bg-white dark:bg-slate-900 border border-gray-300 dark:border-gray-700 rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all"
-                />
-              </div>
-
               {/* Til o'zgartirish tugmasi */}
               <button className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all dark:bg-gray-900">
                 <Globe className="w-4 h-4" />
