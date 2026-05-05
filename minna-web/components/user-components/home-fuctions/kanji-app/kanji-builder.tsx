@@ -15,7 +15,6 @@ export default function KanjiHunterPro() {
   const [selectedLevel, setSelectedLevel] = useState<"N5" | "N4">("N5");
   const [selectedStage, setSelectedStage] = useState(0);
   
-  // YANGI: Xotira (Progress) holati
   const [unlockedStages, setUnlockedStages] = useState<{ N5: number, N4: number }>({ N5: 0, N4: 0 });
 
   const [currentLevelIdx, setCurrentLevelIdx] = useState(0);
@@ -23,7 +22,6 @@ export default function KanjiHunterPro() {
   const [selectedKanji, setSelectedKanji] = useState<string | null>(null);
   const [score, setScore] = useState(0);
 
-  // Sahifa yuklanganda LocalStorage'dan xotirani o'qish
   useEffect(() => {
     const savedProgress = localStorage.getItem("kanjiProProgress");
     if (savedProgress) {
@@ -67,13 +65,12 @@ export default function KanjiHunterPro() {
           setGameState("playing");
           setSelectedKanji(null);
         } else {
-          // BOSQICH TUGADI! Qulfni ochamiz.
           const nextStage = selectedStage + 1;
           
           if (nextStage > unlockedStages[selectedLevel] && nextStage < totalStages) {
             const newProgress = { ...unlockedStages, [selectedLevel]: nextStage };
             setUnlockedStages(newProgress);
-            localStorage.setItem("kanjiProProgress", JSON.stringify(newProgress)); // Xotiraga yozamiz
+            localStorage.setItem("kanjiProProgress", JSON.stringify(newProgress));
           }
 
           setIsStarted(false);
@@ -81,7 +78,6 @@ export default function KanjiHunterPro() {
           setGameState("playing");
           setSelectedKanji(null);
           
-          // O'yinchi menyuga qaytganda keyingi ochiq bosqichni avtomatik tanlab qo'yish
           if (nextStage < totalStages) {
             setSelectedStage(nextStage);
           }
@@ -110,7 +106,7 @@ export default function KanjiHunterPro() {
         selectedLevel={selectedLevel}
         onLevelChange={(lvl) => {
           setSelectedLevel(lvl);
-          setSelectedStage(unlockedStages[lvl]); // Daraja o'zgarsa, o'zining eng oxirgi ochilgan bosqichini ko'rsatadi
+          setSelectedStage(unlockedStages[lvl as keyof typeof unlockedStages]);
           setCurrentLevelIdx(0); 
           setGameState("playing");
         }}
@@ -121,13 +117,13 @@ export default function KanjiHunterPro() {
           setCurrentLevelIdx(0);
           setGameState("playing");
         }}
-        maxUnlockedStage={unlockedStages[selectedLevel]} // Menyuga qulf chegarasini jo'natish
+        maxUnlockedStage={unlockedStages[selectedLevel]}
         onStart={() => {
            if (gameState !== "playing") setGameState("playing");
            setSelectedKanji(null);
            setIsStarted(true);
         }} 
-        onRestartScore={() => setScore(0)} // Progressni o'chirmaymiz, faqat ballni nollaymiz
+        onRestartScore={() => setScore(0)}
         onQuit={() => window.location.href = "/dashboard/games"}
         totalLevels={currentKanjiList.length} 
         currentScore={score}
@@ -138,7 +134,12 @@ export default function KanjiHunterPro() {
   if (!level) return null;
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center bg-white dark:bg-[#0a0f1c] text-slate-900 dark:text-white p-4 pt-20 pb-[86px] sm:pb-10 overflow-hidden select-none bg-[url('/bg.jpg')] bg-cover bg-center bg-no-repeat before:content-[''] before:absolute before:inset-0 before:bg-white/80 dark:before:bg-[#0a0f1c]/90 before:z-0">
+    /* 
+       Yechim: Menyudagi mukammal ishlagan "sm:inset-4 lg:inset-6" va 
+       "rounded-none sm:rounded-[32px] lg:rounded-[48px]" klasslarini bu yerga aniq qilib qo'ydik.
+       Bu har 4 ta tomondan bir xil joy tashlab, rasmdagidek ajoyib yumaloq qiladi.
+    */
+    <div className="bg_kanji_oyin absolute inset-0 sm:inset-4 lg:inset-6 flex flex-col items-center text-slate-900 dark:text-white p-4 pt-20 sm:pt-10 pb-[86px] sm:pb-10 overflow-hidden select-none rounded-none sm:rounded-[32px] lg:rounded-[48px] shadow-none sm:shadow-2xl">
       
       {/* 1. HEADER */}
       <div className="w-full max-w-md h-12 flex items-center justify-between flex-none z-20 relative">
@@ -195,22 +196,51 @@ export default function KanjiHunterPro() {
       {/* PAUSE MENU */}
       <AnimatePresence>
         {isPaused && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 bg-white/95 dark:bg-[#0a0f1c]/95 backdrop-blur-xl flex flex-col items-center justify-center p-8">
-            <h2 className="text-5xl font-black italic mb-10 dark:text-white uppercase tracking-tighter">Pauza</h2>
-            <div className="flex flex-col gap-4 w-full max-w-xs">
-              <button onClick={() => setIsPaused(false)} className="h-16 bg-blue-600 text-white rounded-[24px] font-black text-xl shadow-[0_8px_0_rgb(29,78,216)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3">
-                <Play className="w-6 h-6 fill-current" /> DAVOM ETISH
-              </button>
-              <button onClick={() => { setIsPaused(false); startFreshGame(); }} className="h-16 bg-amber-500 text-white rounded-[24px] font-black text-xl shadow-[0_8px_0_rgb(180,83,9)] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3">
-                <RotateCcw className="w-6 h-6" /> QAYTA BOSHLASH
-              </button>
-              <button onClick={() => { setIsPaused(false); setIsStarted(false); }} className="h-16 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-[24px] font-black text-xl flex items-center justify-center gap-3">
-                <Home className="w-6 h-6" /> MENYUGA QAYTISH
-              </button>
-            </div>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-6"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm bg-white/20 dark:bg-black/40 backdrop-blur-xl rounded-[32px] p-8 shadow-2xl border border-white/30 flex flex-col items-center relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500/50 via-white/50 to-pink-500/50"></div>
+
+              <h2 className="text-4xl font-black italic mb-8 text-white uppercase tracking-tighter mt-4 drop-shadow-md">
+                Pauza
+              </h2>
+
+              <div className="flex flex-col gap-4 w-full">
+                <button 
+                  onClick={() => setIsPaused(false)} 
+                  className="h-14 bg-white/90 text-blue-600 rounded-[20px] font-black text-lg shadow-lg active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3"
+                >
+                  <Play className="w-6 h-6 fill-current" /> DAVOM ETISH
+                </button>
+
+                <button 
+                  onClick={() => { setIsPaused(false); startFreshGame(); }} 
+                  className="h-14 bg-amber-500/80 text-white border border-white/20 rounded-[20px] font-black text-lg shadow-lg active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-3 backdrop-blur-sm"
+                >
+                  <RotateCcw className="w-6 h-6" /> QAYTA BOSHLASH
+                </button>
+
+                <button 
+                  onClick={() => { setIsPaused(false); setIsStarted(false); }} 
+                  className="h-14 bg-black/20 text-white border border-white/10 rounded-[20px] font-black text-lg flex items-center justify-center gap-3 hover:bg-white/10 transition-colors backdrop-blur-sm"
+                >
+                  <Home className="w-6 h-6" /> MENYUGA QAYTISH
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+      
       <style jsx global>{`
         html, body { overflow: hidden !important; height: 100% !important; position: fixed; width: 100%; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }

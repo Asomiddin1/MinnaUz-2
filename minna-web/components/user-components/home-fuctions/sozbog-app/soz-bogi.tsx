@@ -174,7 +174,7 @@ const WordGardenGame = () => {
   }
 
   return (
-    <div className="max-md:fixed max-md:inset-0 max-md:z-[999] md:relative w-full h-[100dvh] md:h-full md:max-h-[calc(100vh-120px)] overflow-hidden flex flex-col font-sans bg-[#e0f2fe] dark:bg-[#020617] md:rounded-[35px] shadow-2xl select-none touch-none scrollbar-hide border-none outline-none">
+    <div className="max-md:fixed max-md:inset-0 max-md:z-[999] md:relative w-full h-[100dvh] md:h-full md:max-h-[calc(100vh-120px)] overflow-hidden flex flex-col font-sans bg-[#e0f2fe] dark:bg-[#170202] md:rounded-[35px] shadow-2xl select-none touch-none scrollbar-hide border-none outline-none">
       
       {/* 🌳 BACKGROUND ATMOSPHERE */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">

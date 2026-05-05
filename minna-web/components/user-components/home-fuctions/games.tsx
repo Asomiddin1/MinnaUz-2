@@ -1,163 +1,232 @@
+"use client";
+
+import React, { useRef, useEffect } from "react";
 import Link from "next/link";
-import { Play, ArrowLeft, Gamepad2, Flame, Sparkles, BrainCircuit } from "lucide-react";
+import { Play, Home , Lock} from "lucide-react";
 
 const GamesList = () => {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+
+        if (scrollLeft >= maxScroll - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          scrollRef.current.scrollBy({ left: clientWidth, behavior: "smooth" });
+        }
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const banners = [
+    {
+     id: 1,
+     title: "Sehrli Dunyo",
+     desc: "Butun Yaponiyani zabt eting! Har bir orol va viloyatda yangi sarguzasht va kanji o'yinlari sizni kutmoqda.",
+     mediaUrl: "/video/qasir.mp4",
+     mediaType: "video",
+     link: "/dashboard/games/map"
+   },
+    {
+      id: 2,
+      title: "Buble Game",
+      desc: "Osmondan tushayotgan kanji belgilarini ushlang. Reaksiya va o'qish tezligingizni maksimal darajada sinovdan o'tkazing.",
+      mediaUrl: "/video/ballon2.mp4",
+      mediaType: "video",
+      link: "/dashboard/games/buble/1"
+    },
+    {
+      id: 3,
+      title: "So'z O'yini",
+      desc: "Sirli bo'g'inlarni topib, yaponcha so'zlar tuzing. Lug'at boyligingizni qiziqarli sarguzasht orqali oshiring.",
+      mediaUrl: "https://i.pinimg.com/1200x/fa/cf/78/facf7892ac06c9e690eb578ff426f8de.jpg",
+      mediaType: "image",
+      link: "/dashboard/games/soz-bogi"
+    },
+    {
+      id: 4,
+      title: "Kanji Builder",
+      desc: "Iyeroglif qismlarini mantiqiy tarzda birlashtirib, murakkab kanjilarni yarating va o'zlashtiring.",
+      mediaUrl: "https://i.pinimg.com/1200x/59/2b/38/592b388671a2bd9a07a39eb81f8ff778.jpg",
+      mediaType: "image",
+      link: "/dashboard/games/kanji"
+    },
+  ];
+
   return (
-    <div className="relative min-h-screen  bg_game_list bg-slate-50 dark:bg-[#030712] text-slate-900 dark:text-white p-3 sm:p-6 lg:p-10 overflow-hidden font-sans transition-colors duration-500">
-      
-      {/* Orqa fon nurlari */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-[100px] sm:blur-[150px] pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 dark:bg-purple-600/10 rounded-full blur-[100px] sm:blur-[150px] pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
-
-      <div className="relative z-10 max-w-[1200px] mx-auto">
+    <div className="relative min-h-screen bg_game_list bg-cover bg-center bg-no-repeat bg-slate-900 text-white overflow-x-hidden font-sans pb-12 -mx-4 px-4 sm:-mx-6 sm:px-6">
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto pt-4 sm:pt-6">
         
-        {/* Navigatsiya qismi */}
-        <div className="mb-6 sm:mb-10 flex items-center justify-between">
-          <Link href={'/dashboard'} className="group flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all font-medium">
-            <div className="w-8 h-8 rounded-full bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:bg-slate-100 dark:group-hover:bg-white/10 transition-all shadow-sm">
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        {/* ASOSIY KATTA BANNER */}
+        <div 
+          ref={scrollRef}
+          className="flex overflow-x-auto snap-x snap-mandatory gap-4 sm:gap-6 mb-10 pb-4 [&::-webkit-scrollbar]:hidden"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {banners.map((banner) => (
+          <div 
+            key={banner.id} 
+              className="relative w-full shrink-0 snap-center aspect-[16/9] sm:aspect-[21/9] lg:aspect-[26/9] rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl group bg-slate-950"
+>
+              {/* MEDIA QISMI - globals.css dagi banner-media-style klassi ishlatildi */}
+              {banner.mediaType === "video" ? (
+                <video 
+                  src={banner.mediaUrl} 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline
+                  className="banner-media-style"
+                />
+              ) : (
+                <img 
+                  src={banner.mediaUrl} 
+                  alt={banner.title} 
+                  className="banner-media-style"
+                />
+              )}
+              
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-[#0f172a]/40 to-transparent pointer-events-none"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/80 via-[#0f172a]/40 to-transparent pointer-events-none"></div>
+
+              <div className="absolute inset-0 p-6 sm:p-10 lg:p-16 flex flex-col justify-end w-full md:w-3/4 lg:w-2/3 pointer-events-none">
+                <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight mb-4 text-white drop-shadow-lg">
+                  {banner.title}
+                </h1>
+                <p className="text-slate-300 text-xs sm:text-sm lg:text-base leading-relaxed mb-8 max-w-2xl text-shadow-sm font-medium">
+                  {banner.desc}
+                </p>
+
+                <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto w-max">
+                  <Link href={banner.link} className="flex items-center gap-2 bg-white text-black px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base hover:scale-105 hover:bg-slate-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                    <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
+                    O'ynash
+                  </Link>
+                </div>
+              </div>
             </div>
-            <span className="hidden sm:inline">Bosh sahifaga</span>
+          ))}
+        </div>
+        
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-wide">
+            Sizga yoqishi mumkin
+          </h2>
+          <Link 
+            href={'/dashboard'} 
+            className="group flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium text-slate-300 hover:text-white transition-all active:scale-95"
+          >
+            <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-110 transition-transform" />
+            <span className="hidden sm:inline">Bosh sahifa</span>
           </Link>
-          
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-full backdrop-blur-md shadow-sm">
-          </div>
         </div>
 
-        {/* Sarlavha qismi - App Store uslubida qisqa va aniq */}
-        <div className="mb-8 border-b border-slate-700 dark:border-white/10 pb-4">
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight mb-1">
-            Yangi o'yinlar
-          </h1>
-          <p className="border-slate-200 dark:text-slate-400 text-xs sm:text-sm font-medium">
-            Tavsiya etilgan qiziqarli mashg'ulotlar
-          </p>
-        </div>
-
-        {/* O'YINLAR GRID - Mobil uchun 2 qator (grid-cols-2), PC uchun 3/4 qator */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+        {/* O'YINLAR GRID */}
+        {/* BU YERDA QATOR 2 DAN 5 GA OSHIRILDI VA MAP RPG QO'SHILDI */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
           
-          {/* 1. PUFAKCHA YORISH KARTASI */}
-          <div className="group relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-[20px] sm:rounded-[28px] overflow-hidden bg-slate-900 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 border border-slate-200 dark:border-white/10">
-            
-            {/* Katta fon rasmi */}
+          {/* 1. BUBLE GAME */}
+          <Link 
+            href="/dashboard/games/buble/1" 
+            className="group block relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-[24px] overflow-hidden bg-slate-900 cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/10"
+          >
             <img 
               src="https://i.pinimg.com/1200x/9c/3a/53/9c3a536b4fa4148811d29d07ff33bf72.jpg" 
               alt="Pufakcha Yorish" 
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
-            
-            {/* O'qilishi uchun qorong'i gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-
-            {/* Tepada kichik yorliq */}
-            <div className="absolute top-3 right-3 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md border border-white/10">
-              <span className="text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-wider">N5-N4</span>
-            </div>
-
-            {/* Pastki o'yin ma'lumotlari paneli (App Store dizayni) */}
-            <div className="absolute inset-x-2 bottom-2 sm:inset-x-3 sm:bottom-3 bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 rounded-[16px] p-2.5 sm:p-3 transition-transform duration-300 group-hover:-translate-y-1">
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                
-                {/* O'yin App Ikonkasi */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shrink-0 shadow-inner border border-white/20">
-                  <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
-                </div>
-                
-                {/* O'yin Nomi va Kategoriya */}
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-white font-bold text-xs sm:text-sm truncate leading-tight mb-0.5 drop-shadow-sm">
-                    Buble Game
-                  </h2>
-                  <p className="text-cyan-300 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider truncate drop-shadow-sm">
-                    Action
-                  </p>
-                </div>
-
-                {/* Play Tugmasi */}
-                <Link href="/dashboard/games/buble/1" className="shrink-0 w-8 h-8 sm:w-9 sm:h-9 bg-white/20 hover:bg-cyan-500 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md">
-                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-current ml-0.5" />
-                </Link>
+            <div className="absolute inset-x-4 bottom-4 flex items-end justify-between transition-transform duration-300 group-hover:-translate-y-2">
+              <div className="flex flex-col">
+                <span className="bg-white/20 backdrop-blur-md border border-white/10 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider mb-1.5 w-max">
+                  Action
+                </span>
+                <h2 className="text-white font-bold text-lg leading-tight mb-0.5 drop-shadow-sm">Buble Game</h2>
+              </div>
+              <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-white text-black group-hover:bg-slate-200 rounded-full flex items-center justify-center transition-colors shadow-lg">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
               </div>
             </div>
-          </div>
+          </Link>
 
-          {/* 2. SO'Z BOG'I KARTASI */}
-          <div className="group relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-[20px] sm:rounded-[28px] overflow-hidden bg-slate-900 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300 border border-slate-200 dark:border-white/10">
-            
+          {/* 2. SO'Z O'YINI */}
+          <Link 
+            href="/dashboard/games/soz-bogi" 
+            className="group block relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-[24px] overflow-hidden bg-slate-900 cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/10"
+          >
             <img  
               src="https://i.pinimg.com/1200x/fa/cf/78/facf7892ac06c9e690eb578ff426f8de.jpg" 
               alt="So'z Bog'i" 
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
-            
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-
-            <div className="absolute top-3 right-3 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md border border-white/10">
-              <span className="text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Yangi</span>
-            </div>
-
-            <div className="absolute inset-x-2 bottom-2 sm:inset-x-3 sm:bottom-3 bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 rounded-[16px] p-2.5 sm:p-3 transition-transform duration-300 group-hover:-translate-y-1">
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shrink-0 shadow-inner border border-white/20">
-                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-white font-bold text-xs sm:text-sm truncate leading-tight mb-0.5 drop-shadow-sm">
-                    So'z O'yini
-                  </h2>
-                  <p className="text-emerald-300 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider truncate drop-shadow-sm">
-                    Sarguzasht
-                  </p>
-                </div>
-
-                <Link href="/dashboard/games/soz-bogi" className="shrink-0 w-8 h-8 sm:w-9 sm:h-9 bg-white/20 hover:bg-emerald-500 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md">
-                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-current ml-0.5" />
-                </Link>
+            <div className="absolute inset-x-4 bottom-4 flex items-end justify-between transition-transform duration-300 group-hover:-translate-y-2">
+              <div className="flex flex-col">
+                <span className="bg-white/20 backdrop-blur-md border border-white/10 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider mb-1.5 w-max">
+                  Sarguzasht
+                </span>
+                <h2 className="text-white font-bold text-lg leading-tight mb-0.5 drop-shadow-sm">So'z O'yini</h2>
+              </div>
+              <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-white text-black group-hover:bg-slate-200 rounded-full flex items-center justify-center transition-colors shadow-lg">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
               </div>
             </div>
-          </div>
-
-          {/* 3. KANJI BUILDER KARTASI */}
-          <div className="group relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-[20px] sm:rounded-[28px] overflow-hidden bg-slate-900 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 border border-slate-200 dark:border-white/10">
-            
+          </Link>
+          
+          {/* 3. KANJI BUILDER */}
+          <Link 
+            href="/dashboard/games/kanji" 
+            className="group block relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-[24px] overflow-hidden bg-slate-900 cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/10"
+          >
             <img 
               src="https://i.pinimg.com/1200x/59/2b/38/592b388671a2bd9a07a39eb81f8ff778.jpg" 
               alt="Kanji Builder" 
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
-            
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
-
-            <div className="absolute top-3 right-3 px-2 py-1 bg-black/40 backdrop-blur-md rounded-md border border-white/10">
-              <span className="text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-wider">N5-N1</span>
-            </div>
-
-            <div className="absolute inset-x-2 bottom-2 sm:inset-x-3 sm:bottom-3 bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 rounded-[16px] p-2.5 sm:p-3 transition-transform duration-300 group-hover:-translate-y-1">
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-[10px] sm:rounded-[14px] bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-inner border border-white/20">
-                  <BrainCircuit className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-md" />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-white font-bold text-xs sm:text-sm truncate leading-tight mb-0.5 drop-shadow-sm">
-                    Kanji Builder
-                  </h2>
-                  <p className="text-purple-300 text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider truncate drop-shadow-sm">
-                    Mantiq & Puzzle
-                  </p>
-                </div>
-
-                <Link href="/dashboard/games/kanji" className="shrink-0 w-8 h-8 sm:w-9 sm:h-9 bg-white/20 hover:bg-purple-500 rounded-full flex items-center justify-center transition-colors border border-white/10 backdrop-blur-md">
-                  <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white fill-current ml-0.5" />
-                </Link>
+            <div className="absolute inset-x-4 bottom-4 flex items-end justify-between transition-transform duration-300 group-hover:-translate-y-2">
+              <div className="flex flex-col">
+                <span className="bg-white/20 backdrop-blur-md border border-white/10 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider mb-1.5 w-max">
+                  Mantiq
+                </span>
+                <h2 className="text-white font-bold text-lg leading-tight mb-0.5 drop-shadow-sm">Kanji Builder</h2>
+              </div>
+              <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-white text-black group-hover:bg-slate-200 rounded-full flex items-center justify-center transition-colors shadow-lg">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
               </div>
             </div>
-          </div>
+          </Link>
 
+          {/* 4. YANGI QO'SHILGAN: KANJIO QUEST (MAP RPG) */}
+          <Link 
+            href="/dashboard/games/map" 
+            className="group block relative w-full aspect-[3/4] sm:aspect-[4/5] rounded-[24px] overflow-hidden bg-slate-900 cursor-pointer shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/10"
+          >
+            <img 
+              src="https://i.pinimg.com/1200x/c1/af/d9/c1afd9d56eb5947a505bdf972412803b.jpg" 
+              alt="Kanjio Quest" 
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+            <div className="absolute inset-x-4 bottom-4 flex items-end justify-between transition-transform duration-300 group-hover:-translate-y-2">
+              <div className="flex flex-col">
+                <span className="bg-blue-500/80 backdrop-blur-md border border-blue-400/50 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider mb-1.5 w-max">
+                  Map RPG
+                </span>
+                <h2 className="text-white font-bold text-lg leading-tight mb-0.5 drop-shadow-sm"> Sehrli Dunyo Kanjio Quest</h2>
+              </div>
+              <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 text-white group-hover:bg-blue-400 rounded-full flex items-center justify-center transition-colors shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                <Lock className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
+              </div>
+            </div>
+          </Link>
+          
         </div>
       </div>
     </div>

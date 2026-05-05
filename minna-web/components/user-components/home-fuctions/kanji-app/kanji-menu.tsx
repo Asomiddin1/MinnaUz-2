@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Play, RotateCcw, Home, Sparkles, Lock, ChevronRight, Crown } from "lucide-react";
+import { Play, Home, Sparkles, Lock, ChevronRight, Crown } from "lucide-react";
 
 interface KanjiMenuProps {
   onStart: () => void;
@@ -23,7 +23,13 @@ export default function KanjiMenu({
   totalStages, selectedStage, onStageChange, maxUnlockedStage
 }: KanjiMenuProps) {
   return (
-    <div className="absolute inset-0 flex flex-col items-center bg-slate-50 dark:bg-[#060b14] text-slate-900 dark:text-white p-4 overflow-hidden pb-[80px] sm:pb-8 pt-8 sm:pt-12">
+    /* 
+       ASOSIY O'ZGARISH (SHU YERDA): 
+       1. "fixed" o'rniga "absolute" qo'yildi (Saytbarni yopib qo'ymasligi uchun o'zining div'i ichida qoladi).
+       2. sm:inset-4 lg:inset-6 berildi (Katta ekranlarda saytbar yonida bo'sh joy tashlab chiroyli ramka bo'ladi).
+       3. z-50 olib tashlandi.
+    */
+    <div className="absolute inset-0 sm:inset-4 lg:inset-6 flex flex-col items-center bg_kanji_imag text-slate-900 dark:text-white p-4 overflow-hidden pb-[80px] sm:pb-8 pt-8 sm:pt-12 rounded-none sm:rounded-[32px] lg:rounded-[48px] sm:shadow-2xl">
       
       {/* Premium Background Effects */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 blur-[120px] rounded-full pointer-events-none" />
@@ -42,7 +48,7 @@ export default function KanjiMenu({
           </h1>
         </motion.div>
 
-        {/* --- 2. LEVEL SWITCHER (Sleek Toggle) --- */}
+        {/* --- 2. LEVEL SWITCHER --- */}
         <div className="bg-slate-200/60 dark:bg-slate-800/60 backdrop-blur-xl p-1 rounded-[16px] w-full max-w-[200px] flex mx-auto shadow-inner border border-white/50 dark:border-white/5">
           {(["N5", "N4"] as const).map((lvl) => (
             <button key={lvl} onClick={() => onLevelChange(lvl)}
@@ -56,7 +62,7 @@ export default function KanjiMenu({
           ))}
         </div>
 
-        {/* --- 3. STAGES GRID (Glassmorphism Card) --- */}
+        {/* --- 3. STAGES GRID --- */}
         <div className="w-full bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl p-4 sm:p-5 rounded-[24px] sm:rounded-[32px] border border-white/60 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
           
           <div className="flex justify-between items-end mb-3 px-1">
@@ -95,8 +101,6 @@ export default function KanjiMenu({
 
         {/* --- 4. ACTION BUTTONS --- */}
         <div className="w-full flex flex-col gap-3 px-1">
-          
-          {/* Main 3D Play Button */}
           <motion.button whileTap={{ y: 4 }} onClick={onStart} className="relative w-full h-16 sm:h-20 group">
             <div className="absolute inset-0 bg-blue-800 dark:bg-blue-900 rounded-[24px] sm:rounded-[30px] translate-y-1.5 sm:translate-y-2" />
             <div className="absolute inset-0 bg-gradient-to-b from-blue-500 to-blue-600 rounded-[24px] sm:rounded-[30px] flex items-center justify-center gap-2 sm:gap-3 border-t-2 border-white/20 shadow-xl group-active:translate-y-1.5 sm:group-active:translate-y-2 group-active:border-t-0 transition-all duration-150">
@@ -108,18 +112,13 @@ export default function KanjiMenu({
             </div>
           </motion.button>
 
-          {/* Secondary Actions (Premium Pill Container) */}
           <div className="flex items-center justify-center gap-1 mx-auto bg-white/40 dark:bg-slate-800/40 backdrop-blur-md p-1 rounded-full border border-white/60 dark:border-white/10 shadow-sm w-full max-w-[260px]">
-             
-             <div className="w-px h-3.5 bg-slate-300 dark:bg-slate-700 rounded-full flex-none" />
-             
              <button 
                onClick={onQuit} 
                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-full font-bold text-[9px] sm:text-[10px] tracking-widest text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-400 hover:shadow-sm shadow-red-500/5 uppercase transition-all duration-200 active:scale-95"
              >
                <Home className="w-3 h-3" /> Chiqish
              </button>
-
           </div>
         </div>
 

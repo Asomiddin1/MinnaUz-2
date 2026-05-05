@@ -1,6 +1,6 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
+import { unlockNextStage } from "@/components/user-components/japan-map-rpg/data";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -48,6 +48,7 @@ const FloatingClouds = React.memo(() => {
     </div>
   );
 });
+FloatingClouds.displayName = "FloatingClouds";
 
 const VictoryConfetti = React.memo(() => {
   return (
@@ -64,12 +65,14 @@ const VictoryConfetti = React.memo(() => {
     </div>
   );
 });
+VictoryConfetti.displayName = "VictoryConfetti";
 
+// Sharlar qotmasligi uchun React.memo
 const Bubble = React.memo(({ bubble, handlePop, removeBubble, isPaused }: any) => {
   const [currentText, setCurrentText] = useState(bubble.ja);
 
   useEffect(() => {
-    if (isPaused) return; // Pauzada so'zlar o'zgarmay turadi
+    if (isPaused) return; 
     const interval = setInterval(() => {
       const randomWord = WORDS_LIST[Math.floor(Math.random() * WORDS_LIST.length)].ja;
       setCurrentText(randomWord);
@@ -80,12 +83,13 @@ const Bubble = React.memo(({ bubble, handlePop, removeBubble, isPaused }: any) =
   return (
     <motion.div
       initial={{ y: 0 }} 
-      animate={isPaused ? {} : { y: -1300 }} // Pauzada joyida qotadi
+      // y yo'nalishi bo'yicha -120vh ishlatildi
+      animate={isPaused ? {} : { y: "-120vh" }} 
       exit={{ scale: 1.8, opacity: 0, transition: { duration: 0.2 } }}
       transition={{ duration: bubble.duration, ease: "linear" }}
       onAnimationComplete={() => removeBubble(bubble.id)}
-      onClick={() => !isPaused && handlePop(currentText, bubble.id)} // Pauzada bosib bo'lmaydi
-      className={`absolute will-change-transform flex flex-col items-center justify-center 
+      onClick={() => !isPaused && handlePop(currentText, bubble.id)} 
+      className={`absolute pointer-events-auto will-change-transform flex flex-col items-center justify-center 
         w-20 h-20 sm:w-32 sm:h-32 rounded-full 
         bg-gradient-to-br ${bubble.colorClass} 
         border-2 border-white/60
@@ -100,6 +104,7 @@ const Bubble = React.memo(({ bubble, handlePop, removeBubble, isPaused }: any) =
     </motion.div>
   );
 });
+Bubble.displayName = "Bubble";
 
 export default function PopTheWordStage2() {
   const [targetWord, setTargetWord] = useState(WORDS_LIST[0]);
@@ -108,17 +113,20 @@ export default function PopTheWordStage2() {
   const [lives, setLives] = useState(3);
   const [gameOver, setGameOver] = useState(false);
   const [victory, setVictory] = useState(false);
-  const [isPaused, setIsPaused] = useState(false); // <-- Pauza holati qo'shildi
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (score >= 100) {
       setVictory(true);
       setBubbles([]);
+
+      // BUM! 🚀 Shunchaki bosqich raqamini beramiz, qolganini o'zi hal qiladi!
+      // Faraz qilaylik, bu Bubble Pop o'yini xaritadagi 2-bosqich o'yini:
+      unlockNextStage(2); 
     }
   }, [score]);
 
   useEffect(() => {
-    // Agar o'yin tugagan, yutilgan yoki pauzada bo'lsa, yangi shar chiqarmaymiz
     if (gameOver || victory || isPaused) return; 
     
     const interval = setInterval(() => {
@@ -132,9 +140,15 @@ export default function PopTheWordStage2() {
       }]);
     }, 1200);
     return () => clearInterval(interval);
-  }, [gameOver, victory, isPaused]); // isPaused o'zgaruvchisi qo'shildi
+  }, [gameOver, victory, isPaused]);
 
-  const handlePop = (clickedWord: string, id: number) => {
+  // OPTIMIZATSIYA: removeBubble qotirib qo'yildi
+  const removeBubble = useCallback((id: number) => {
+    setBubbles((prev) => prev.filter((b) => b.id !== id));
+  }, []);
+
+  // OPTIMIZATSIYA: handlePop o'zgarganda boshqa sharlar qotib qolmasligi uchun useRef
+  const handlePopLogic = (clickedWord: string, id: number) => {
     if (isPaused) return;
     
     if (clickedWord === targetWord.ja) {
@@ -148,7 +162,15 @@ export default function PopTheWordStage2() {
     }
   };
 
-  const removeBubble = (id: number) => setBubbles((prev) => prev.filter((b) => b.id !== id));
+  const popLogicRef = useRef(handlePopLogic);
+  useEffect(() => {
+    popLogicRef.current = handlePopLogic;
+  });
+
+  const stableHandlePop = useCallback((word: string, id: number) => {
+    popLogicRef.current(word, id);
+  }, []);
+  // ===========================================
 
   const restartGame = () => {
     setScore(0); setLives(3); setBubbles([]); setGameOver(false); setVictory(false); setIsPaused(false);
@@ -157,7 +179,7 @@ export default function PopTheWordStage2() {
 
   if (victory) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-purple-950 via-indigo-900 to-blue-950 text-white z-[100] p-4 overflow-hidden rounded-[30px]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-purple-950 via-indigo-900 to-blue-950 text-white z-[100] p-4 overflow-hidden">
         <VictoryConfetti />
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white/10 p-8 sm:p-12 rounded-[30px] sm:rounded-[40px] border border-white/20 backdrop-blur-2xl shadow-2xl flex flex-col items-center z-10 text-center max-w-lg w-full">
             <div className="text-6xl sm:text-8xl mb-6">👑</div>
@@ -165,6 +187,7 @@ export default function PopTheWordStage2() {
             <p className="text-xl sm:text-2xl mb-10 text-blue-100">Siz 100 ball yig'ib, 2-bosqichni zabt etdingiz!</p>
             <div className="flex flex-col gap-4 w-full">
                 <button onClick={restartGame} className="w-full px-8 py-4 bg-yellow-500 hover:bg-yellow-400 text-black rounded-2xl font-bold shadow-lg">🔄 Qaytadan o'ynash</button>
+                <Link href="/dashboard/games/map" className="w-full px-8 py-4 bg-white/10 hover:bg-white/20 rounded-2xl font-bold border border-white/10 text-center">🗺️ Xaritaga qaytish</Link>
                 <Link href="/dashboard/games" className="w-full px-8 py-4 bg-white/10 hover:bg-white/20 rounded-2xl font-bold border border-white/10 text-center">🏠 Menyuga qaytish</Link>
             </div>
         </motion.div>
@@ -174,7 +197,7 @@ export default function PopTheWordStage2() {
 
   if (gameOver) {
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-slate-950 to-black text-white z-[100] p-4 rounded-[30px]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-slate-950 to-black text-white z-[100] p-4 overflow-hidden">
         <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-slate-900/80 p-8 sm:p-12 rounded-[30px] sm:rounded-[40px] border border-slate-700 backdrop-blur-3xl shadow-2xl flex flex-col items-center max-w-lg w-full">
             <h2 className="text-4xl sm:text-6xl font-black mb-6 text-red-500">GAME OVER</h2>
             <div className="text-2xl sm:text-4xl mb-10 bg-white/5 px-8 py-4 rounded-2xl border border-white/10">
@@ -187,11 +210,10 @@ export default function PopTheWordStage2() {
   }
 
   return (
-    <div className="relative w-full h-[calc(100vh-100px)] min-h-[500px] bg_buble_level2 from-indigo-300 via-purple-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-hidden rounded-[30px] border border-slate-200 dark:border-slate-700 shadow-inner">
+    <div className="absolute inset-0 z-40 bg_buble_level2 bg-cover bg-center bg-no-repeat overflow-hidden bg-slate-900">
       <FloatingClouds />
 
-      {/* HUD: Saytbar va mobilga moslashuvchan */}
-      <div className="absolute top-2 sm:top-6 left-2 sm:left-6 right-2 sm:right-6 
+      <div className="absolute top-4 sm:top-6 left-4 sm:left-6 right-4 sm:right-6 
         flex justify-between items-center bg-white/30 dark:bg-black/30 backdrop-blur-xl 
         px-3 py-2 sm:px-8 sm:py-4 rounded-xl sm:rounded-[30px] shadow-2xl z-20 border border-white/40 dark:border-white/10">
         
@@ -208,7 +230,6 @@ export default function PopTheWordStage2() {
           </div>
         </div>
 
-        {/* BALL VA PAUZA TUGMASI */}
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="bg-white/50 dark:bg-white/10 px-2 py-1 sm:px-6 sm:py-2 rounded-lg sm:rounded-2xl border border-white/50 dark:border-white/10 shadow-inner min-w-[70px] sm:min-w-[100px] text-right">
             <span className="hidden sm:inline text-xs font-bold text-purple-900/60 dark:text-white/60 mr-1 uppercase">Ball:</span>
@@ -225,22 +246,30 @@ export default function PopTheWordStage2() {
         </div>
       </div>
 
-      <div className="relative w-full h-full z-10">
+      <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+       <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
         <AnimatePresence>
           {bubbles.map((bubble) => (
-            <Bubble key={bubble.id} bubble={bubble} handlePop={handlePop} removeBubble={removeBubble} isPaused={isPaused} />
+            <Bubble 
+              key={bubble.id} 
+              bubble={bubble} 
+              handlePop={stableHandlePop} 
+              removeBubble={removeBubble} 
+              isPaused={isPaused} 
+            />
           ))}
         </AnimatePresence>
       </div>
+      </div>
 
-      {/* PAUZA MENYUSI */}
       {isPaused && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-indigo-950/60 dark:bg-black/80 backdrop-blur-md rounded-[30px]">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-indigo-950/60 dark:bg-black/80 backdrop-blur-md">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white/10 dark:bg-slate-800 p-8 sm:p-10 rounded-[30px] border border-white/20 dark:border-white/10 backdrop-blur-[24px] shadow-2xl flex flex-col items-center w-[90%] max-w-[400px]">
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-8 tracking-wider uppercase drop-shadow-sm">To'xtatildi</h2>
             <div className="flex flex-col gap-4 w-full">
               <button onClick={() => setIsPaused(false)} className="w-full py-3.5 bg-green-500 hover:bg-green-400 text-black rounded-full font-black text-lg shadow-lg uppercase">▶️ Davom etish</button>
               <button onClick={restartGame} className="w-full py-3.5 bg-blue-500 hover:bg-blue-400 text-white rounded-full font-black text-lg shadow-lg uppercase">🔄 Qaytadan</button>
+              <Link href="/dashboard/games/map" className="w-full px-8 py-4 bg-white/10 hover:bg-white/20 rounded-2xl font-bold border border-white/10 text-center"> 🗺️ Xaritaga qaytish</Link>
               <Link href="/dashboard/games" className="w-full py-3.5 bg-red-500 hover:bg-red-400 text-white text-center rounded-full font-black text-lg shadow-lg uppercase">🚪 Chiqish</Link>
             </div>
           </motion.div>

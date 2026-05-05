@@ -16,7 +16,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStart, highestLevel, totalLevels 
 
   return (
     // 1. Ota quti (Wrapper): Kompyuterda nisbiy (relative), mobil telefonda esa to'liq ekran (fixed) qilib moslashtirildi.
-    <div className="max-md:fixed max-md:inset-0 max-md:z-[999] md:relative w-full h-[100dvh] md:h-full min-h-[500px] overflow-hidden flex items-center justify-center p-4 bg-gradient-to-b from-[#7dd3fc] to-[#f0fdf4] dark:from-slate-950 dark:to-slate-900 md:rounded-[35px] border border-transparent dark:border-white/10 select-none">
+    <div className="max-md:fixed max-md:inset-0 max-md:z-[999] md:relative w-full h-[100dvh] md:h-full min-h-[500px] overflow-hidden flex items-center justify-center p-4 bg_sozbog_imag from-[#7dd3fc] to-[#f0fdf4] dark:from-slate-950 dark:to-slate-900 md:rounded-[35px] border border-transparent dark:border-white/10 select-none">
       
       {/* ORQA FONDAGI BEZAKLAR (Ixtiyoriy) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none md:rounded-[35px]">
@@ -30,7 +30,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStart, highestLevel, totalLevels 
         className="relative z-10 bg-white/40 dark:bg-slate-800/60 backdrop-blur-2xl p-6 sm:p-8 rounded-[40px] shadow-2xl border border-white/50 dark:border-white/10 w-full max-w-sm text-center"
       >
         <h1 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-500 mb-2 drop-shadow-sm uppercase tracking-tighter">
-          So'z <br/> Bog'i
+          So'z <br/> O'yini
         </h1>
         <p className="text-slate-600 dark:text-slate-400 font-medium mb-8 sm:mb-10 text-sm sm:text-base">
           Kanji so'zlarni toping
