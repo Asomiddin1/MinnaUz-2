@@ -149,11 +149,21 @@
     }
 }
 
-
-.bg_game_list{
-  background-image: url('./img/image.png');
+/* Yorug' rejim (Light Mode) uchun asosiy fon */
+.bg_game_list {
+  background-image: url('./img/light.png'); 
+  background-color: #f8fafc3d; 
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: overlay;
+}
+
+.dark .bg_game_list {
+  /* Qorong'i rejim uchun boshqa rasm kerak bo'lsa, URL ni o'zgartirasiz. Yoki o'zini qoldirasiz */
+  background-image: url('./img/dark.png');
+  background-color: #0505059b; 
+  background-blend-mode: overlay; 
 }
 .bg_buble_image {
   /* 1200x o'rniga originals so'zi yozildi - bu rasmni maksimal tiniq qiladi */
@@ -172,4 +182,42 @@
   background-image: url('./img/buble2.png');
   background-size: cover;
   background-position: center;
+}
+
+.bg_sozbog_imag{
+  background-image: url('./img/sozbog.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.bg_sozbogi_oyin{
+  background-image: url('./img/sozbog.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.bg_kanji_imag{
+  background-image: url('./img/kanji2.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.bg_kanji_oyin {
+  background-image: url('./img/kanji.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.bg_xarita {
+  background-image: url('./img/xarita.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  /* background-size: cover; ISHLATMANG! */
+  background-size: 100% 100%; /* Bu rasm va tugmalarni bir xil masshtabda ushlaydi */
+}
+
+.banner-media-style {
+  @apply absolute inset-0 w-full h-full object-cover;
+  /* Agar chetida bo'shliq qolsa, buni qo'shing: */
+  transform: scale(1.01); 
 }

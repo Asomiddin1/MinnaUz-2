@@ -1,12 +1,10 @@
 "use client";
 
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // useRouter qo'shildi
+import { useRouter } from "next/navigation";
 
-// Yaratgan yangi komponentingizni chaqiramiz (yo'lini o'zingizga moslang)
 import GameLogin from "./buble-Menu";
 
 // --- MA'LUMOTLAR ---
@@ -26,7 +24,7 @@ const BUBBLE_COLORS = [
 const TOTAL_LEVELS = 2;
 
 // --- YORDAMCHI KOMPONENTLAR ---
-const FloatingClouds = () => (
+const FloatingClouds = React.memo(() => (
   <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
     {[1, 2, 3, 4, 5].map((cloud, index) => (
       <motion.div key={cloud} className="absolute opacity-40 sm:opacity-60" style={{ top: `${index * 18}%`, left: "-30%" }} animate={{ x: ["0vw", "130vw"] }} transition={{ duration: 25 + Math.random() * 15, ease: "linear", repeat: Infinity, delay: Math.random() * 10 }}>
@@ -37,42 +35,50 @@ const FloatingClouds = () => (
       </motion.div>
     ))}
   </div>
-);
+));
+FloatingClouds.displayName = "FloatingClouds";
 
-const Confetti = () => (
+const Confetti = React.memo(() => (
   <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
     {[...Array(30)].map((_, i) => (
       <motion.div key={i} className={`absolute w-2 h-2 sm:w-3 sm:h-3 rounded-full opacity-70 ${["bg-red-400", "bg-blue-400", "bg-green-400", "bg-yellow-400", "bg-purple-400"][i % 5]}`} style={{ left: `${Math.random() * 100}%`, top: `-5%` }} animate={{ y: `105vh`, x: `${(Math.random() - 0.5) * 30}vw`, rotate: 360 }} transition={{ duration: 3 + Math.random() * 3, repeat: Infinity, delay: Math.random() * 2 }} />
     ))}
   </div>
-);
-
-const BubbleStatic = React.memo(({ bubble, handlePop, removeBubble, isPaused }: any) => (
-  <motion.div
-    initial={{ y: 0 }} 
-    animate={isPaused ? {} : { y: -1300 }}
-    exit={{ scale: 1.8, opacity: 0, transition: { duration: 0.2 } }}
-    transition={{ duration: bubble.duration, ease: "linear" }}
-    onAnimationComplete={() => removeBubble(bubble.id)}
-    onClick={() => !isPaused && handlePop(bubble.ja, bubble.id)} 
-    className={`absolute will-change-transform flex flex-col items-center justify-center 
-      w-20 h-20 sm:w-32 sm:h-32 rounded-full 
-      bg-gradient-to-br ${bubble.colorClass} 
-      border-2 border-white/60
-      shadow-[inset_0_5px_15px_rgba(255,255,255,0.4),0_10px_25px_rgba(0,0,0,0.2)] 
-      text-white text-2xl sm:text-4xl font-black 
-      ${!isPaused ? 'cursor-pointer active:scale-90' : 'cursor-not-allowed opacity-80 grayscale-[30%]'} transition-transform`}
-    style={{ left: bubble.left, top: "100%" }} 
-  >
-    <div className="absolute top-2 left-4 w-5 h-3 bg-white/40 rounded-full blur-[1px] rotate-[-30deg]"></div>
-    <span className="z-10 drop-shadow-lg select-none">{bubble.ja}</span>
-    <div className="absolute top-full left-1/2 -translate-x-1/2 w-[1px] h-12 sm:h-20 bg-white/40"></div>
-  </motion.div>
 ));
+Confetti.displayName = "Confetti";
+
+// Sharlar qotmasligi uchun optimizatsiya qilingan komponent
+const BubbleStatic = React.memo(({ bubble, handlePop, removeBubble, isPaused }: any) => {
+  return (
+    <motion.div
+      initial={{ y: 0 }} 
+      // Qotmasligi uchun piksel emas, balki vh ishlatamiz. Mobil ekranni aniq tark etadi.
+      animate={isPaused ? {} : { y: "-120vh" }}
+      exit={{ scale: 1.8, opacity: 0, transition: { duration: 0.15 } }}
+      transition={{ duration: bubble.duration, ease: "linear" }}
+      onAnimationComplete={() => removeBubble(bubble.id)}
+      onClick={() => !isPaused && handlePop(bubble.ja, bubble.id)} 
+      className={`absolute will-change-transform flex flex-col items-center justify-center 
+        w-20 h-20 sm:w-32 sm:h-32 rounded-full 
+        bg-gradient-to-br ${bubble.colorClass} 
+        border-2 border-white/60
+        shadow-[inset_0_5px_15px_rgba(255,255,255,0.4),0_10px_25px_rgba(0,0,0,0.2)] 
+        text-white text-2xl sm:text-4xl font-black 
+        ${!isPaused ? 'cursor-pointer active:scale-90' : 'cursor-not-allowed opacity-80 grayscale-[30%]'} transition-transform`}
+      style={{ left: bubble.left, top: "100%" }} 
+    >
+      <div className="absolute top-2 left-4 w-5 h-3 bg-white/40 rounded-full blur-[1px] rotate-[-30deg]"></div>
+      <span className="z-10 drop-shadow-lg select-none">{bubble.ja}</span>
+      <div className="absolute top-full left-1/2 -translate-x-1/2 w-[1px] h-12 sm:h-20 bg-white/40"></div>
+    </motion.div>
+  );
+});
+BubbleStatic.displayName = "BubbleStatic";
+
 
 // --- ASOSIY KOMPONENT ---
 export default function CompleteGame() {
-  const router = useRouter(); // Router inisializatsiyasi
+  const router = useRouter(); 
   
   const [gameState, setGameState] = useState<'briefing' | 'playing' | 'paused' | 'completed' | 'gameover'>('briefing');
   const [targetWord, setTargetWord] = useState(WORDS_LIST[0]);
@@ -125,8 +131,8 @@ export default function CompleteGame() {
       setBubbles((prev) => [...prev, {
         id: Math.random(),
         ja: startWord.ja,
-        left: `${5 + Math.random() * 85}%`,
-        duration: Math.max(4, 7 + Math.random() * 5 - (currentLevelId * 0.2)),
+        left: `${5 + Math.random() * 80}%`, // Ekranga siqishi uchun 85% dan 80% ga tushirildi
+        duration: Math.max(3.5, 6 + Math.random() * 4 - (currentLevelId * 0.2)),
         colorClass: BUBBLE_COLORS[Math.floor(Math.random() * BUBBLE_COLORS.length)],
       }]);
     }, LEVEL_INFO.speed);
@@ -134,7 +140,13 @@ export default function CompleteGame() {
     return () => clearInterval(interval);
   }, [gameState, targetWord, currentLevelId]);
 
-  const handlePop = (clickedWord: string, id: number) => {
+  // OPTIMIZATSIYA: Bubble o'chirish funksiyasi qotirib qo'yildi
+  const removeBubble = useCallback((id: number) => {
+    setBubbles((prev) => prev.filter((b) => b.id !== id));
+  }, []);
+
+  // OPTIMIZATSIYA: handlePop o'zgarganda barcha sharlar re-render bo'lmasligi uchun useRef ishlatildi
+  const handlePopLogic = (clickedWord: string, id: number) => {
     if (gameState !== 'playing') return;
     
     if (clickedWord === targetWord.ja) {
@@ -148,7 +160,15 @@ export default function CompleteGame() {
     }
   };
 
-  const removeBubble = (id: number) => setBubbles((prev) => prev.filter((b) => b.id !== id));
+  const popLogicRef = useRef(handlePopLogic);
+  useEffect(() => {
+    popLogicRef.current = handlePopLogic;
+  });
+
+  const stableHandlePop = useCallback((word: string, id: number) => {
+    popLogicRef.current(word, id);
+  }, []);
+  // ===========================================
 
   const resumeGame = () => {
       if (score === 0 || gameState === 'gameover' || lives === 0) {
@@ -166,10 +186,8 @@ export default function CompleteGame() {
     setGameState('playing');
   };
 
-  // BU YER O'ZGARDI
  const changeLevel = (lvl: number) => {
     if (lvl === 2) {
-      // MANA SHU YER O'ZGARDI: Endi u to'g'ridan-to'g'ri yangi dinamik manzilingizga boradi
       router.push('/dashboard/games/buble/2'); 
     } else {
       setCurrentLevelId(lvl);
@@ -182,9 +200,6 @@ export default function CompleteGame() {
     }
   };
 
-  // ==========================================
-  // 1. BOSH EKRAN (LOGIN/BRIEFING) YUKLANISHI
-  // ==========================================
   if (gameState === 'briefing') {
     return (
       <GameLogin 
@@ -202,9 +217,6 @@ export default function CompleteGame() {
     );
   }
 
-  // ==========================================
-  // 2. ASOSIY O'YIN EKRANI
-  // ==========================================
   return (
    <div className="max-md:fixed max-md:inset-0 max-md:z-[999] relative w-full h-[100dvh] md:h-[calc(100vh-80px)] md:min-h-[650px] bg_buble_levle1 from-sky-400 via-sky-200 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 overflow-hidden md:rounded-[30px] border border-transparent dark:border-slate-700 shadow-inner transition-colors duration-500 select-none touch-none"> 
     <FloatingClouds />
@@ -244,7 +256,13 @@ export default function CompleteGame() {
       <div className="relative w-full h-full z-10">
         <AnimatePresence>
           {bubbles.map((bubble) => (
-            <BubbleStatic key={bubble.id} bubble={bubble} handlePop={handlePop} removeBubble={removeBubble} isPaused={gameState === 'paused' || showLevelsModal} />
+            <BubbleStatic 
+               key={bubble.id} 
+               bubble={bubble} 
+               handlePop={stableHandlePop} 
+               removeBubble={removeBubble} 
+               isPaused={gameState === 'paused' || showLevelsModal} 
+            />
           ))}
         </AnimatePresence>
       </div>
@@ -258,13 +276,14 @@ export default function CompleteGame() {
               <button onClick={resumeGame} className="w-full py-3.5 bg-green-500 hover:bg-green-400 text-black rounded-full font-black text-lg shadow-lg uppercase">▶️ Davom etish</button>
               <button onClick={restartLevel} className="w-full py-3.5 bg-blue-500 hover:bg-blue-400 text-white rounded-full font-black text-lg shadow-lg uppercase">🔄 Qaytadan</button>
               <button onClick={() => setShowLevelsModal(true)} className="w-full py-3.5 bg-purple-500 hover:bg-purple-400 text-white rounded-full font-black text-lg shadow-lg uppercase">📊 Darajalar</button>
+              <Link href="/dashboard/games/map" className="w-full px-8 py-4 bg-white/10 hover:bg-white/20 rounded-2xl font-bold border border-white/10 text-center">🗺️ Xaritaga qaytish</Link>
               <Link href="/dashboard/games" className="w-full py-3.5 bg-red-500 hover:bg-red-400 text-white text-center rounded-full font-black text-lg shadow-lg uppercase">🚪 Chiqish</Link>
             </div>
           </motion.div>
         </div>
       )}
 
-      {/* DARAJALAR MODALI (Pauza ichida) */}
+      {/* DARAJALAR MODALI */}
       <AnimatePresence>
         {showLevelsModal && (
           <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-xl md:rounded-[30px]">
