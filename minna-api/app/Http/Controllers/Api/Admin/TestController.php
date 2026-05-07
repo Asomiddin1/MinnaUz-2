@@ -64,17 +64,17 @@ class TestController extends Controller
             // standart bo‘limlar
             $sections = [
                 [
-                    'name'  => 'Moji-Goi (Vocabulary)',
+                    'name'  => '文字・語彙',    
                     'type'  => 'vocabulary',
                     'order' => 1,
                 ],
                 [
-                    'name'  => 'Bunpou-Dokkai (Grammar & Reading)',
+                    'name'  => '文法・読解',
                     'type'  => 'grammar_reading',
                     'order' => 2,
                 ],
                 [
-                    'name'  => 'Choukai (Listening)',
+                    'name'  => '聴解',
                     'type'  => 'listening',
                     'order' => 3,
                 ],

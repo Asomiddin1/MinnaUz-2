@@ -137,6 +137,60 @@ class ExamController extends Controller
         ]);
     }
 
+    // YANGA QO'SHILGAN FUNKSIYA: Bitta natijani to'liq ko'rsatish
+    public function result($resultId)
+    {
+        $user = auth()->user();
+
+        // 1. Natijani bazadan olamiz. Xavfsizlik uchun faqat shu userga tegishli ekanligini tekshiramiz.
+        $examResult = ExamResult::with(['test', 'answers.question'])
+            ->where('id', $resultId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        // 2. Savollar va javoblarni Frontend (React) kutayotgan formatga o'tkazamiz
+        $mappedAnswers = $examResult->answers->map(function ($ans) {
+            $question = $ans->question;
+            
+            // Audio manzilini to'g'rilash (agar bor bo'lsa)
+            $audioUrl = null;
+            if ($question && $question->audio_url) {
+                $audioUrl = asset('storage/' . str_replace('storage/', '', $question->audio_url));
+            }
+
+            return [
+                'question_id' => $ans->question_id,
+                'question_text' => $question ? $question->question_text : 'Savol topilmadi',
+                'passage' => $question ? $question->passage : null,
+                'options' => $question ? (is_string($question->options) ? json_decode($question->options, true) : $question->options) : [],
+                'type' => $question ? $question->type : 'unknown',
+                'audio_url' => $audioUrl,
+                'selected_option' => $ans->selected_option,
+                'correct_option' => $ans->correct_option,
+                'is_correct' => (bool)$ans->is_correct,
+                'points' => (int)$ans->points,
+            ];
+        });
+
+        // 3. To'liq natijani Frontend'ga jo'natamiz
+        return response()->json([
+            'data' => [
+                'id' => $examResult->id,
+                'test_id' => $examResult->test_id,
+                'test_title' => $examResult->test ? $examResult->test->title : 'Test',
+                'level' => $examResult->test ? $examResult->test->level : '',
+                'total_questions' => $examResult->total_questions,
+                'correct_count' => $examResult->correct_count,
+                'wrong_count' => $examResult->wrong_count,
+                'unanswered_count' => $examResult->unanswered_count,
+                'score_percentage' => $examResult->score,
+                'passed' => (bool)$examResult->passed,
+                'time_spent' => $examResult->time_spent,
+                'answers' => $mappedAnswers,
+            ]
+        ]);
+    }
+
     public function history()
     {
         $user = auth()->user();

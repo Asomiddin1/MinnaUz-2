@@ -84,7 +84,7 @@ const CustomAudioPlayer = ({ src }: { src: string }) => {
 
   return (
     <div
-      className="flex w-full items-center gap-4 rounded-[6px] border border-slate-200  px-4 py-3 dark:border-slate-800 "
+      className="flex w-full items-center gap-4 rounded-[6px] border border-slate-200 px-4 py-3 dark:border-slate-800"
       onContextMenu={(e) => e.preventDefault()}
     >
       <audio
@@ -320,18 +320,13 @@ export default function TestPage() {
 
   const isAnswered = (qId: number) => answers.some((a) => a.question_id === qId)
 
+  // O'ZGARTIRILGAN QISM 1: ScrollIntoView usuliga o'tildi
   const scrollToQuestion = (qId: number) => {
     const element = document.getElementById(`q-${qId}`)
     if (element) {
-      const offset = 180
-      const bodyRect = document.body.getBoundingClientRect().top
-      const elementRect = element.getBoundingClientRect().top
-      const elementPosition = elementRect - bodyRect
-      const offsetPosition = elementPosition - offset
-
-      window.scrollTo({
-        top: offsetPosition,
+      element.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       })
     }
   }
@@ -434,7 +429,11 @@ export default function TestPage() {
 
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`flex h-full items-center justify-center border-l border-slate-100 px-4 py-[14px] transition-colors dark:border-slate-800 ${isSidebarOpen ? "bg-indigo-50 text-[#5C55C4] dark:bg-indigo-900/20" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900"} `}
+            className={`flex h-full items-center justify-center border-l border-slate-100 px-4 py-[14px] transition-colors dark:border-slate-800 ${
+              isSidebarOpen
+                ? "bg-indigo-50 text-[#5C55C4] dark:bg-indigo-900/20"
+                : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-900"
+            } `}
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -471,7 +470,9 @@ export default function TestPage() {
       <main className="mx-auto grid max-w-[1400px] grid-cols-1 gap-8 px-4 py-6 lg:grid-cols-12 lg:px-6">
         {/* CHAP QISM: SAVOLLAR */}
         <div
-          className={`${isSidebarOpen ? "lg:col-span-8" : "lg:col-span-12"} space-y-10 transition-all duration-300`}
+          className={`${
+            isSidebarOpen ? "lg:col-span-8" : "lg:col-span-12"
+          } space-y-10 transition-all duration-300`}
         >
           {/* BIZ YASAGAN MAXSUS AUDIO PLEYER */}
           {currentSection?.type === "listening" && test.audio_url && (
@@ -500,10 +501,12 @@ export default function TestPage() {
                 </div>
               )}
 
-              {/* Savollar ro'yxati */}
+             {/* Savollar ro'yxati */}
               <div className="space-y-10">
                 {qs.map((q: any) => (
-                  <div key={q.id} id={`q-${q.id}`} className="space-y-4">
+                  <div key={q.id} id={`q-${q.id}`} className="space-y-4 scroll-mt-[180px]">
+                    
+                    
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0 rounded-[6px] bg-[#5C55C4] px-2.5 py-1 text-[13px] font-semibold text-white">
                         {q.mondai_number}.{q.question_number}
@@ -512,7 +515,6 @@ export default function TestPage() {
                         {q.question_text}
                       </h3>
                     </div>
-
                     <RadioGroup
                       onValueChange={(val) => handleAnswer(q.id, val)}
                       value={
@@ -536,7 +538,11 @@ export default function TestPage() {
                           >
                             <RadioGroupItem value={opt} className="sr-only" />
                             <div
-                              className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${isSelected ? "border-[#5C55C4]" : "border-slate-300 dark:border-slate-600"}`}
+                              className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors ${
+                                isSelected
+                                  ? "border-[#5C55C4]"
+                                  : "border-slate-300 dark:border-slate-600"
+                              }`}
                             >
                               {isSelected && (
                                 <div className="h-[12px] w-[12px] rounded-full bg-[#5C55C4]" />
