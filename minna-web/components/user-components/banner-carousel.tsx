@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import { Calendar } from "@/components/ui/calendar"
-import { Card } from "@/components/ui/card"
 import {
   Carousel,
   CarouselContent,
@@ -8,7 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { StreakCalendar } from './streak-calendar'
+
 
 const BannerCarousel = () => {
   const [date, setDate] = useState<Date | undefined>(new Date())

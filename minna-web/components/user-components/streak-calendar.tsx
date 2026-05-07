@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent } from "@/components/ui/card"
-import { userAPI } from "@/lib/api"
+import { userAPI } from "@/lib/api/user"
 
 export function StreakCalendar() {
   const [isMounted, setIsMounted] = React.useState(false)
