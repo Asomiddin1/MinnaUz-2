@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   CheckCircle2,
   XCircle,
@@ -54,9 +53,10 @@ interface TestResultData {
 export default function ResultPage() {
   const params = useParams();
   const router = useRouter();
-  // ⚠️ To‘g‘ri nomlar: [id] → params.id, [resultId] → params.resultId
-  const testId = params.id as string;
-  const resultId = params.resultId as string;
+  
+  // Papka nomi [id] yoki [testId] bo'lishidan qat'iy nazar ushlab olamiz
+  const testId = (params?.id || params?.testId) as string;
+  const resultId = params?.resultId as string;
 
   const [result, setResult] = useState<TestResultData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,8 +67,8 @@ export default function ResultPage() {
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // 1-HIMOYA: Agar parametrlar hali kelmagan bo'lsa, kutamiz (setLoading(false) qilib yubormaymiz)
     if (!testId || !resultId) {
-      setLoading(false);
       return;
     }
 
@@ -77,11 +77,14 @@ export default function ResultPage() {
         setLoading(true);
         const res = await userAPI.getTestResult(Number(resultId));
         const data = res.data?.data || res.data;
+        
         if (!data) throw new Error("Natija topilmadi");
+        
         setResult(data);
       } catch (err: any) {
         console.error("Natija yuklashda xatolik:", err);
         toast.error(err?.response?.data?.message || "Natija yuklanmadi");
+        setResult(null); // Xato bo'lsa aniq null qilib qo'yamiz
       } finally {
         setLoading(false);
       }
@@ -95,6 +98,7 @@ export default function ResultPage() {
         audioRef.src = "";
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testId, resultId]);
 
   const toggleAudio = (questionId: number, audioUrl: string) => {
@@ -141,7 +145,7 @@ export default function ResultPage() {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
         <AlertTriangle className="w-12 h-12 text-amber-500" />
-        <p className="text-slate-600 font-medium">Natija topilmadi</p>
+        <p className="text-slate-600 font-medium">Natija topilmadi yoki xatolik yuz berdi</p>
         <Button variant="outline" onClick={() => router.push("/dashboard/jlpt")}>
           Testlarga qaytish
         </Button>
@@ -173,8 +177,8 @@ export default function ResultPage() {
               <Badge
                 className={`mb-4 ${
                   result.passed
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                    : "bg-red-100 text-red-700 hover:bg-red-200"
                 } border-none px-3 py-1 text-sm`}
               >
                 {result.passed
@@ -298,8 +302,8 @@ export default function ResultPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {q.options.map((opt, oIdx) => {
                     const safeOpt = String(opt).trim().toLowerCase();
-                    const safeSelected = (q.selected_option || "").trim().toLowerCase();
-                    const safeCorrect = q.correct_option.trim().toLowerCase();
+                    const safeSelected = String(q.selected_option || "").trim().toLowerCase();
+                    const safeCorrect = String(q.correct_option || "").trim().toLowerCase();
 
                     const isUserChoice = safeOpt === safeSelected;
                     const isCorrectChoice = safeOpt === safeCorrect;
