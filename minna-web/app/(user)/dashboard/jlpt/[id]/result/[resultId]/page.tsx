@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { userAPI } from "@/lib/api";
+import { userAPI } from "@/lib/api/user";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
-import { userAPI } from '@/lib/api';
+import { userAPI } from '@/lib/api/user';
 import Image from 'next/image';
 import {
   Crown,

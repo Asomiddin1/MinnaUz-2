@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { adminAPI } from "@/lib/api";
+import { adminAPI } from "@/lib/api/admin";
 import { useSession } from "next-auth/react";
 
 import {
@@ -175,7 +175,7 @@ const UsersPage = () => {
 
       {/* SEARCH */}
       <div className="relative mb-6 max-w-sm">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+        <Search className="absolute left-3 top-2 h-4 w-4 text-slate-400" />
         <Input
           className="pl-10"
           placeholder="Ism yoki email orqali qidirish..."

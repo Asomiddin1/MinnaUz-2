@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { adminAPI } from "@/lib/api"; // O'zingizning to'g'ri yo'lingizni tekshirib oling
+import { adminAPI } from "@/lib/api/admin"; // O'zingizning to'g'ri yo'lingizni tekshirib oling
 import { toast } from "sonner";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
