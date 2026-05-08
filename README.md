@@ -17,7 +17,7 @@ Loyiha web va mobile ilovadan tashkil topgan.
   ```bash
    npm i
   ```
-- 3 Qadam ishga tushirish
+ - 3 Qadam ishga tushirish
   ```bash
    npm run dev
   ```
@@ -27,17 +27,21 @@ Loyiha web va mobile ilovadan tashkil topgan.
 ### 2. MinnaUz Backend PHP
 - Framework: Laravel
 - Qanday ishga tushiraman
-- 1 Qadam
+ - 1 Qadam
   ```bash
     cd minna-web
   ```
-- 2 Qadam
+ - 2 Qadam pakage larni install qilish
   ```bash
     composer i
   ```
- - 3 Qadam
+ - 3 Qadam database ga sqlite file yaratish
   ```bash
     php artisan migrate:fresh
+  ```
+ - 4 Qadam
+  ```bash
+    php artisan serve
   ```
   - .env file ni qo'yishni unutmang
 
