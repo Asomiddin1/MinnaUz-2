@@ -8,7 +8,21 @@ Loyiha web va mobile ilovadan tashkil topgan.
 ### 1. Minna Web
 - Framework: Next.js
 - To‘liq web platforma
-- Frontend qismi
+- Frontend qismi qanday ishga tushiraman
+- 1 Qadam
+  ```bash
+    cd minna-web
+  ```
+ - 2 Qadam pakage larni install qilish
+  ```bash
+   npm i
+  ```
+- 3 Qadam ishga tushirish
+  ```bash
+   npm run dev
+  ```
+
+  - .env file ni ham qo'yishni unutmang
 
 ### 2. MinnaUz Backend PHP
 - Framework: Laravel
