@@ -1,4 +1,4 @@
-shuni chiroyli qilib korsata olsanmi bu readmd file uchun
+
 # 🇯🇵 MinnaUz
 
 **MinnaUz** — bu Yapon tilini online o‘rgatishga mo‘ljallangan platforma.  
