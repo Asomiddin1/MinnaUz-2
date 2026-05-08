@@ -32,12 +32,17 @@ class Question extends Model
      * Ma'lumot turlarini konvertatsiya qilish.
      */
     protected $casts = [
-        'options' => 'array',       // JSON-ni avtomatik PHP array-ga aylantiradi
-        'points' => 'integer',
-        'mondai_number' => 'integer',
+        'options'         => 'array',       // JSON-ni avtomatik PHP array-ga aylantiradi
+        'points'          => 'integer',
+        'mondai_number'   => 'integer',
         'question_number' => 'integer',
-        'section_id' => 'integer',
+        'section_id'      => 'integer',
     ];
+
+    /**
+     * JSON ga avtomatik qo‘shiladigan qo‘shimcha maydonlar (accessor orqali).
+     */
+    protected $appends = ['image_url', 'audio_url'];
 
     // --- BOG'LANISHLAR (RELATIONS) ---
 
