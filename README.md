@@ -10,9 +10,9 @@ Loyiha web va mobile ilovadan tashkil topgan.
 - Framework: Next.js
 - To‘liq web platforma
 - Frontend qismi qanday ishga tushiraman
-- 1 Qadam
+ - 1 Qadam papkaga kiramiz
   ```bash
-    cd minna-web
+   cd minna-web
   ```
  - 2 Qadam pakage larni install qilish
   ```bash
@@ -27,14 +27,13 @@ Loyiha web va mobile ilovadan tashkil topgan.
 
 ### 2. MinnaUz Backend PHP
 - Framework: Laravel
-- Qanday ishga tushiraman
- - 1 Qadam
-    ```bash
-     cd minna-web
-    ```
-- 2 Qadam pakage larni install qilish
+ - 1 Qadam paplaga kiramiz
   ```bash
-    composer i
+    cd minn-api
+  ```
+ - 3 Qadam pakage install qilamiz
+  ```bash
+   composer i
   ```
  - 3 Qadam database ga sqlite file yaratish
   ```bash
