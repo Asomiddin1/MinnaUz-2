@@ -10,14 +10,25 @@ Loyiha web va mobile ilovadan tashkil topgan.
 - To‘liq web platforma
 - Frontend qismi
 
-### 2. MinnaUz Mobile App
+### 2. MinnaUz Backend PHP
+- Framework: Laravel
+- Qanday ishga tushiraman
+- 1 Qadam
+  ```bash
+    cd minna-web
+  ```
+- 2 Qadam
+  ```bash
+    composer i
+  ```
+ - 3 Qadam
+  ```bash
+    php artisan migrate:fresh
+  ```
+  - .env file ni qo'yishni unutmang
+
+### 3. MinnaUz Mobile App
 - Framework: React Native (Expo)
 - Android va iOS qurilmalari uchun mobile ilova
 
 ---
-
-# 🚀 Frontend (Next.js) ni ishga tushirish
-
-### 1. Project papkasiga kirish
-```bash
-cd minna-web
