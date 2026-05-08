@@ -1,26 +1,72 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+"use client";
 
-export default function Page() {
+import Navbar from '../components/minna-uz/Navbar';
+import Hero from '../components/minna-uz/Hero';
+import Herotap from '../components/minna-uz/Herotap';
+import LanguageStrip from '../components/minna-uz/LanguageStrip';
+import Features from '../components/minna-uz/Features';
+import SuperDuolingo from '../components/minna-uz/SuperDuolingo';
+import EnglishTest from '../components/minna-uz/EnglishTest';
+import ForSchools from '../components/minna-uz/ForSchools';
+import DuolingoABC from '../components/minna-uz/DuolingoABC';
+import AppDownload from '../components/minna-uz/AppDownload';
+import Footer from '../components/minna-uz/Footer';
+
+export default function Home() {
   return (
-    <div className="flex min-h-svh items-center justify-center p-6 relative">
-        <h1 className="bg-[orange] absolute top-0 w-full text-center  py-2">Sayt hozirda test rejimda ishlamoqda !!!</h1>
-      <div className="flex max-w-md min-w-0 flex-col gap-6 text-center text-sm leading-loose">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Yapon tilini biz bilan o'rganing!</h1>
-          <p className="text-muted-foreground mb-6">
-            Platformamizga xush kelibsiz. O'z bilimingizni oshiring, kunlik streaklarni saqlang va tangalar yig'ing.
-          </p>
+    <div className="min-h-screen bg-white font-sans overflow-x-hidden pt-16">
+      
+      {/* 1. Yuqori menyu */}
+      <Navbar />
 
-          <Button asChild className="w-full text-lg py-6 mt-2">
-            <Link href="/auth/login">Platformaga kirish</Link>
-          </Button>
-        </div>
+      {/* 2. Asosiy kirish */}
+      <Hero />
 
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd className="bg-muted px-1 rounded">d</kbd> to toggle dark mode)
-        </div>
+      {/* 3. Tillar qatori */}
+      <LanguageStrip />
+
+      {/* 4. Saytning afzalliklari */}
+      <Features />
+      
+      <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
+      
+      {/* 5. Super Duolingo - "Tariflar" uchun id: pricing */}
+      <div id="pricing">
+        <SuperDuolingo />
       </div>
+
+      <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
+
+      {/* 6. English Test - "Natijalar" uchun id: results */}
+      <div id="results">
+        <EnglishTest />
+      </div>
+
+      <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
+
+      {/* 7. Maktablar uchun - "Maktab haqida" uchun id: about */}
+      <div id="about">
+        <ForSchools />
+      </div>
+
+      <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
+
+      {/* 8. Duolingo ABC */}
+      <DuolingoABC />
+
+      {/* 9. Ilovalarni yuklash - "Aloqa" yoki App qismi uchun id: contact */}
+      <div id="contact">
+        <AppDownload />
+      </div>
+
+      {/* 10. Footer dan oldingi Hero qismi */}
+      <div className="pb-20 bg-white">
+          <Herotap />
+      </div>
+
+      {/* 11. Yashil Footer */}
+      <Footer />
+
     </div>
-  )
+  );
 }
