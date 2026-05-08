@@ -1,24 +1,23 @@
-Bu loyiha MinnaUz bo'lib Yapon tilini online o'rgataigan platformadir bu loyiha 
-1 Minna-web - Next js da yozilgan toliq website !
-2 MinnaUz application - React native expo da qilingan bolib Android va Ios qurilmalari uchun
+# 🇯🇵 MinnaUz
 
+**MinnaUz** — bu Yapon tilini online o‘rgatishga mo‘ljallangan platforma.  
+Loyiha web va mobile ilovadan tashkil topgan.
 
+## 📦 Loyihalar
 
-Frontend Next js ni ishga tushirish 
-Terminlaga : cd minna-web
-Terminlaga : npm i
-Terminalga : npm run dev
+### 1. Minna Web
+- Framework: Next.js
+- To‘liq web platforma
+- Frontend qismi
 
-and .env file ni qoyasiz
+### 2. MinnaUz Mobile App
+- Framework: React Native (Expo)
+- Android va iOS qurilmalari uchun mobile ilova
 
+---
 
---------------------------------------
+# 🚀 Frontend (Next.js) ni ishga tushirish
 
-Backend Laravel PHP ni ishga tushirish
-Terminlaga : cd minna-api
-Terminlaga :  composer i
-Terminalga : php artisan migrate:fresh  // bu sqlilte file ni create qiladi
-Terminlaga : php artisan serve
-
-.env file ham qo'yish kerak
-
+### 1. Project papkasiga kirish
+```bash
+cd minna-web
