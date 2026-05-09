@@ -1,23 +1,95 @@
+"use client";
+import { motion } from "framer-motion";
+import Link from "next/link";
+
 export default function EnglishTest() {
   return (
-    <section className="w-full py-24 px-6 bg-white flex justify-center">
-      <div className="max-w-5xl w-full flex flex-col md:flex-row items-center gap-10 md:gap-20">
-        <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
-          <h2 className="text-4xl font-extrabold text-[#0213cc] mb-6">
-            Minnadan Yapon tili testi
-          </h2>
-          <p className="text-[17px] text-gray-500 font-medium mb-8">
-            Sun'iy intellekt va tilni baholash sohasidagi so'nggi tadqiqotlarga asoslangan qulay, tezkor va arzon yapon tilini bilish testini taqdim etamiz. Endi har kim o'zi uchun qulay muhitda va qulay vaqtda ishonchli test topshirishi mumkin.
-          </p>
-          <button className="text-[#0213cc] hover:bg-gray-50 text-[#1cb0f6] font-extrabold text-sm uppercase py-4 px-8 rounded-2xl border-2 border-gray-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all">
-            SERTIFIKAT OLING
-          </button>
+    <section className="w-full py-32 px-6 bg-white overflow-hidden relative">
+      {/* Orqa fon dekoratsiyasi */}
+      <div className="absolute top-1/4 -right-20 w-96 h-96 bg-indigo-50/50 rounded-full blur-[120px] -z-10" />
+
+      <div className="max-w-6xl mx-auto w-full flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+        
+        {/* 1. MATN QISMI */}
+        <div className="w-full lg:w-1/2 text-center lg:text-left order-2 lg:order-1">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-[1000] uppercase tracking-[0.2em] mb-8 border border-indigo-100">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+              Real JLPT Experience
+            </div>
+            
+            <h2 className="text-5xl md:text-7xl font-[1000] text-slate-900 leading-[0.95] tracking-tighter mb-8">
+              Minnadan <br />
+              <span className="text-[#0213cc]">Haqiqiy JLPT Testi</span>
+            </h2>
+            
+            <p className="text-lg md:text-xl text-slate-500 font-medium mb-10 leading-relaxed max-w-lg mx-auto lg:mx-0">
+              Imtihon muhitini his qiling. Bizning testlarimiz <span className="text-slate-900 font-black">JLPT standartlari</span> asosida tuzilgan bo'lib, bilimingizni 100% aniqlikda baholaydi.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start items-center">
+              <Link href={'/dashboard'}>
+                <button className="w-full sm:w-auto bg-[#0213cc] text-white font-black py-5 px-12 rounded-[2rem] text-sm uppercase tracking-widest border-b-[6px] border-[#0a0b80] active:border-b-0 active:translate-y-1 transition-all shadow-xl shadow-indigo-100">
+                  Testni Boshlash
+                </button>
+              </Link>
+              <div className="text-slate-400 font-black text-[10px] uppercase tracking-widest leading-tight">
+                N5 dan N1 gacha <br /> barcha darajalar
+              </div>
+            </div>
+          </motion.div>
         </div>
-        <div className="w-full md:w-1/2 flex justify-center">
-          <div className="w-72 h-72 bg-gray-50 rounded-3xl flex items-center justify-center">
-             <span className="text-gray-400 font-bold">Test Rasmi</span>
-          </div>
+
+        {/* 2. VIZUAL QISM */}
+        <div className="w-full lg:w-1/2 flex justify-center relative order-1 lg:order-2 h-[400px] md:h-[500px] items-center">
+          
+          {/* Rasm va uning orqasidagi qog'ozlar uchun umumiy konteyner (Group) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="relative w-full max-w-[320px] md:max-w-[380px] aspect-[3/4] group cursor-pointer z-20"
+          >
+            {/* Orqadagi 1-qog'oz (Chapga qiyshaygan) */}
+            <div className="absolute inset-0 bg-slate-50 border border-slate-200 rounded-2xl transform -rotate-6 -translate-x-4 translate-y-4 -z-20 transition-all duration-500 group-hover:-rotate-12 group-hover:-translate-x-8 group-hover:translate-y-6" />
+            
+            {/* Orqadagi 2-qog'oz (O'ngga qiyshaygan) */}
+            <div className="absolute inset-0 bg-slate-100 border border-slate-200 rounded-2xl transform rotate-3 translate-x-4 translate-y-2 -z-10 transition-all duration-500 group-hover:rotate-8 group-hover:translate-x-8 group-hover:translate-y-4" />
+
+            {/* ASOSIY RASM (Oldinda) */}
+            <div className="relative w-full h-full bg-white rounded-2xl overflow-hidden border border-slate-100 z-20 transition-transform duration-500 group-hover:-translate-y-2">
+              <img 
+                src="/images/jlpt.png" 
+                alt="JLPT Real Test Varaqasi" 
+                className="w-full h-full object-contain transform group-hover:scale-105 transition-transform duration-700"
+              />
+            </div>
+          </motion.div>
+
+          {/* FLOATING ELEMENTS (Atrofdagi bezaklar) */}
+          <motion.div 
+            animate={{ y: [0, -12, 0], rotate: [0, 5, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-4 md:top-10 -right-2 md:-right-8 bg-white/10 backdrop-blur-md p-3 md:p-4 rounded-2xl shadow-xl border border-white/20 z-30"
+          >
+            <div className="text-xl md:text-2xl font-black text-cyan-300">N1 - N5</div>
+          </motion.div>
+
+          <motion.div 
+            animate={{ x: [-8, 8, -8] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute bottom-8 md:bottom-16 -left-4 md:-left-12 bg-[#58cc02] text-white px-4 py-2 md:px-5 md:py-3 rounded-xl md:rounded-2xl shadow-2xl z-30 flex items-center gap-2 md:gap-3"
+          >
+            <span className="text-lg md:text-xl">✅</span>
+            <span className="text-[9px] md:text-[11px] font-[1000] uppercase tracking-widest">Haqiqiy Test</span>
+          </motion.div>
+
         </div>
+
       </div>
     </section>
   );

@@ -45,14 +45,14 @@ export default function Hero({ isBottom = false }: HeroProps) {
           </h1>
           
           <div className="flex flex-col w-full max-w-[320px] gap-4">
-            <Link href="/auth/login" className="w-full">
-              <button className="w-full font-black text-[17px] uppercase py-4 rounded-2xl border-b-4 transition-all shadow-sm text-[#1259fe] text-[#0549b0] border-[#03206a]  active:border-b-3 active:translate-y-1">
+            <Link href={'/dashboard'}>
+              <button className="w-full font-black text-[17px] uppercase py-4 rounded-2xl border-b-4 transition-all shadow-sm text-[#1259fe] hover:bg-gray-100 text-[#0549b0] border-[#03206a]  active:border-b-3 active:translate-y-1">
                 Boshlanishi
               </button>
             </Link>
-            
+
             {!isBottom && (
-              <Link href="/auth/login" className="w-full">
+              <Link href={'/auth/login'}>
                 <button className="w-full bg-white hover:bg-gray-100 text-[#1cb0f6] font-black text-[17px] uppercase py-4 rounded-2xl border-2 border-gray-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all shadow-sm">
                   Mening akkauntim bor
                 </button>

@@ -1,6 +1,5 @@
 export default function Footer() {
   return (
-    // overflow-hidden eng muhimi: bu ulkan yozuvning pastki yarmini kesib tashlaydi
     <footer className="relative w-full bg-[#f4f7f9] pt-20 overflow-hidden flex flex-col font-sans">
       
       {/* 4 Ustunli Menyu qismi */}
@@ -52,19 +51,25 @@ export default function Footer() {
       {/* Eng pastki qism: Yarim kesilgan yozuv va Copyright */}
       <div className="relative w-full flex justify-center items-end h-32 md:h-48 mt-10">
         
-        {/* Copyright matni (Ulkan yozuvning ustida turishi uchun z-20 berildi) */}
-        <div className="absolute bottom-6 md:bottom-10 z-20 text-center w-full px-4">
-          <p className="text-black text-[15px] md:text-[17px] font-medium">
-            © 2026 Minna.Uz <span className="mx-2 md:mx-4 font-light text-gray-400">|</span> 
-            Maxfiylik shartlari <span className="mx-2 md:mx-4 font-light text-gray-400">|</span> 
-            Til: O'zbek
-          </p>
-        </div>
-
-        {/* Yarim kesilgan ulkan yozuv (translate-y-[38%] bilan pastga surildi) */}
-        <h1 className="absolute bottom-0 z-70 text-[25vw] font-black text-[#0832579d] leading-none tracking-tighter uppercase select-none translate-y-[30%] text-center w-full whitespace-nowrap">
+        {/* Yarim kesilgan ulkan yozuv */}
+        <h1 className="absolute bottom-0 z-0 text-[25vw] font-black text-[#083257]/40 leading-none tracking-tighter uppercase select-none translate-y-[30%] text-center w-full whitespace-nowrap pointer-events-none">
           MINNA 
         </h1>
+
+        {/* Copyright matni */}
+        <div className="absolute bottom-6 md:bottom-10 z-20 text-center w-full px-4">
+          <p className="text-white text-[14px] md:text-[16px] font-medium bg-black inline-flex flex-wrap justify-center items-center gap-3 py-3 px-5 rounded-xl shadow-lg">
+            <span>© 2026 Minna.Uz</span> 
+            
+            <span className="font-light text-gray-400">|</span> 
+            
+            <span className="hover:underline cursor-pointer">Maxfiylik shartlari</span> 
+            
+            <span className="font-light text-gray-400">|</span> 
+            
+            <span>Til: O'zbek</span>
+          </p>
+        </div>
         
       </div>
       

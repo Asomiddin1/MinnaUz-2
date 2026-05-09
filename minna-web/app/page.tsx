@@ -11,6 +11,7 @@ import ForSchools from '../components/minna-uz/ForSchools';
 import DuolingoABC from '../components/minna-uz/DuolingoABC';
 import AppDownload from '../components/minna-uz/AppDownload';
 import Footer from '../components/minna-uz/Footer';
+import Mentors from '../components/minna-uz/Mentors';
 
 export default function Home() {
   return (
@@ -51,6 +52,9 @@ export default function Home() {
 
       <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
 
+      <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
+      {/* --------------------------------- */}
+
       {/* 8. Duolingo ABC */}
       <DuolingoABC />
 
@@ -58,13 +62,16 @@ export default function Home() {
       <div id="contact">
         <AppDownload />
       </div>
-
-      {/* 10. Footer dan oldingi Hero qismi */}
+       {/* 10. Mentorlarimiz - jamoa haqida ma'lumot beruvchi qism */}
+      <div id="mentors">
+        <Mentors />
+      </div>
+      {/* 11. Footer dan oldingi Hero qismi */}
       <div className="pb-20 bg-white">
           <Herotap />
       </div>
 
-      {/* 11. Yashil Footer */}
+      {/* 12. Yashil Footer */}
       <Footer />
 
     </div>

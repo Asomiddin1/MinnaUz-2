@@ -1,6 +1,7 @@
 "use client";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import Link from "next/link";
 
 export default function AppDownload() {
   const containerRef = useRef(null);
@@ -36,14 +37,14 @@ export default function AppDownload() {
           className="text-center mb-20"
         >
           <h2 className="text-7xl md:text-[120px] font-[1000] text-[#042c60] leading-none tracking-tighter mb-6">
-            o'rganing
+            kuzating
           </h2>
           <p className="text-xl md:text-2xl font-bold text-[#042c60]/60 max-w-2xl mx-auto">
-            Testlar, maktablar va til kurslari — hammasi bitta ilovada!
+            Bizning ijtimoiy tarmoqlarimizga a'zo bo'ling va eng so'nggi yangiliklardan birinchilardan bo'lib xabardor bo'ling!
           </p>
         </motion.div>
 
-        {/* 3. Mahsulotlar Kartochkalari (Test va Maktab o'rniga zamonaviy bloklar) */}
+        {/* 3. Mahsulotlar Kartochkalari */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mb-20">
           {/* Ingliz tili testi bloki */}
           <motion.div 
@@ -51,7 +52,7 @@ export default function AppDownload() {
             className="bg-white/60 backdrop-blur-md p-8 rounded-[3rem] border-2 border-white shadow-xl flex flex-col items-center text-center group"
           >
             <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">🎓</div>
-            <h3 className="text-2xl font-black text-[#042c60] mb-2">Ingliz tili testi</h3>
+            <h3 className="text-2xl font-black text-[#042c60] mb-2">Yapon tili testi</h3>
             <p className="text-gray-600 font-bold text-sm">Sertifikatni uydan chiqmay oling.</p>
           </motion.div>
 
@@ -62,33 +63,47 @@ export default function AppDownload() {
           >
             <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">🏫</div>
             <h3 className="text-2xl font-black text-[#042c60] mb-2">Maktablar uchun</h3>
-            <p className="text-gray-600 font-bold text-sm">O'qituvchilar uchun bepul vositalar.</p>
+            <p className="text-gray-600 font-bold text-sm">O'qituvchilar uchun maxsus vositalar.</p>
           </motion.div>
         </div>
 
-        {/* 4. Yuklab olish tugmalari (Haqiqiy 3D effekt) */}
+        {/* 4. Ijtimoiy tarmoq tugmalari (Haqiqiy 3D effekt) */}
         <div className="flex flex-col sm:flex-row gap-6 w-full justify-center">
-          <motion.button 
+          
+          {/* Telegram tugmasi */}
+          <Link href="https://t.me/yapontilini_organamiz" target="_blank">
+           <motion.button 
             whileHover={{ y: -8 }} whileTap={{ y: 0 }}
-            className="bg-white px-10 py-5 rounded-[2rem] flex items-center gap-4 border-b-[10px] border-gray-300 active:border-b-0 transition-all shadow-2xl"
+            className="bg-white px-10 py-5 rounded-[2rem] flex items-center gap-4 border-b-[10px] border-[#229ED9]/50 active:border-b-0 transition-all shadow-2xl"
           >
-             <span className="text-4xl text-black font-black"></span>
+             {/* Telegram SVG Ikonkasi */}
+             <span className="text-5xl text-[#229ED9]">
+                <svg xmlns="https://t.me/yapontilini_organamiz" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12a12 12 0 0 0 12-12A12 12 0 0 0 12 0a11.96 11.96 0 0 0-.056 0m4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472c-.18 1.898-.962 6.502-1.36 8.627c-.168.9-.499 1.201-.82 1.23c-.696.065-1.225-.46-1.9-.902c-1.056-.693-1.653-1.124-2.678-1.8c-1.185-.78-.417-1.21.258-1.91c.177-.184 3.247-2.977 3.307-3.23c.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345c-.48.33-.913.49-1.302.48c-.428-.008-1.252-.241-1.865-.44c-.752-.245-1.349-.374-1.297-.789c.027-.216.325-.437.893-.666c3.498-1.524 5.83-2.529 6.998-3.014c3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+             </span>
              <div className="text-left">
-                <div className="text-[10px] font-black text-gray-400 uppercase">Yuklab olish</div>
-                <div className="text-lg font-black text-[#042c60]">App Store</div>
+                <div className="text-[10px] font-black text-gray-400 uppercase">Bizga qo'shiling</div>
+                <div className="text-xl font-black text-[#042c60]">Telegram</div>
              </div>
           </motion.button>
+          </Link>
 
+          {/* Instagram tugmasi */}
+          <Link href="https://www.instagram.com/minnaa.uz?igsh=MWI1eDJ2bDY4cmYxZQ==" target="_blank">
           <motion.button 
             whileHover={{ y: -8 }} whileTap={{ y: 0 }}
-            className="bg-white px-10 py-5 rounded-[2rem] flex items-center gap-4 border-b-[10px] border-gray-300 active:border-b-0 transition-all shadow-2xl"
+            className="bg-white px-10 py-5 rounded-[2rem] flex items-center gap-4 border-b-[10px] border-[#E1306C]/50 active:border-b-0 transition-all shadow-2xl"
           >
-             <span className="text-4xl">▶️</span>
+             {/* Instagram SVG Ikonkasi */}
+             <span className="text-5xl text-[#E1306C]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="currentColor" d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3"/></svg>
+             </span>
              <div className="text-left">
-                <div className="text-[10px] font-black text-gray-400 uppercase">Mavjud</div>
-                <div className="text-lg font-black text-[#042c60]">Google Play</div>
+                <div className="text-[10px] font-black text-gray-400 uppercase">Kuzatib boring</div>
+                <div className="text-xl font-black text-[#042c60]">Instagram</div>
              </div>
           </motion.button>
+          </Link>
+
         </div>
 
       </div>
