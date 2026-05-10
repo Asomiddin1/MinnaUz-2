@@ -187,6 +187,10 @@ class ExamController extends Controller
                 'passed' => (bool)$examResult->passed,
                 'time_spent' => $examResult->time_spent,
                 'answers' => $mappedAnswers,
+                'user' => [
+                    'name' => $user->name ?? 'Foydalanuvchi', // Agar DB'da first_name bo'lsa: $user->first_name . ' ' . $user->last_name
+                    'email' => $user->email ?? ''
+                ]
             ]
         ]);
     }

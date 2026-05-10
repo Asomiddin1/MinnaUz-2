@@ -18,6 +18,8 @@ import {
   Menu,
   LayoutList,
   ChevronRight,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 
 // ---------- YORDAMCHI FUNKSIYALAR ----------
@@ -68,6 +70,7 @@ interface Test {
   time: number;
   sections: Section[];
   audio_url?: string;
+  is_premium?: boolean;
 }
 
 // ---------- Rasm URL yasovchi funksiya ----------
@@ -79,7 +82,6 @@ const getImageUrl = (imagePath: string | null | undefined): string | null => {
     ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
     : "http://127.0.0.1:8000";
   
-  // Agar imagePath allaqachon "storage/" bilan boshlansa, to'g'rilaymiz
   let cleanPath = imagePath;
   if (!cleanPath.includes("storage/")) {
     cleanPath = `storage/${cleanPath}`;
@@ -113,6 +115,9 @@ export default function TestPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const [hasStarted, setHasStarted] = useState(false);
+  const [needsPremium, setNeedsPremium] = useState(false);
+
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [answers, setAnswers] = useState<
     { question_id: number; selected_option: string }[]
@@ -128,22 +133,39 @@ export default function TestPage() {
     }
   }, []);
 
-  // ===== ASOSIY O'ZGARTIRISH: fetchTest ni to'g'rilaymiz =====
   const fetchTest = useCallback(async () => {
     try {
       setLoading(true);
+
       const res = await userAPI.getTestDetails(testId);
       const data = res.data?.data || res.data;
 
-      // BARCHA SAVOLLARNING RASMLARINI TO'G'RILAYMIZ
+      // PREMIUM TEKSHIRUVI
+      if (data.is_premium) {
+        try {
+          const userRes = await (userAPI as any).getProfile(); 
+          const isPremium = userRes?.data?.is_premium;
+          
+          if (!isPremium) {
+            setNeedsPremium(true); // Oddiy userni premium UI ga yo'naltirish
+            setLoading(false);
+            return;
+          }
+        } catch (err) {
+          console.warn("User ma'lumotlarini olishda xatolik yuz berdi.");
+          setNeedsPremium(true);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Savollarni formatlash
       if (data?.sections) {
         data.sections = data.sections.map((section: any) => ({
           ...section,
           questions: (section.questions || []).map((question: any) => ({
             ...question,
-            // Savolning o'z rasmi
             image_url: getImageUrl(question.image_url || question.image_path || question.image),
-            // Variant rasmlari
             options: (question.options || []).map((opt: any) => ({
               text: opt.text ?? null,
               image: opt.image ?? null,
@@ -156,19 +178,24 @@ export default function TestPage() {
       setTest(data);
       setTimeLeft(data.time * 60);
     } catch (err: any) {
-      setError("Test yuklashda xatolik yuz berdi");
+      // Backend 403 (ruxsat yo'q) xatosi qaytarganda ham Premium UI ni chiqaramiz
+      if (err?.response?.status === 403 || err?.response?.status === 401) {
+         setNeedsPremium(true);
+      } else {
+         setError("Bunday test topilmadi yoki yuklashda xatolik yuz berdi.");
+      }
     } finally {
       setLoading(false);
     }
-  }, [testId]);
-  // ==========================================================
+  }, [testId, router]);
 
   useEffect(() => {
     fetchTest();
   }, [fetchTest]);
 
+  // Vaqt hisoblagich
   useEffect(() => {
-    if (!test || loading || submitting) return;
+    if (!test || loading || submitting || !hasStarted) return;
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -179,14 +206,14 @@ export default function TestPage() {
       });
     }, 1000);
     return () => clearInterval(timerRef.current!);
-  }, [test, loading, submitting]);
+  }, [test, loading, submitting, hasStarted]);
 
   useEffect(() => {
-    if (timeLeft === 0 && test && !submitting) {
+    if (timeLeft === 0 && test && hasStarted && !submitting) {
       handleSubmit();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
+  }, [timeLeft, hasStarted]);
 
   const handleSubmit = async () => {
     if (submitting) return;
@@ -228,6 +255,14 @@ export default function TestPage() {
       return acc;
     }, {});
   }, [currentSection]);
+
+  const totalQuestions = useMemo(() => {
+    if (!test) return 0;
+    return test.sections.reduce(
+      (total, section) => total + (section.questions?.length || 0),
+      0
+    );
+  }, [test]);
 
   const handleAnswer = (qId: number, val: string) => {
     setAnswers((prev) => {
@@ -286,6 +321,52 @@ export default function TestPage() {
         <Skeleton className="h-full w-full" />
       </div>
     );
+
+  // ============================================
+  // 🔥 CHIROYLI PREMIUM BLOKI (Premium test bo'lib, user oddiy bo'lsa chiqadi)
+  // ============================================
+  if (needsPremium) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50/50 p-4 dark:bg-slate-950">
+        <div className="w-full max-w-[420px] animate-in zoom-in-95 duration-500 rounded-[32px] border border-slate-100 bg-white p-8 text-center shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] dark:border-slate-800 dark:bg-slate-900">
+          
+          <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-tr from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 to-yellow-500 shadow-inner">
+              <Lock className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          
+          <h2 className="mb-3 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            Premium obuna zarur
+          </h2>
+          
+          <p className="mb-8 text-[15px] leading-relaxed text-slate-500 dark:text-slate-400">
+            Ushbu test faqat <strong className="text-amber-500">Premium</strong> foydalanuvchilar uchun ochiladi. Barcha testlarni cheklovsiz ishlash uchun hoziroq obuna bo'ling!
+          </p>
+          
+          <div className="flex flex-col gap-3">
+            <Button
+              onClick={() => router.push("/dashboard/premium")}
+              className="h-14 w-full rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 text-[16px] font-bold text-white shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02] hover:from-amber-600 hover:to-yellow-600"
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Premium sotib olish
+            </Button>
+            
+            <Button
+              onClick={() => router.back()}
+              variant="ghost"
+              className="h-12 w-full rounded-2xl text-[15px] font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              Orqaga qaytish
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // ============================================
+
   if (error) return <div className="p-20 text-center text-red-500">{error}</div>;
 
   if (!test) return <div className="p-20 text-center">Test not found</div>;
@@ -295,6 +376,67 @@ export default function TestPage() {
 
   return (
     <div className="relative min-h-screen bg-slate-50/50 pb-20 font-sans text-slate-900 dark:bg-slate-950 dark:text-slate-200">
+      
+      {/* ===== TEST MODALI ===== */}
+      {!hasStarted && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-[480px] rounded-[24px] bg-white p-8 shadow-2xl dark:bg-slate-900">
+            <div className="flex justify-between items-center mb-6">
+               <h2 className="text-3xl font-bold text-[#5C55C4] dark:text-indigo-400">
+                 {test.title}
+               </h2>
+               {!test.is_premium && (
+                 <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-none shadow-sm px-3 py-1 text-sm font-semibold">
+                   Bepul
+                 </Badge>
+               )}
+            </div>
+            
+            <div className="space-y-4 text-[16px] text-slate-700 dark:text-slate-300">
+              <div className="flex justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                <span className="font-medium text-slate-500">Vaqt:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{test.time} daqiqa</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                <span className="font-medium text-slate-500">Umumiy savollar:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{totalQuestions} ta</span>
+              </div>
+              
+              <div className="pt-2">
+                <p className="mb-3 text-sm font-semibold text-slate-400">Bo'limlar kesimida:</p>
+                <div className="space-y-2">
+                  {test.sections.map((sec) => (
+                    <div key={sec.id} className="flex justify-between rounded-lg bg-slate-50 px-4 py-2.5 dark:bg-slate-800/50">
+                      <span className="font-medium">{sec.name}</span>
+                      <span className="font-semibold text-[#5C55C4] dark:text-indigo-400">
+                        {sec.questions?.length || 0} savol
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-4">
+              <Button
+                variant="outline"
+                className="h-12 w-1/2 rounded-xl border-slate-200 text-base"
+                onClick={() => router.back()}
+              >
+                Orqaga
+              </Button>
+              <Button
+                className="h-12 w-1/2 rounded-xl bg-[#5C55C4] text-base font-bold text-white shadow-md hover:bg-indigo-700"
+                onClick={() => setHasStarted(true)}
+              >
+                Boshlash
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ======================= */}
+
       {/* MOBILE TOP HEADER */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3 lg:hidden dark:border-slate-800 dark:bg-slate-950">
         <button
@@ -313,7 +455,7 @@ export default function TestPage() {
 
         <button
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || !hasStarted}
           className="-mr-2 p-2 text-[#5C55C4] disabled:opacity-50"
         >
           {submitting ? (
@@ -393,7 +535,7 @@ export default function TestPage() {
             isSidebarOpen ? "lg:col-span-8" : "lg:col-span-12"
           } space-y-10 transition-all duration-300`}
         >
-          {/* UMUMIY AUDIO PLEYER (agar mavjud bo'lsa) */}
+          {/* UMUMIY AUDIO PLEYER */}
           {currentSection?.type === "listening" && test.audio_url && (
             <div className="sticky top-[110px] z-20 bg-slate-50/90 backdrop-blur-md lg:top-[80px] dark:bg-slate-950/90">
               <audio
@@ -411,7 +553,6 @@ export default function TestPage() {
               key={mondaiNum}
               className="animate-in space-y-8 duration-500 fade-in"
             >
-              {/* PASSAGE (agar mavjud) */}
               {qs[0]?.passage && (
                 <div className="rounded-xl border border-slate-200 bg-white p-5 text-[15px] leading-relaxed text-slate-800 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
                   <Badge className="mr-3 mb-2 bg-[#5C55C4] px-3 py-1 text-xs text-white hover:bg-indigo-600">
@@ -429,18 +570,15 @@ export default function TestPage() {
                     id={`q-${q.id}`}
                     className="space-y-4 scroll-mt-[180px]"
                   >
-                    {/* Savol raqami + matni + rasmi */}
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 shrink-0 rounded-[6px] bg-[#5C55C4] px-2.5 py-1 text-[13px] font-semibold text-white">
                         {q.mondai_number}.{q.question_number}
                       </div>
                       <div className="flex-1 space-y-3">
-                        {/* Savol matni */}
                         <h3 className="text-[17px] leading-relaxed font-medium text-slate-900 dark:text-slate-100">
                           {q.question_text}
                         </h3>
 
-                        {/* SAVOLGA TEGISHLI RASM (agar mavjud bo'lsa) */}
                         {q.image_url && (
                           <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-gray-50 p-2 dark:border-slate-800 dark:bg-slate-900">
                             <img
@@ -448,7 +586,6 @@ export default function TestPage() {
                               alt="Savol rasmi"
                               className="mx-auto max-h-64 w-auto object-contain"
                               onError={(e) => {
-                                console.error("Savol rasmi yuklanmadi:", q.image_url);
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
@@ -457,7 +594,6 @@ export default function TestPage() {
                       </div>
                     </div>
 
-                    {/* JAVOB VARIANTLARI */}
                     <RadioGroup
                       onValueChange={(val) => handleAnswer(q.id, val)}
                       value={
@@ -465,17 +601,13 @@ export default function TestPage() {
                           ?.selected_option || ""
                       }
                       className="mt-2 grid grid-cols-1 gap-2.5"
+                      disabled={!hasStarted}
                     >
                       {q.options.map((opt: QuestionOption, i: number) => {
                         const optionValue = String(i);
                         const isSelected =
                           answers.find((a) => a.question_id === q.id)
                             ?.selected_option === optionValue;
-
-                        // Debug uchun konsolga chiqaramiz
-                        if (opt.image_url) {
-                          console.log(`Variant ${i+1} rasm URL:`, opt.image_url);
-                        }
 
                         return (
                           <Label
@@ -502,9 +634,7 @@ export default function TestPage() {
                               )}
                             </div>
 
-                            {/* Variant matni va/yoki rasmi */}
                             <div className="flex flex-1 items-center gap-3">
-                              {/* Variant rasm (chapda) */}
                               {opt.image_url && (
                                 <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-gray-50 dark:border-slate-800 dark:bg-slate-900">
                                   <img
@@ -512,21 +642,18 @@ export default function TestPage() {
                                     alt={`Variant ${i + 1}`}
                                     className="h-full w-full object-cover"
                                     onError={(e) => {
-                                      console.error(`Variant ${i+1} rasmi yuklanmadi:`, opt.image_url);
                                       e.currentTarget.style.display = 'none';
                                     }}
                                   />
                                 </div>
                               )}
 
-                              {/* Variant matni */}
                               {opt.text && (
                                 <span className="text-[16px] leading-tight font-normal">
                                   {opt.text}
                                 </span>
                               )}
 
-                              {/* Agar na matn, na rasm bo'lsa */}
                               {!opt.text && !opt.image_url && (
                                 <span className="text-[16px] leading-tight font-normal italic text-slate-400">
                                   (bo'sh variant)
@@ -544,7 +671,7 @@ export default function TestPage() {
             </div>
           ))}
 
-          {/* KEYINGI BO'LIMGA O'TISH YOKI YAKUNLASH TUGMASI */}
+          {/* KEYINGI BO'LIMGA O'TISH YOKI YAKUNLASH */}
           <div className="animate-in pt-6 pb-12 duration-500 fade-in">
             {!isLastSection ? (
               <Button
@@ -552,6 +679,7 @@ export default function TestPage() {
                   setCurrentSectionIndex((prev) => prev + 1);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
+                disabled={!hasStarted}
                 className="w-full rounded-2xl border border-indigo-100 bg-indigo-50 py-7 text-[16px] font-bold text-[#5C55C4] transition-all hover:bg-indigo-100 dark:border-slate-700 dark:bg-slate-800 dark:text-indigo-400 dark:hover:bg-slate-700"
               >
                 Keyingi bo'lim: {test.sections[currentSectionIndex + 1]?.name}{" "}
@@ -560,7 +688,7 @@ export default function TestPage() {
             ) : (
               <Button
                 onClick={handleSubmit}
-                disabled={submitting}
+                disabled={submitting || !hasStarted}
                 className="w-full rounded-2xl bg-[#5C55C4] py-7 text-[16px] font-bold text-white shadow-md hover:bg-indigo-700"
               >
                 {submitting ? (
@@ -588,7 +716,7 @@ export default function TestPage() {
                 <div className="flex flex-col gap-3">
                   <Button
                     onClick={handleSubmit}
-                    disabled={submitting}
+                    disabled={submitting || !hasStarted}
                     className="h-[52px] w-full rounded-[12px] bg-[#5C55C4] font-bold text-white shadow-md hover:bg-indigo-700"
                   >
                     {submitting ? (
