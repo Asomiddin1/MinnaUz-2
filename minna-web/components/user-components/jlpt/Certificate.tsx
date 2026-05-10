@@ -136,9 +136,9 @@ export default function Certificate({
           </div>
           
           {/* Muhr shakli */}
-          <div className="w-12 h-12 md:w-14 md:h-14 border border-[#c23b3b] flex items-center justify-center text-center">
+          <div className=" flex items-center justify-center text-center">
             <span className="text-[#c23b3b] text-[10px] md:text-xs font-bold leading-tight">
-              minna<br/>Uz
+              minna.uz
             </span>
           </div>
           

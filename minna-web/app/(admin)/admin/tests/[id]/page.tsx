@@ -21,10 +21,10 @@ import {
 } from "@/components/ui/select";
 import {
   ArrowLeft, Edit, Trash2, Plus, Loader2, Clock, AlertCircle,
-  ImagePlus, X
+  ImagePlus, X, Calculator
 } from "lucide-react";
 
-// ---------- INTERFACES (o'zgarmagan) ----------
+// ---------- INTERFACES ----------
 interface QuestionOption {
   text?: string | null;
   image?: string | null;
@@ -64,7 +64,7 @@ interface OptionFormItem {
   text: string;
   image: File | null;
   preview: string;
-  remove_image: boolean;   // YANGI: rasmini o'chirish flagi
+  remove_image: boolean;
 }
 
 interface QuestionFormData {
@@ -124,72 +124,81 @@ export default function TestDetailPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<QuestionFormData>(INITIAL_FORM);
 
-  // ---------- DATA FETCH (o'zgarmagan) ----------
-// Rasm URL yasovchi funksiyani komponentadan tashqariga, 
-// boshqa funksiyalar yoniga qo'shing (getAudioUrl yoniga)
-const getImageUrl = (imagePath: string | null | undefined): string | null => {
-  if (!imagePath) return null;
-  if (imagePath.startsWith("http")) return imagePath;
-  
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL
-    ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
-    : "http://127.0.0.1:8000";
-  
-  let cleanPath = imagePath;
-  if (!cleanPath.includes("storage/")) {
-    cleanPath = `storage/${cleanPath}`;
-  }
-  cleanPath = cleanPath.replace(/^\//, "");
-  
-  return `${baseUrl}/${cleanPath}`;
-};
+  // ===== UMUMIY BALNI HISOBLASH =====
+  const calculateTotalPoints = (sections: Section[]): number => {
+    return sections.reduce((total, section) => {
+      return total + section.questions.reduce((sectionTotal, question) => {
+        return sectionTotal + (question.points || 0);
+      }, 0);
+    }, 0);
+  };
 
-// Keyin fetchData ni shu bilan almashtiring:
-const fetchData = useCallback(async () => {
-  if (!testId || isNaN(testId)) return;
-  try {
-    setLoading(true);
-    setError(null);
-    const res = await adminAPI.getTestById(testId);
-    let testData = res.data?.data || res.data?.test || res.data;
-    if (!testData || typeof testData !== "object") throw new Error("Test ma'lumoti topilmadi");
+  // ===== BO'LIM BALINI HISOBLASH =====
+  const calculateSectionPoints = (section: Section): number => {
+    return section.questions.reduce((total, question) => {
+      return total + (question.points || 0);
+    }, 0);
+  };
 
-    const processedSections = (Array.isArray(testData.sections) ? testData.sections : [])
-      .map((section: Section) => ({
-        ...section,
-        questions: Array.isArray(section.questions)
-          ? section.questions.map((q: Question) => ({
-              ...q,
-              // ===== SAVOL RASMI URL =====
-              image_url: getImageUrl(q.image_url || (q as any).image),
-              // ===== VARIANT RASMLARI URL =====
-              options: (q.options || []).map((opt: any) => {
-                // Agar eski formatda bo'lsa (oddiy string)
-                if (typeof opt === 'string') {
-                  return { text: opt, image: null, image_url: null };
-                }
-                // Yangi format (obyekt)
-                return {
-                  text: opt.text ?? null,
-                  image: opt.image ?? null,
-                  image_url: getImageUrl(opt.image_url || opt.image),
-                };
-              }),
-            }))
-          : [],
-      }));
+  // ---------- DATA FETCH ----------
+  const getImageUrl = (imagePath: string | null | undefined): string | null => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL
+      ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
+      : "http://127.0.0.1:8000";
+    
+    let cleanPath = imagePath;
+    if (!cleanPath.includes("storage/")) {
+      cleanPath = `storage/${cleanPath}`;
+    }
+    cleanPath = cleanPath.replace(/^\//, "");
+    
+    return `${baseUrl}/${cleanPath}`;
+  };
 
-    setTest({ ...testData, sections: processedSections });
-    setSections(processedSections);
-    if (processedSections.length === 0) toast.info("Bu testda hali bo'limlar mavjud emas");
-  } catch (err: any) {
-    console.error("Fetch error:", err);
-    setError(err?.message || "Ma'lumotni yuklashda xatolik");
-    toast.error("Ma'lumotni yuklashda xatolik!");
-  } finally {
-    setLoading(false);
-  }
-}, [testId]);
+  const fetchData = useCallback(async () => {
+    if (!testId || isNaN(testId)) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await adminAPI.getTestById(testId);
+      let testData = res.data?.data || res.data?.test || res.data;
+      if (!testData || typeof testData !== "object") throw new Error("Test ma'lumoti topilmadi");
+
+      const processedSections = (Array.isArray(testData.sections) ? testData.sections : [])
+        .map((section: Section) => ({
+          ...section,
+          questions: Array.isArray(section.questions)
+            ? section.questions.map((q: Question) => ({
+                ...q,
+                image_url: getImageUrl(q.image_url || (q as any).image),
+                options: (q.options || []).map((opt: any) => {
+                  if (typeof opt === 'string') {
+                    return { text: opt, image: null, image_url: null };
+                  }
+                  return {
+                    text: opt.text ?? null,
+                    image: opt.image ?? null,
+                    image_url: getImageUrl(opt.image_url || opt.image),
+                  };
+                }),
+              }))
+            : [],
+        }));
+
+      setTest({ ...testData, sections: processedSections });
+      setSections(processedSections);
+      if (processedSections.length === 0) toast.info("Bu testda hali bo'limlar mavjud emas");
+    } catch (err: any) {
+      console.error("Fetch error:", err);
+      setError(err?.message || "Ma'lumotni yuklashda xatolik");
+      toast.error("Ma'lumotni yuklashda xatolik!");
+    } finally {
+      setLoading(false);
+    }
+  }, [testId]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -252,21 +261,20 @@ const fetchData = useCallback(async () => {
       };
       reader.readAsDataURL(file);
     } else {
-      // Rasmni olib tashlash
       setFormData(prev => {
         const updated = [...prev.options];
         updated[index] = { 
           ...updated[index], 
           image: null, 
           preview: "",
-          remove_image: true   // backendga o'chirish signali
+          remove_image: true
         };
         return { ...prev, options: updated };
       });
     }
   };
 
-  // ---------- ASOSIY TUZATILGAN QISM: handleSubmit ----------
+  // ---------- SUBMIT ----------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -274,7 +282,6 @@ const fetchData = useCallback(async () => {
     try {
       const fd = new FormData();
       
-      // Asosiy maydonlar
       fd.append("section_id", formData.section_id);
       fd.append("mondai_number", String(formData.mondai_number));
       fd.append("question_number", String(formData.question_number));
@@ -287,45 +294,28 @@ const fetchData = useCallback(async () => {
         fd.append("passage", formData.passage);
       }
 
-      // === SAVOL RASMI ===
       if (formData.question_image instanceof File) {
-        // Yangi rasm yuklangan
         fd.append("image_path", formData.question_image);
       } else if (formData.remove_question_image) {
-        // Rasmni o'chirish
         fd.append("remove_image", "1");
       }
-      // Agar hech narsa bo'lmasa, eski rasmga tegmaymiz (fdga qo'shmaymiz)
 
-      // === VARIANTLAR ===
       formData.options.forEach((opt, idx) => {
-        // Matn (har doim yuboramiz)
         fd.append(`options[${idx}][text]`, opt.text || "");
         
-        // Rasm
         if (opt.image instanceof File) {
-          // Yangi rasm fayli
           fd.append(`options[${idx}][image]`, opt.image, opt.image.name);
         } else if (opt.remove_image) {
-          // Rasmni o'chirish uchun flag yuboramiz (backendda remove_image flag yo'q variantlar uchun,
-          // lekin biz null yoki bo'sh emas, balki butunlay yubormaslik kerak)
-          // Backend update metodi image maydoni kelmasa, eski qiymatni qoldiradi.
-          // Shuning uchun o'chirish kerak bo'lsa, alohida maydon bilan yoki backend mantiqini o'zgartiramiz.
-          // Hozircha: backendga "options[idx][remove_image]=1" sifatida yuboramiz (agar backendda qo'llansa)
           fd.append(`options[${idx}][remove_image]`, "1");
         }
-        // Agar na yangi rasm, na o'chirish bo'lsa -> hech narsa yubormaymiz (eski saqlanadi)
       });
 
-      // Debug: FormData tarkibini ko'rish
       console.log("=== FormData tarkibi ===");
       for (const pair of fd.entries()) {
         console.log(pair[0], pair[1]);
       }
 
-      // API chaqiruvi
       if (editingId) {
-        // Tahrirlashda POST emas, PUT yoki PATCH; lekin form-data bilan POST ham ishlaydi
         await adminAPI.updateQuestion(editingId, fd);
         toast.success("Savol yangilandi");
       } else {
@@ -358,7 +348,7 @@ const fetchData = useCallback(async () => {
     }
   };
 
-  // ---------- RENDER (asosan o'zgarmagan, faqat variant rasm o'chirishda kichik tuzatish) ----------
+  // ---------- RENDER ----------
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
       <Loader2 className="animate-spin h-12 w-12 text-blue-500" />
@@ -392,6 +382,10 @@ const fetchData = useCallback(async () => {
                 <Clock className="w-3 h-3" /> {test.time} min
               </Badge>
               <Badge variant="secondary">{sections.length} ta bo'lim</Badge>
+              <Badge variant="outline" className="flex items-center gap-1 bg-amber-50 border-amber-300 text-amber-700">
+                <Calculator className="w-3 h-3" />
+                Jami: {calculateTotalPoints(sections)} ball
+              </Badge>
             </div>
           </div>
         </div>
@@ -410,6 +404,9 @@ const fetchData = useCallback(async () => {
                 <div className="flex items-center gap-3">
                   <h2 className="text-lg font-bold uppercase">{section.name}</h2>
                   <Badge variant="secondary">{section.questions?.length || 0} ta savol</Badge>
+                  <Badge variant="outline" className="text-amber-600 border-amber-300">
+                    {calculateSectionPoints(section)} ball
+                  </Badge>
                 </div>
                 <Button size="sm" onClick={() => openModal(section.id)} className="bg-indigo-600 hover:bg-indigo-700">
                   <Plus className="w-4 h-4 mr-1" /> Savol qo'shish
@@ -489,9 +486,30 @@ const fetchData = useCallback(async () => {
           <form onSubmit={handleSubmit} className="space-y-5 py-4">
             {/* Mondai, No, Ball */}
             <div className="grid grid-cols-3 gap-4">
-              <div><Label>Mondai No</Label><Input type="number" value={formData.mondai_number} onChange={e => setFormData({...formData, mondai_number: +e.target.value})} /></div>
-              <div><Label>Savol No</Label><Input type="number" value={formData.question_number} onChange={e => setFormData({...formData, question_number: +e.target.value})} /></div>
-              <div><Label>Ball</Label><Input type="number" value={formData.points} onChange={e => setFormData({...formData, points: +e.target.value})} /></div>
+              <div>
+                <Label>Mondai No</Label>
+                <Input 
+                  type="number" 
+                  value={formData.mondai_number} 
+                  onChange={e => setFormData({...formData, mondai_number: +e.target.value})} 
+                />
+              </div>
+              <div>
+                <Label>Savol No</Label>
+                <Input 
+                  type="number" 
+                  value={formData.question_number} 
+                  onChange={e => setFormData({...formData, question_number: +e.target.value})} 
+                />
+              </div>
+              <div>
+                <Label>Ball</Label>
+                <Input 
+                  type="number" 
+                  value={formData.points} 
+                  onChange={e => setFormData({...formData, points: +e.target.value})} 
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -510,12 +528,20 @@ const fetchData = useCallback(async () => {
 
             <div className="space-y-2">
               <Label>Asosiy matn (Passage)</Label>
-              <Textarea value={formData.passage} onChange={e => setFormData({...formData, passage: e.target.value})} className="h-24" />
+              <Textarea 
+                value={formData.passage} 
+                onChange={e => setFormData({...formData, passage: e.target.value})} 
+                className="h-24" 
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Savol matni *</Label>
-              <Input required value={formData.question_text} onChange={e => setFormData({...formData, question_text: e.target.value})} />
+              <Input 
+                required 
+                value={formData.question_text} 
+                onChange={e => setFormData({...formData, question_text: e.target.value})} 
+              />
             </div>
 
             {/* SAVOLGA TEGISHLI RASM */}
@@ -533,7 +559,12 @@ const fetchData = useCallback(async () => {
                       const file = e.target.files?.[0] || null;
                       if (file) {
                         const reader = new FileReader();
-                        reader.onload = ev => setFormData({...formData, question_image: file, question_image_preview: ev.target?.result as string, remove_question_image: false});
+                        reader.onload = ev => setFormData({
+                          ...formData, 
+                          question_image: file, 
+                          question_image_preview: ev.target?.result as string, 
+                          remove_question_image: false
+                        });
                         reader.readAsDataURL(file);
                       }
                       e.target.value = "";
@@ -541,7 +572,18 @@ const fetchData = useCallback(async () => {
                   />
                 </label>
                 {formData.question_image_preview && (
-                  <Button type="button" variant="ghost" size="sm" className="text-red-500" onClick={() => setFormData({...formData, question_image: null, question_image_preview: "", remove_question_image: true})}>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-500" 
+                    onClick={() => setFormData({
+                      ...formData, 
+                      question_image: null, 
+                      question_image_preview: "", 
+                      remove_question_image: true
+                    })}
+                  >
                     <X className="h-4 w-4 mr-1" /> Rasmni o'chirish
                   </Button>
                 )}
@@ -562,27 +604,44 @@ const fetchData = useCallback(async () => {
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded">Variant {idx + 1}</span>
                       {opt.preview && (
-                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-red-400" onClick={() => handleOptionImageChange(idx, null)}>
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 text-red-400" 
+                          onClick={() => handleOptionImageChange(idx, null)}
+                        >
                           <X className="h-3 w-3" />
                         </Button>
                       )}
                     </div>
-                    <Input placeholder="Matn (ixtiyoriy)" value={opt.text} onChange={e => handleOptionTextChange(idx, e.target.value)} />
+                    <Input 
+                      placeholder="Matn (ixtiyoriy)" 
+                      value={opt.text} 
+                      onChange={e => handleOptionTextChange(idx, e.target.value)} 
+                    />
                     <label className="cursor-pointer inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
                       <ImagePlus className="h-4 w-4" />
                       {opt.preview ? "Rasmni almashtirish" : "Rasm yuklash"}
-                      <input type="file" accept="image/*" className="hidden" onChange={e => {
-                        const file = e.target.files?.[0] || null;
-                        handleOptionImageChange(idx, file);
-                        e.target.value = "";
-                      }} />
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={e => {
+                          const file = e.target.files?.[0] || null;
+                          handleOptionImageChange(idx, file);
+                          e.target.value = "";
+                        }} 
+                      />
                     </label>
                     {opt.preview && (
                       <div className="w-full h-24 rounded border overflow-hidden bg-gray-100 dark:bg-gray-900">
                         <img src={opt.preview} alt={`var ${idx+1}`} className="w-full h-full object-contain" />
                       </div>
                     )}
-                    {!opt.text.trim() && !opt.preview && <p className="text-xs text-amber-500">Matn yoki rasm kiriting</p>}
+                    {!opt.text.trim() && !opt.preview && (
+                      <p className="text-xs text-amber-500">Matn yoki rasm kiriting</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -591,12 +650,19 @@ const fetchData = useCallback(async () => {
             {/* TO'G'RI JAVOB */}
             <div className="space-y-2">
               <Label className="text-emerald-600 font-bold">To'g'ri javob *</Label>
-              <Select value={formData.correct_answer} onValueChange={v => setFormData({...formData, correct_answer: v})}>
-                <SelectTrigger className="border-emerald-500"><SelectValue placeholder="Variantni tanlang" /></SelectTrigger>
+              <Select 
+                value={formData.correct_answer} 
+                onValueChange={v => setFormData({...formData, correct_answer: v})}
+              >
+                <SelectTrigger className="border-emerald-500">
+                  <SelectValue placeholder="Variantni tanlang" />
+                </SelectTrigger>
                 <SelectContent>
                   {[0,1,2,3].map(n => {
                     const opt = formData.options[n];
-                    const label = opt.text?.trim() ? `Variant ${n+1}: ${opt.text}` : `Variant ${n+1} (rasm)`;
+                    const label = opt.text?.trim() 
+                      ? `Variant ${n+1}: ${opt.text}` 
+                      : `Variant ${n+1} (rasm)`;
                     return <SelectItem key={n} value={String(n)}>{label}</SelectItem>;
                   })}
                 </SelectContent>
@@ -604,8 +670,18 @@ const fetchData = useCallback(async () => {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Bekor qilish</Button>
-              <Button type="submit" disabled={submitting || !formData.correct_answer || formData.options.every(o => !o.text.trim() && !o.preview)} className="bg-blue-600 text-white min-w-[120px]">
+              <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+                Bekor qilish
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={
+                  submitting || 
+                  !formData.correct_answer || 
+                  formData.options.every(o => !o.text.trim() && !o.preview)
+                } 
+                className="bg-blue-600 text-white min-w-[120px]"
+              >
                 {submitting ? "Saqlanmoqda..." : "Saqlash"}
               </Button>
             </DialogFooter>
