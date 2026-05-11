@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Level extends Model
+{
+    protected $fillable = ['slug', 'title', 'tags', 'video_count', 'lesson_count', 'description'];
+
+    protected $casts = [
+        'tags' => 'array',
+    ];
+
+    public function modules()
+    {
+        return $this->hasMany(Module::class)->orderBy('order');
+    }
+
+    public function kanjis()
+    {
+        return $this->hasMany(Kanji::class);
+    }
+
+    public function vocabularies()
+    {
+        return $this->hasMany(Vocabulary::class);
+    }
+}

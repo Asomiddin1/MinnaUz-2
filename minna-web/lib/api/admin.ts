@@ -60,4 +60,58 @@ export const adminAPI = {
 
   deleteQuestion: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/questions/${id}`),
+
+  /* ==========================================
+     LMS (O'QUV KURS) MANAGEMENT - YANGI QO'SHILDI
+     ========================================== */
+
+  /* --- LEVELS (Darajalar) --- */
+  getLevels: (): Promise<AxiosResponse> =>
+    apiClient.get("/admin/levels"),
+
+  getLevelById: (id: number): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/levels/${id}`),
+
+  createLevel: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/levels", data),
+
+  updateLevel: (id: number, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/levels/${id}`, data),
+
+  deleteLevel: (id: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/levels/${id}`),
+
+  /* --- MODULES (Bo'limlar) --- */
+  // level_id orqali filtrlash imkoniyati bilan
+  getModules: (levelId?: number): Promise<AxiosResponse> =>
+    apiClient.get("/admin/modules", { params: { level_id: levelId } }),
+
+  getModuleById: (id: number): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/modules/${id}`),
+
+  createModule: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/modules", data),
+
+  updateModule: (id: number, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/modules/${id}`, data),
+
+  deleteModule: (id: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/modules/${id}`),
+
+  /* --- LESSONS (Video darslar) --- */
+  // module_id orqali filtrlash imkoniyati bilan
+  getLessons: (moduleId?: number): Promise<AxiosResponse> =>
+    apiClient.get("/admin/lessons", { params: { module_id: moduleId } }),
+
+  getLessonById: (id: number): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/lessons/${id}`),
+
+  createLesson: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/lessons", data),
+
+  updateLesson: (id: number, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/lessons/${id}`, data),
+
+  deleteLesson: (id: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/lessons/${id}`),
 };
