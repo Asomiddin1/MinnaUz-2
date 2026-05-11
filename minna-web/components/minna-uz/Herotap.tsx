@@ -57,7 +57,7 @@ export default function HeroSection() {
           
           <div className="w-full h-full bg-gradient-to-b from-[#f0f9ff] to-white relative flex items-end justify-center overflow-hidden">
             <div className="relative w-full h-[85%] flex items-end justify-center px-4">
-              <motion.img 
+              <motion.div 
                 initial={{ y: 250, opacity: 0, scale: 0.7 }}
                 animate={{ y: [0, -10, 0], opacity: 1, scale: 1 }}
                 transition={{ 
@@ -67,16 +67,20 @@ export default function HeroSection() {
                   damping: 12,
                   y: { duration: 3, repeat: Infinity, ease: "easeInOut" }
                 }}
-                src="/images/jlpt.png"
-                alt="Minna Characters"
+                
+                
                 className="w-[110%] h-auto object-contain z-20 select-none drop-shadow-2xl mb-2 sm:mb-4"
               />
+              
 
               {/* Sparkles */}
-              <div className="absolute top-6 sm:top-10 flex space-x-8 sm:space-x-12 text-2xl sm:text-3xl z-30 pointer-events-none">
+              <div className="absolute top-6 sm:top-10 flex space-x-8 sm:space-x-12 text-2xl items-center h-full sm:text-3xl z-30 pointer-events-none">
+                <h1 className="text-[#042c60] font-black text-center ">Minna.Uz</h1>
                 <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2 }}>✨</motion.span>
-                <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2.5, delay: 0.5 }} className="mt-[-20px] sm:mt-[-30px]">⭐</motion.span>
+                {/* <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 2.5, delay: 0.5 }} className="mt-[-20px] sm:mt-[-30px]">⭐</motion.span> */}
+                
               </div>
+             
             </div>
           </div>
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/10 pointer-events-none z-40" />

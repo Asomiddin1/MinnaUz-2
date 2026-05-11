@@ -15,7 +15,7 @@ import Mentors from '../components/minna-uz/Mentors';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white font-sans overflow-x-hidden pt-16">
+    <div className="min-h-screen bg-white font-sans overflow-x-hidden ">
       
       {/* 1. Yuqori menyu */}
       <Navbar />
@@ -46,9 +46,9 @@ export default function Home() {
       <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
 
       {/* 7. Maktablar uchun - "Maktab haqida" uchun id: about */}
-      <div id="about">
+      {/* <div id="about">
         <ForSchools />
-      </div>
+      </div> */}
 
       <div className="w-full border-t-2 border-gray-100 max-w-5xl mx-auto"></div>
 

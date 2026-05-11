@@ -42,8 +42,8 @@ export default function Navbar() {
         {/* ACTIONS */}
         <div className="flex items-center gap-3">
          <Link href={'/dashboard'}>
-             <button className="hidden sm:block bg-[#1454d2] text-white font-[1000] text-[12px] uppercase py-3 px-8 rounded-full border-b-[4px] border-[#10366f] active:border-b-0 active:translate-y-1 transition-all shadow-lg shadow-green-100">
-            Boshlash
+             <button className="hidden sm:block bg-[#1454d2] text-white font-[1000] text-[12px] uppercase py-3 px-8 rounded-full border-b-[4px] border-[#164ea0] active:border-b-0 active:translate-y-1 transition-all shadow-lg shadow-blue-500/20">
+            Kirish
           </button>
          </Link>
 
@@ -100,7 +100,7 @@ export default function Navbar() {
               ))}
               <hr className="w-full border-slate-50" />
               <button className="w-full bg-[#1745de] text-white font-[1000] py-4 rounded-3xl border-b-[6px] border-[#0f37ba] active:border-b-0 active:translate-y-1 transition-all">
-                Boshlash
+                Boshlash 
               </button>
             </motion.div>
           </>

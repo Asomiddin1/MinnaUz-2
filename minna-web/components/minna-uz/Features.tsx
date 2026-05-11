@@ -99,7 +99,7 @@ export default function Features() {
           >
             {/* Olov animatsiyasi */}
             <motion.div 
-              animate={{ scale: [1, 1.1, 1], filter: ["blur(0px)", "blur(2px)", "blur(0px)"] }}
+              animate={{ scale: [1, 1.1, 1]}}
               transition={{ duration: 2, repeat: Infinity }}
               className="text-[160px] relative z-10 drop-shadow-[0_20px_40px_rgba(249,115,22,0.4)]"
             >

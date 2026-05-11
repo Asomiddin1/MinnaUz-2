@@ -242,7 +242,7 @@ export default function PremiumPromo() {
       <PremiumSection>
         <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-6 text-center lg:text-left">
-            <h3 className="text-4xl md:text-6xl font-black text-[#58cc02] uppercase italic leading-none">YOPIC <br/> O'YINLAR</h3>
+            <h3 className="text-4xl md:text-6xl font-black text-[#58cc02] uppercase italic leading-none">YOPIQ <br/> O'YINLAR</h3>
             <p className="text-indigo-200/60 text-xl font-bold leading-relaxed">
               Faqat premium uchun yopiq mini-o'yinlar. O'yin orqali yapon tilini qiziqarli o'rganing.
             </p>
