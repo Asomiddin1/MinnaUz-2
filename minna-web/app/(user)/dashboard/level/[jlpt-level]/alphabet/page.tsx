@@ -1,10 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, use } from "react"
 import BackButton from "@/components/back-button"
-import { Type, PenTool, Volume2, Languages, Sparkles } from "lucide-react"
+import { Type, PenTool, Volume2, Languages } from "lucide-react"
+import Link from "next/link"
 
-// Alifbo ma'lumotlari
+interface PageProps {
+  params: Promise<{
+    "jlpt-level": string
+  }>
+}
+
 const HIRAGANA_DATA = [
   { jpn: "あ", rom: "a" }, { jpn: "い", rom: "i" }, { jpn: "う", rom: "u" }, { jpn: "え", rom: "e" }, { jpn: "お", rom: "o" },
   { jpn: "か", rom: "ka" }, { jpn: "き", rom: "ki" }, { jpn: "く", rom: "ku" }, { jpn: "け", rom: "ke" }, { jpn: "こ", rom: "ko" },
@@ -26,16 +32,36 @@ const KATAKANA_DATA = [
   { jpn: "タ", rom: "ta" }, { jpn: "チ", rom: "chi" }, { jpn: "ツ", rom: "tsu" }, { jpn: "テ", rom: "te" }, { jpn: "ト", rom: "to" },
   { jpn: "ナ", rom: "na" }, { jpn: "ニ", rom: "ni" }, { jpn: "ヌ", rom: "nu" }, { jpn: "ネ", rom: "ne" }, { jpn: "ノ", rom: "no" },
   { jpn: "ハ", rom: "ha" }, { jpn: "ヒ", rom: "hi" }, { jpn: "フ", rom: "fu" }, { jpn: "ヘ", rom: "he" }, { jpn: "ホ", rom: "ho" },
-  { jpn: "マ", rom: "ma" }, { jpn: "ミ", rom: "ni" }, { jpn: "ム", rom: "mu" }, { jpn: "メ", rom: "me" }, { jpn: "モ", rom: "mo" },
+  { jpn: "マ", rom: "ma" }, { jpn: "ミ", rom: "mi" }, { jpn: "ム", rom: "mu" }, { jpn: "メ", rom: "me" }, { jpn: "モ", rom: "mo" },
   { jpn: "ヤ", rom: "ya" }, { jpn: "", rom: "" }, { jpn: "ユ", rom: "yu" }, { jpn: "", rom: "" }, { jpn: "ヨ", rom: "yo" },
   { jpn: "ラ", rom: "ra" }, { jpn: "リ", rom: "ri" }, { jpn: "ル", rom: "ru" }, { jpn: "レ", rom: "re" }, { jpn: "ロ", rom: "ro" },
   { jpn: "ワ", rom: "wa" }, { jpn: "", rom: "" }, { jpn: "", rom: "" }, { jpn: "", rom: "" }, { jpn: "ヲ", rom: "wo" },
   { jpn: "ン", rom: "n" },
 ]
 
-const AlphabetPage = () => {
+const AlphabetPage = ({ params }: PageProps) => {
+  const resolvedParams = use(params)
+  const level = resolvedParams["jlpt-level"]
+  
   const [activeTab, setActiveTab] = useState<"hiragana" | "katakana">("hiragana")
   const currentData = activeTab === "hiragana" ? HIRAGANA_DATA : KATAKANA_DATA
+
+  // Qiz bola ovozi (Yaponka)
+  const playSound = (text: string) => {
+    if (!text || typeof window === "undefined") return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "ja-JP";
+    utterance.pitch = 1.2; // Ingichka ovoz
+    utterance.rate = 0.8;  // Biroz sekin
+    
+    // Yapon ayol ovozini tanlash
+    const voices = window.speechSynthesis.getVoices();
+    const femaleVoice = voices.find(v => v.lang.includes("ja") && (v.name.includes("Female") || v.name.includes("Google")));
+    if (femaleVoice) utterance.voice = femaleVoice;
+    
+    window.speechSynthesis.speak(utterance);
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 p-4 md:p-10">
@@ -53,10 +79,9 @@ const AlphabetPage = () => {
             <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white">
               {activeTab === "hiragana" ? "Hiragana" : "Katakana"} Alifbosi
             </h1>
-            <p className="text-slate-500 mt-2">Harflarni tanlang va ularning talaffuzi hamda yozilishini o'rganing</p>
+            <p className="text-slate-500 mt-2">Harflarni tanlang va ularning talaffuzini tinglang</p>
           </div>
           
-          {/* Switcher */}
           <div className="flex bg-white dark:bg-slate-900 p-1.5 rounded-2xl border shadow-sm dark:border-slate-800">
              <button 
                 onClick={() => setActiveTab("hiragana")}
@@ -87,6 +112,7 @@ const AlphabetPage = () => {
             char.jpn ? (
               <div 
                 key={i} 
+                onClick={() => playSound(char.jpn)}
                 className="group relative aspect-square bg-white dark:bg-slate-900 rounded-[24px] border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:shadow-xl transition-all active:scale-95 shadow-sm"
               >
                 <span className="text-3xl font-bold text-slate-800 dark:text-white group-hover:text-blue-600 transition-colors">
@@ -101,7 +127,7 @@ const AlphabetPage = () => {
                 </div>
               </div>
             ) : (
-              <div key={i} className="aspect-square hidden md:block" /> // Bo'sh joylar uchun
+              <div key={i} className="aspect-square hidden md:block" />
             )
           ))}
         </div>
@@ -115,11 +141,11 @@ const AlphabetPage = () => {
              </div>
              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Yozish mashqlari</h3>
              <p className="text-slate-500 mt-3 leading-relaxed">
-               Har bir harfning yozilish tartibini (Stroke order) bosqichma-bosqich o'rganing va ekran ustida mashq qiling.
+               Har bir harfning yozilish tartibini (Stroke order) animatsiyalar orqali o'rganing.
              </p>
-             <button className="mt-8 flex items-center gap-2 bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-blue-700 transition-colors">
+             <Link href={`/dashboard/level/${level}/alphabet/practice`} className="mt-8 inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-blue-700 transition-colors">
                 Mashqni boshlash
-             </button>
+             </Link>
           </div>
           
           {/* Test bo'limi */}
@@ -129,11 +155,11 @@ const AlphabetPage = () => {
              </div>
              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">O'qish testi</h3>
              <p className="text-slate-500 mt-3 leading-relaxed">
-               O'rgangan harflaringizni tezlik va aniqlik bo'yicha sinovdan o'tkazing. O'zingizni imtihonga tayyorlang!
+               O'rgangan harflaringizni tasodifiy testlar orqali sinab ko'ring va bilimingizni tekshiring.
              </p>
-             <button className="mt-8 flex items-center gap-2 bg-slate-900 dark:bg-slate-800 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-black dark:hover:bg-slate-700 transition-colors">
+             <Link href={`/dashboard/level/${level}/alphabet/quiz`} className="mt-8 inline-flex items-center gap-2 bg-slate-900 dark:bg-slate-800 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-black dark:hover:bg-slate-700 transition-colors">
                 Testga o'tish
-             </button>
+             </Link>
           </div>
         </div>
       </div>
