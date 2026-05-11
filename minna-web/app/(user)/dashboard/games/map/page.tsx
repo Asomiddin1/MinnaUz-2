@@ -1,4 +1,4 @@
-import JapanRPGMap from "@/components/user-components/japan-map-rpg/JapanMap";
+import JapanRPGMap from "@/components/user-components/home-fuctions/games/japan-map-rpg/JapanMap";
 
 export default function MapPage() {
   return (

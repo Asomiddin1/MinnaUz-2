@@ -1,4 +1,4 @@
-import Games from "@/components/user-components/home-fuctions/games"
+import Games from "@/components/user-components/home-fuctions/games/games"
 
 const GamesPage = () => {
   return (

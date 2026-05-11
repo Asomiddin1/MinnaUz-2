@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Play, Trophy, Map as MapIcon } from "lucide-react";
 import Link from "next/link";
 // ✅ Data fayliga to'g'ri yo'l (Alias ishlatish tavsiya etiladi)
-import { unlockNextStage } from "@/components/user-components/japan-map-rpg/data";
+import { unlockNextStage } from "@/components/user-components/home-fuctions/games/japan-map-rpg/data";
 
 export default function KanjiDash({ stageId }: { stageId: number }) {
   const [score, setScore] = useState(0);
