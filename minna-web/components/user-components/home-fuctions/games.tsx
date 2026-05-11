@@ -45,8 +45,8 @@ const GamesList = () => {
       id: 3,
       title: "So'z O'yini",
       desc: "Sirli bo'g'inlarni topib, yaponcha so'zlar tuzing. Lug'at boyligingizni qiziqarli sarguzasht orqali oshiring.",
-      mediaUrl: "https://i.pinimg.com/1200x/fa/cf/78/facf7892ac06c9e690eb578ff426f8de.jpg",
-      mediaType: "image",
+      mediaUrl: "/video/mp.mp4",
+      mediaType: "video",
       link: "/dashboard/games/soz-bogi"
     },
     {
