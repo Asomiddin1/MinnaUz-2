@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { unlockNextStage } from "@/components/user-components/japan-map-rpg/data";
+import { unlockNextStage } from "@/components/user-components/home-fuctions/games/japan-map-rpg/data";
 import { useRouter } from "next/navigation";
 import { ShieldAlert, Sword, Heart, ArrowLeft, Trophy, Timer, XCircle, RefreshCcw } from "lucide-react";
 

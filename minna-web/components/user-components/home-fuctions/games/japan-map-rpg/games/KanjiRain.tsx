@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { unlockNextStage } from "@/components/user-components/japan-map-rpg/data";
+import { unlockNextStage } from "@/components/user-components/home-fuctions/games/japan-map-rpg/data";
 import Link from "next/link";
 
 export default function KanjiRain({ stageId }: { stageId: number }) {

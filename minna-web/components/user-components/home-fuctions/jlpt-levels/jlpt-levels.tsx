@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { BookOpen, Package, Languages, ArrowRight } from "lucide-react"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import JlptLevelsSkeleton from "./jlpt-skleton"
 
 const levelsData = [
@@ -32,9 +32,9 @@ const levelsData = [
   { id: "n1", title: "N1", image: "N1.jpg", grammar: 0, vocab: 0, kanji: 0 },
 ]
 
-
 export default function JlptLevels() {
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 300)
@@ -51,7 +51,8 @@ export default function JlptLevels() {
         {levelsData.map((level) => (
           <Card
             key={level.id}
-            className="mx-auto w-full overflow-hidden rounded-[24px] border border-slate-100 pt-0 shadow-sm transition-shadow duration-300 hover:shadow-md dark:border-slate-800"
+            onClick={() => router.push(`/dashboard/level/${level.id}`)}
+            className="mx-auto w-full cursor-pointer overflow-hidden rounded-[24px] border border-slate-100 pt-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-slate-800"
           >
             <Image
               src={require(`./images/${level.image}`)}
@@ -71,10 +72,12 @@ export default function JlptLevels() {
                   <BookOpen className="h-4 w-4 text-blue-400" />
                   <span>{level.grammar} grammatika</span>
                 </div>
+
                 <div className="flex items-center gap-1.5">
                   <Package className="h-4 w-4 text-purple-400" />
                   <span>{level.vocab} lug&apos;at</span>
                 </div>
+
                 <div className="flex items-center gap-1.5">
                   <Languages className="h-4 w-4 text-green-400" />
                   <span>{level.kanji} kanji</span>
@@ -85,10 +88,10 @@ export default function JlptLevels() {
                 <span className="text-sm font-medium text-slate-400 dark:text-slate-500">
                   Batafsil ko&apos;rish
                 </span>
+
                 <Button
                   size="icon"
                   className="rounded-full bg-blue-500 text-white shadow-sm shadow-blue-200 hover:bg-blue-600 dark:shadow-none"
-                  aria-label={`${level.title} ni ko'rish`}
                 >
                   <ArrowRight className="h-5 w-5" />
                 </Button>

@@ -16,7 +16,8 @@ import {
 import { useSession } from "next-auth/react"
 import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels/jlpt-levels"
 import BannerCarousel from "@/components/user-components/banner-carousel"
-import GamesList from "@/components/user-components/home-fuctions/games"
+import GamesList from "@/components/user-components/home-fuctions/games/games"
+import Lugat from "@/components/user-components/home-fuctions/lugat/lugat"
 
 const MENU_ITEMS = [
   {
@@ -168,6 +169,10 @@ export default function DashboardPage() {
 
            <TabsContent value="games" className="mt-4 w-full outline-none">
               <GamesList />
+          </TabsContent>
+
+            <TabsContent value="dictionary" className="mt-4 w-full outline-none">
+              <Lugat />
           </TabsContent>
 
           

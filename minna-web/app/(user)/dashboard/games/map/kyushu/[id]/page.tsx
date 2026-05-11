@@ -1,9 +1,9 @@
 "use client";
 import { useParams } from "next/navigation";
-import KanjiDash from "@/components/user-components/japan-map-rpg/games/KanjiDash";
-import WordMatch from "@/components/user-components/japan-map-rpg/games/WordMatch";
-import KanjiRain from "@/components/user-components/japan-map-rpg/games/KanjiRain";
-import BossBattle from "@/components/user-components/japan-map-rpg/games/BossBattle";
+import KanjiDash from "@/components/user-components/home-fuctions/games/japan-map-rpg/games/KanjiDash";
+import WordMatch from "@/components/user-components/home-fuctions/games/japan-map-rpg/games/WordMatch";
+import KanjiRain from "@/components/user-components/home-fuctions/games/japan-map-rpg/games/KanjiRain";
+import BossBattle from "@/components/user-components/home-fuctions/games/japan-map-rpg/games/BossBattle";
 
 export default function KyushuGamePage() {
   const params = useParams();

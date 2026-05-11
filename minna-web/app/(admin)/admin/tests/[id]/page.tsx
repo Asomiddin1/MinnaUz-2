@@ -408,7 +408,7 @@ export default function TestDetailPage() {
                     {calculateSectionPoints(section)} ball
                   </Badge>
                 </div>
-                <Button size="sm" onClick={() => openModal(section.id)} className="bg-indigo-600 hover:bg-indigo-700">
+                <Button size="sm" onClick={() => openModal(section.id)} className="bg-slate-600 hover:bg-slate-700">
                   <Plus className="w-4 h-4 mr-1" /> Savol qo'shish
                 </Button>
               </div>
@@ -453,7 +453,7 @@ export default function TestDetailPage() {
                           </TableCell>
                           <TableCell><Badge variant="outline">{q.points} pt</Badge></TableCell>
                           <TableCell className="text-right space-x-1">
-                            <Button size="icon" variant="ghost" onClick={() => openModal(section.id, q)} className="h-8 w-8 text-blue-500">
+                            <Button size="icon" variant="ghost" onClick={() => openModal(section.id, q)} className="h-8 w-8 text-slate-500">
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button size="icon" variant="ghost" onClick={() => handleDelete(q.id)} className="h-8 w-8 text-red-500">

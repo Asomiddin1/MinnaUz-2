@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Lock, Play, Check, ArrowLeft } from "lucide-react"; // Check ikonkasi qo'shildi
 import { useRouter } from "next/navigation";
-import { JAPAN_REGIONS } from "@/components/user-components/japan-map-rpg/data";
+import { JAPAN_REGIONS } from "@/components/user-components/home-fuctions/games/japan-map-rpg/data";
 
 const KYUSHU_COORDS = [
   { id: 1, name: "Fukuoka", x: "55%", y: "20%" },

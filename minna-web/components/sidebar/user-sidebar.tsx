@@ -23,15 +23,14 @@ import {
   LogOut,
 } from "lucide-react"
 
-import { ModeToggle } from "../mode-toggle"
 import { useTheme } from "next-themes"
 import { signOut, useSession } from "next-auth/react"
+import Image from "next/image"
 
 export function UserSidebar() {
   const pathname = usePathname()
   const { state, toggleSidebar } = useSidebar()
   const collapsed = state === "collapsed"
-  const { theme, setTheme } = useTheme()
 
   const { data: session, status } = useSession()
 
@@ -58,16 +57,14 @@ export function UserSidebar() {
         >
           {!collapsed ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-400 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
-                🐱
-              </div>
+              <Image src={require("./logo.png")} alt="Logo" width={32} height={32} />
               <span className="text-sm font-bold tracking-widest text-slate-900 dark:text-slate-100">
                 MinnaUz
               </span>
             </div>
           ) : (
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
-              🐱
+              <Image src={require("./logo.png")} alt="Logo" width={32} height={32} />
             </div>
           )}
 

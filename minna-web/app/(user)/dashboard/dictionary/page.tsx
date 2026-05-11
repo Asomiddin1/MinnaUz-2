@@ -1,6 +1,10 @@
+import Lugat from "@/components/user-components/home-fuctions/lugat/lugat"
+
 const DictionaryPage = () => {
   return (
-    <div>DictionaryPage</div>
+    <div>
+       <Lugat />
+    </div>
   )
 }
 

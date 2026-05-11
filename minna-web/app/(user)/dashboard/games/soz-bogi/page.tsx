@@ -1,4 +1,4 @@
-import WordGardenGame from "@/components/user-components/home-fuctions/sozbog-app/soz-bogi";
+import WordGardenGame from "@/components/user-components/home-fuctions/games/sozbog-app/soz-bogi";
 
 export default function SozBogiPage() {
   return (
