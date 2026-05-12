@@ -18,7 +18,6 @@ export const JLPT_DATA: any = {
       "Kundalik ehtiyoj uchun 800 ta so'z",
       "100 ta eng ko'p ishlatiladigan Kanji",
       "Boshlang'ich Listening (Eshitish) mashqlari",
-      "Oddiy matnlarni o'qish (Reading)"
     ],
     videoCount: "40.12",
     lessonCount: 120

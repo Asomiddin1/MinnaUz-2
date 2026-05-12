@@ -25,8 +25,7 @@ export function StreakCalendar() {
         const year = currentMonth.getFullYear()
         const month = currentMonth.getMonth() + 1 
         const response = await userAPI.getStreaks(year, month)
-        
-        // Timezone (soat) xatosini oldini olish
+      
         const datesArray = response.data.map((dateString: string) => {
           const [y, m, d] = dateString.split('-');
           return new Date(Number(y), Number(m) - 1, Number(d), 12, 0, 0); 

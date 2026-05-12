@@ -17,7 +17,10 @@ import {
   PanelLeftClose,
   PanelLeft,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  Layers,
+  BookOpen,
+  PlayCircle
 } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 
@@ -27,12 +30,14 @@ export function AdminSidebar() {
   const collapsed = state === "collapsed"
   const { data: session, status } = useSession()
 
-  const menuItems = [
-    { name: "Dashboard", href: "/admin", icon: Home },
-    {name: "Jlpt testlar", href:'/admin/tests' , icon: GraduationCap},
-    {name: "Users", href:'/admin/users' , icon: Users}
-  ]
-
+ const menuItems = [
+  { name: "Dashboard", href: "/admin", icon: Home },
+  { name: "Darajalar", href: "/admin/levels", icon: Layers },      
+  { name: "Bo'limlar", href: "/admin/modules", icon: BookOpen },  
+  { name: "Video Darslar", href: "/admin/lessons", icon: PlayCircle },
+  { name: "JLPT Testlar", href: "/admin/tests", icon: GraduationCap },
+  { name: "Foydalanuvchilar", href: "/admin/users", icon: Users }
+];
   const userName = session?.user?.name || "Guest User"
   const userEmail = session?.user?.email || ""
 

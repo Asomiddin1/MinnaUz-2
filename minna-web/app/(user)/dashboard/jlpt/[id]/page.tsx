@@ -36,6 +36,18 @@ const formatPlayerTime = (seconds: number) => {
   return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
+// Matndagi \n larni <br /> ga o'girib beruvchi funksiya
+const renderTextWithBreaks = (text: string | null | undefined) => {
+  if (!text) return null;
+  // Regex yordamida ikkala holatni ham tutib olib, bo'lamiz
+  return text.split(/\\n|\n/).map((line, i, arr) => (
+    <span key={i}>
+      {line}
+      {i !== arr.length - 1 && <br />}
+    </span>
+  ));
+};
+
 // ---------- INTERFACES ----------
 interface QuestionOption {
   text?: string | null;
@@ -147,7 +159,7 @@ export default function TestPage() {
           const isPremium = userRes?.data?.is_premium;
           
           if (!isPremium) {
-            setNeedsPremium(true); // Oddiy userni premium UI ga yo'naltirish
+            setNeedsPremium(true);
             setLoading(false);
             return;
           }
@@ -178,7 +190,6 @@ export default function TestPage() {
       setTest(data);
       setTimeLeft(data.time * 60);
     } catch (err: any) {
-      // Backend 403 (ruxsat yo'q) xatosi qaytarganda ham Premium UI ni chiqaramiz
       if (err?.response?.status === 403 || err?.response?.status === 401) {
          setNeedsPremium(true);
       } else {
@@ -323,7 +334,7 @@ export default function TestPage() {
     );
 
   // ============================================
-  // 🔥 CHIROYLI PREMIUM BLOKI (Premium test bo'lib, user oddiy bo'lsa chiqadi)
+  // 🔥 CHIROYLI PREMIUM BLOKI
   // ============================================
   if (needsPremium) {
     return (
@@ -555,10 +566,15 @@ export default function TestPage() {
             >
               {qs[0]?.passage && (
                 <div className="rounded-xl border border-slate-200 bg-white p-5 text-[15px] leading-relaxed text-slate-800 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-                  <Badge className="mr-3 mb-2 bg-[#5C55C4] px-3 py-1 text-xs text-white hover:bg-indigo-600">
-                    Mondai {mondaiNum}
-                  </Badge>
-                  {qs[0].passage}
+                  <div className="mb-3">
+                    <Badge className="bg-[#5C55C4] px-3 py-1 text-xs text-white hover:bg-indigo-600">
+                      Mondai {mondaiNum}
+                    </Badge>
+                  </div>
+                  {/* Yangi matn qatori qo'shilib ketmasligi uchun <br /> bilan chiqaramiz */}
+                  <div className="whitespace-pre-wrap leading-loose">
+                    {renderTextWithBreaks(qs[0].passage)}
+                  </div>
                 </div>
               )}
 
@@ -575,8 +591,9 @@ export default function TestPage() {
                         {q.mondai_number}.{q.question_number}
                       </div>
                       <div className="flex-1 space-y-3">
-                        <h3 className="text-[17px] leading-relaxed font-medium text-slate-900 dark:text-slate-100">
-                          {q.question_text}
+                        {/* Savol matni ham yopishib ketmasligi uchun */}
+                        <h3 className="text-[17px] leading-relaxed font-medium text-slate-900 dark:text-slate-100 whitespace-pre-wrap">
+                          {renderTextWithBreaks(q.question_text)}
                         </h3>
 
                         {q.image_url && (
@@ -734,7 +751,8 @@ export default function TestPage() {
                   <LayoutList className="mr-2 h-4 w-4 text-[#5C55C4]" /> Joriy
                   bo'lim savollari
                 </h4>
-                <div className="scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 max-h-[55vh] overflow-y-auto pr-3">
+                {/* Asosiy muammo shu yerda hal etildi: max-h-[calc(100vh-320px)] qo'shilib standard overflow berildi */}
+                <div className="max-h-[calc(80vh-320px)] overflow-y-auto pr-3 pb-4">
                   {renderQuestionNavigator()}
                 </div>
               </div>
