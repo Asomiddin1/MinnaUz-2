@@ -1,9 +1,4 @@
 "use client";
-<<<<<<< HEAD
-
-=======
-import { unlockNextStage } from "../japan-map-rpg/data";
->>>>>>> f772e41a8597cf7950eb6ca64fab6eafe2880767
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
