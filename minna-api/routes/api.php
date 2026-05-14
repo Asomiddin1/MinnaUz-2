@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\Admin\TestController as AdminTestController;
 use App\Http\Controllers\Api\Admin\QuestionController as AdminQuestionController;
 
 // ==========================================
-// YANGI LMS (O'QUV KURS) CONTROLLERLARI
+// LMS (O'QUV KURS) CONTROLLERLARI
 // ==========================================
 use App\Http\Controllers\Api\Admin\LevelController as AdminLevelController;
 use App\Http\Controllers\Api\Admin\ModuleController as AdminModuleController;
@@ -23,9 +23,19 @@ use App\Http\Controllers\Api\Admin\LessonController as AdminLessonController;
 use App\Http\Controllers\Api\User\LevelController as UserLevelController;
 use App\Http\Controllers\Api\User\InteractionController;
 
+// ==========================================
+// YANGI: MATERIALLAR VA QIDIRUV CONTROLLERLARI
+// ==========================================
+use App\Http\Controllers\Api\Admin\GrammarController as AdminGrammarController;
+use App\Http\Controllers\Api\Admin\KanjiController as AdminKanjiController;
+use App\Http\Controllers\Api\Admin\VocabularyController as AdminVocabularyController;
+
+use App\Http\Controllers\Api\User\MaterialController as UserMaterialController;
+use App\Http\Controllers\Api\User\SearchController;
+
 /*
 |--------------------------------------------------------------------------
-| PUBLIC ROUTELAR
+| PUBLIC ROUTELAR (Hamma ko'ra oladi)
 |--------------------------------------------------------------------------
 */
 // Public Auth
@@ -35,13 +45,13 @@ Route::prefix('auth')->group(function () {
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 });
 
-// Public LMS Data (Next.js serverdan authsiz erkin o'qishi uchun)
+// Kurslar ro'yxati va kurs haqida ma'lumotni sotish/ko'rsatish maqsadida ochiq qoldiramiz
 Route::get('/levels', [UserLevelController::class, 'index']);
 Route::get('/levels/{slug}', [UserLevelController::class, 'show']);
 
 /*
 |--------------------------------------------------------------------------
-| AUTHENTICATED USER ROUTELARI (Tizimga kirganlar)
+| AUTHENTICATED USER ROUTELARI (Faqat tizimga kirganlar uchun)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
@@ -52,6 +62,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user/streaks', [UserProfileController::class, 'getStreaks']);
 
+    // ==========================================
+    // YOPILGAN MATERIALLAR (Faqat userlar ko'radi)
+    // ==========================================
+    Route::get('/levels/{slug}/grammars', [UserMaterialController::class, 'getGrammars']);
+    Route::get('/levels/{slug}/kanjis', [UserMaterialController::class, 'getKanjis']);
+    Route::get('/levels/{slug}/vocabularies', [UserMaterialController::class, 'getVocabularies']);
+    Route::get('/search', [SearchController::class, 'search']);
+    // ==========================================
+
     // User harakatlari va Test qismi
     Route::prefix('user')->group(function () {
         Route::get('/tests', [UserExamController::class, 'index']);
@@ -60,7 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/results/{resultId}', [UserExamController::class, 'result']);
         Route::get('/results', [UserExamController::class, 'history']); 
         
-        // Yangi: Darslarga like bosish va izoh yozish
+        // Darslarga like bosish va izoh yozish
         Route::post('/lessons/{lesson}/like', [InteractionController::class, 'toggleLike']);
         Route::post('/lessons/{lesson}/comments', [InteractionController::class, 'addComment']);
     });
@@ -79,8 +98,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/tests/{testId}/questions', [AdminTestController::class, 'getQuestions']);
     Route::apiResource('questions', AdminQuestionController::class);
 
-    // Yangi: LMS Admin routelar (Kurslar, Modullar va Darslarni boshqarish)
+    // LMS Admin routelar
     Route::apiResource('levels', AdminLevelController::class);
     Route::apiResource('modules', AdminModuleController::class);
     Route::apiResource('lessons', AdminLessonController::class);
+
+    // Yangi: Materiallarni boshqarish (CRUD)
+    Route::apiResource('grammars', AdminGrammarController::class);
+    Route::apiResource('kanjis', AdminKanjiController::class);
+    Route::apiResource('vocabularies', AdminVocabularyController::class);
 });
