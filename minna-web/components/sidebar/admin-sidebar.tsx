@@ -35,6 +35,7 @@ export function AdminSidebar() {
 
  const menuItems = [
   { name: "Dashboard", href: "/admin", icon: Home },
+  { name: "Videolar", href: "/admin/videos", icon: PlayCircle },
   { name: "Darajalar", href: "/admin/levels", icon: Layers },      
   { name: "Bo'limlar", href: "/admin/modules", icon: BookOpen },  
   { name: "Video Darslar", href: "/admin/lessons", icon: PlayCircle },

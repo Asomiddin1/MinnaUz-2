@@ -1,27 +1,78 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-// Papkalar ierarxiyasiga mos import yo'llari
+// Papkalar ierarxiyasiga mos import yo'llari (o'zingiznikini tekshirib oling)
 import VideoCard from '../../../../components/user-components/video-app/video-card';
-import { VIDEOS_DATABASE } from '../../../constants/video-data';
-import { PlayCircle, Sparkles, Eye, Clock } from 'lucide-react';
+import { userAPI } from "@/lib/api/user"; // API ni import qildik
+import { PlayCircle, Sparkles, Eye, Clock, Loader2 } from 'lucide-react';
 
 export default function VideoPage() {
   const [activeFilter, setActiveFilter] = useState("Barchasi");
+  
+  // Backenddan keladigan ma'lumotlar uchun statelar
+  const [allVideos, setAllVideos] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const filters = ["Barchasi", "Anime tili", "Yaponiyada hayot", "Vloglar", "Madaniyat", "Qiziqarli faktlar", "Shorts"];
 
-  // video-data.ts'dan barcha videolarni massiv ko'rinishida olamiz
-  const allVideos = Object.values(VIDEOS_DATABASE);
+  // =====================
+  // API DAN VIDEOLARNI OLISH
+  // =====================
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        setIsLoading(true);
+        const res = await userAPI.getVideos();
+        const fetchedVideos = res.data?.data || res.data || [];
+        
+        // Backenddagi created_at ni VideoCard tushunishi uchun postedAt ga o'zgartiramiz
+        const mappedVideos = fetchedVideos.map((video: any) => {
+          const date = new Date(video.created_at);
+          return {
+            ...video,
+            postedAt: `${date.getDate()}-${date.toLocaleString('uz-UZ', { month: 'short' })} ${date.getFullYear()}`, // Masalan: 15-Okt 2023
+          };
+        });
 
-  // Filtrlash mantiqi
+        setAllVideos(mappedVideos);
+      } catch (err) {
+        console.error("Videolarni yuklashda xatolik:", err);
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVideos();
+  }, []);
+
+  // Filtrlash mantiqi (Frontendda tezkor ishlashi uchun local filter ishlatamiz)
   const filteredVideos = activeFilter === "Barchasi" 
-    ? allVideos.slice(1) 
+    ? allVideos.slice(1) // Birinchisini Bannerga olib qolganimiz uchun 1 dan boshlaymiz
     : allVideos.filter((v: any) => v.category === activeFilter);
 
-  // Banner uchun birinchi video
-  const featuredVideo = allVideos[0] as any;
+  // Banner uchun eng oxirgi (yangi) birinchi video
+  const featuredVideo = allVideos.length > 0 ? allVideos[0] : null;
+
+  // Yuklanish holati
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  // Xatolik holati
+  if (error) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <p className="text-red-500 font-medium">Videolarni yuklashda xatolik yuz berdi. Iltimos qayta urinib ko'ring.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full w-full mx-auto max-w-[1400px] p-4 md:p-6 lg:p-8 space-y-10">

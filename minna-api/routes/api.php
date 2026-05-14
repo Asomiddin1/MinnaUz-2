@@ -24,7 +24,7 @@ use App\Http\Controllers\Api\User\LevelController as UserLevelController;
 use App\Http\Controllers\Api\User\InteractionController;
 
 // ==========================================
-// YANGI: MATERIALLAR VA QIDIRUV CONTROLLERLARI
+// MATERIALLAR VA QIDIRUV CONTROLLERLARI
 // ==========================================
 use App\Http\Controllers\Api\Admin\GrammarController as AdminGrammarController;
 use App\Http\Controllers\Api\Admin\KanjiController as AdminKanjiController;
@@ -32,6 +32,12 @@ use App\Http\Controllers\Api\Admin\VocabularyController as AdminVocabularyContro
 
 use App\Http\Controllers\Api\User\MaterialController as UserMaterialController;
 use App\Http\Controllers\Api\User\SearchController;
+
+// ==========================================
+// VIDEO DARSLAR CONTROLLERLARI (YANGI QO'SHILDI)
+// ==========================================
+use App\Http\Controllers\Api\Admin\VideoLessonController as AdminVideoController;
+use App\Http\Controllers\Api\User\VideoLessonController as UserVideoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +75,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/levels/{slug}/kanjis', [UserMaterialController::class, 'getKanjis']);
     Route::get('/levels/{slug}/vocabularies', [UserMaterialController::class, 'getVocabularies']);
     Route::get('/search', [SearchController::class, 'search']);
+    
+    // Video Darslar (Yangi qo'shildi)
+    Route::get('/videos', [UserVideoController::class, 'index']);
+    Route::get('/videos/{id}', [UserVideoController::class, 'show']);
     // ==========================================
 
     // User harakatlari va Test qismi
@@ -103,8 +113,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::apiResource('modules', AdminModuleController::class);
     Route::apiResource('lessons', AdminLessonController::class);
 
-    // Yangi: Materiallarni boshqarish (CRUD)
+    // Materiallarni boshqarish (CRUD)
     Route::apiResource('grammars', AdminGrammarController::class);
     Route::apiResource('kanjis', AdminKanjiController::class);
     Route::apiResource('vocabularies', AdminVocabularyController::class);
+
+    // Video Darslarni boshqarish (YANGI QO'SHILDI)
+    // Diqqat: fetch-youtube doim apiResource dan oldin turishi kerak!
+    Route::post('/videos/fetch-youtube', [AdminVideoController::class, 'fetchFromYoutube']);
+    Route::apiResource('videos', AdminVideoController::class);
 });
