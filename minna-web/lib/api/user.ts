@@ -34,10 +34,29 @@ export const userAPI = {
   getLevels: (): Promise<AxiosResponse> => 
     apiClient.get("/levels"),
 
-  // Bitta daraja haqida to'liq ma'lumot (barcha modul va darslari bilan)
-  // E'tibor bering: id emas, URL dagi so'z (slug) orqali izlaymiz (masalan: 'n5')
+  // Bitta daraja haqida to'liq ma'lumot
   getLevelBySlug: (slug: string): Promise<AxiosResponse> => 
     apiClient.get(`/levels/${slug}`),
+
+  // ==========================================
+  // YANGI: MATERIALLAR VA QIDIRUV (Auth talab qilinadi)
+  // ==========================================
+
+  // Daraja uchun barcha grammatikalarni olish
+  getLevelGrammars: (slug: string): Promise<AxiosResponse> => 
+    apiClient.get(`/levels/${slug}/grammars`),
+
+  // Daraja uchun barcha kanjilarni olish
+  getLevelKanjis: (slug: string): Promise<AxiosResponse> => 
+    apiClient.get(`/levels/${slug}/kanjis`),
+
+  // Daraja uchun barcha lug'atlarni olish
+  getLevelVocabularies: (slug: string): Promise<AxiosResponse> => 
+    apiClient.get(`/levels/${slug}/vocabularies`),
+
+  // Baza bo'ylab so'z va namunalardan qidirish
+  searchMaterials: (query: string): Promise<AxiosResponse> => 
+    apiClient.get("/search", { params: { q: query } }),
 
   // ==========================================
   // USER INTERAKSIYALARI (Faqat ro'yxatdan o'tganlar uchun)
