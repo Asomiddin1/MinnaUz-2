@@ -110,40 +110,6 @@ const PremiumPage = () => {
         </div>
       </div>
 
-      {/* CURRENT STATUS CARDS */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="p-6 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/50 shadow-sm backdrop-blur-sm transition-colors flex items-center justify-between">
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Current Device Limit</p>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white">
-              {user?.device_limit !== undefined ? (
-                 user.device_limit
-              ) : (
-                 <span className="animate-pulse">...</span> // API dan kelguncha kutish effekti
-              )}
-            </p>
-          </div>
-          <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-full flex items-center justify-center text-blue-500">
-            <MonitorSmartphone className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="p-6 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/50 shadow-sm backdrop-blur-sm transition-colors flex items-center justify-between">
-          <div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Account Type</p>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              {isPremium ? "Premium" : "Free"}
-            </p>
-          </div>
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-            isPremium ? 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-500' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
-          }`}>
-             {isPremium ? <Crown className="w-6 h-6" /> : <span className="text-xl font-bold">🆓</span>}
-          </div>
-        </div>
-      </div>
-
-      {/* PLANS */}
       <div className="grid md:grid-cols-2 gap-6 mt-4">
         {plans.map((plan, i) => {
           // Joriy planni aniqlash
