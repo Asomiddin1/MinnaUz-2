@@ -162,4 +162,27 @@ export const adminAPI = {
 
   deleteVocabulary: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/vocabularies/${id}`),
+
+  /* ==========================================
+     VIDEO DARSLAR (YANGI QO'SHILDI)
+     ========================================== */
+  
+  getVideos: (): Promise<AxiosResponse> =>
+    apiClient.get("/admin/videos"),
+
+  getVideoById: (id: number): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/videos/${id}`),
+
+  createVideo: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/videos", data),
+
+  updateVideo: (id: number, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/videos/${id}`, data),
+
+  deleteVideo: (id: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/videos/${id}`),
+
+  // YOUTUBE DAN AVTOMAT MA'LUMOT OLISH
+  fetchYoutubeData: (url: string): Promise<AxiosResponse> =>
+    apiClient.post("/admin/videos/fetch-youtube", { url }),
 };

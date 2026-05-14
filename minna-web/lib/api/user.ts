@@ -39,7 +39,7 @@ export const userAPI = {
     apiClient.get(`/levels/${slug}`),
 
   // ==========================================
-  // YANGI: MATERIALLAR VA QIDIRUV (Auth talab qilinadi)
+  // MATERIALLAR VA QIDIRUV (Auth talab qilinadi)
   // ==========================================
 
   // Daraja uchun barcha grammatikalarni olish
@@ -57,6 +57,18 @@ export const userAPI = {
   // Baza bo'ylab so'z va namunalardan qidirish
   searchMaterials: (query: string): Promise<AxiosResponse> => 
     apiClient.get("/search", { params: { q: query } }),
+
+  // ==========================================
+  // VIDEO DARSLAR (YANGI QO'SHILDI)
+  // ==========================================
+
+  // Barcha videolarni olish (Kategoriya bo'yicha filterlash mumkin)
+  getVideos: (category?: string): Promise<AxiosResponse> => 
+    apiClient.get("/videos", { params: { category } }),
+
+  // Bitta videoni o'qish (ko'rishlar soni avtomat oshadi)
+  getVideoById: (id: number): Promise<AxiosResponse> => 
+    apiClient.get(`/videos/${id}`),
 
   // ==========================================
   // USER INTERAKSIYALARI (Faqat ro'yxatdan o'tganlar uchun)
