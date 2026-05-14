@@ -24,21 +24,7 @@ const WritingPractice = () => {
 
   const alphabet = type === "hira" ? HIRAGANA : KATAKANA
 
- useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d")
-    if (ctx) {
-      ctx.lineCap = "round"
-      ctx.lineJoin = "round"
-      ctx.lineWidth = 12
-      ctx.strokeStyle = "#0047FF"
-    }
-    
-    // Muhim: Agar harf almashsa, har safar canvasni tozalash kerak bo'lsa 
-    // shu yerda clearCanvas() chaqirilishi mumkin.
-  }, [currentChar, type]); // Bu massiv renderlar aro o'zgarmas qolishi shart
+ 
 
   const startDrawing = (e: any) => {
     setIsDrawing(true)

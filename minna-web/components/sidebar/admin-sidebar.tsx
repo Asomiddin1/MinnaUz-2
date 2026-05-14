@@ -20,7 +20,10 @@ import {
   GraduationCap,
   Layers,
   BookOpen,
-  PlayCircle
+  PlayCircle,
+  BookMarked,
+  PenTool,
+  Languages
 } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 
@@ -35,6 +38,9 @@ export function AdminSidebar() {
   { name: "Darajalar", href: "/admin/levels", icon: Layers },      
   { name: "Bo'limlar", href: "/admin/modules", icon: BookOpen },  
   { name: "Video Darslar", href: "/admin/lessons", icon: PlayCircle },
+  { name: "Grammatika", href: "/admin/grammars", icon: Languages },
+  { name: "Kanjilar", href: "/admin/kanjis", icon: PenTool },
+  { name: "Lug'atlar", href: "/admin/vocabularies", icon: BookMarked },
   { name: "JLPT Testlar", href: "/admin/tests", icon: GraduationCap },
   { name: "Foydalanuvchilar", href: "/admin/users", icon: Users }
 ];

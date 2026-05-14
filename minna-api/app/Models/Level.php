@@ -26,4 +26,9 @@ class Level extends Model
     {
         return $this->hasMany(Vocabulary::class);
     }
+
+    public function grammars()
+{
+    return $this->hasMany(Grammar::class);
+}
 }

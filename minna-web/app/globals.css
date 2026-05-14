@@ -238,3 +238,12 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Skroll chizig'ini yashirish (Lekin ishlashda davom etadi) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE va Edge uchun */
+  scrollbar-width: none;  /* Firefox uchun */
+}

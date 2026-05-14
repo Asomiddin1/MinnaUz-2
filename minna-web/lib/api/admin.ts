@@ -1,5 +1,5 @@
 import { AxiosResponse } from "axios";
-import apiClient from "./axios"; // Asosiy axios sozlamasini chaqiramiz
+import apiClient from "./axios";
 
 export const adminAPI = {
   /* --- USERS MANAGEMENT --- */
@@ -26,14 +26,12 @@ export const adminAPI = {
     apiClient.post("/admin/tests", data),
 
   updateTest: (id: number, data: any): Promise<AxiosResponse> => {
-    // Agar ma'lumot fayl (FormData) ko'rinishida bo'lsa
     if (data instanceof FormData) {
       data.append("_method", "PUT");
       return apiClient.post(`/admin/tests/${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
     }
-    // Oddiy JSON bo'lsa (faylsiz)
     return apiClient.put(`/admin/tests/${id}`, data);
   },
 
@@ -62,7 +60,7 @@ export const adminAPI = {
     apiClient.delete(`/admin/questions/${id}`),
 
   /* ==========================================
-     LMS (O'QUV KURS) MANAGEMENT - YANGI QO'SHILDI
+     LMS (O'QUV KURS) MANAGEMENT
      ========================================== */
 
   /* --- LEVELS (Darajalar) --- */
@@ -82,7 +80,6 @@ export const adminAPI = {
     apiClient.delete(`/admin/levels/${id}`),
 
   /* --- MODULES (Bo'limlar) --- */
-  // level_id orqali filtrlash imkoniyati bilan
   getModules: (levelId?: number): Promise<AxiosResponse> =>
     apiClient.get("/admin/modules", { params: { level_id: levelId } }),
 
@@ -99,7 +96,6 @@ export const adminAPI = {
     apiClient.delete(`/admin/modules/${id}`),
 
   /* --- LESSONS (Video darslar) --- */
-  // module_id orqali filtrlash imkoniyati bilan
   getLessons: (moduleId?: number): Promise<AxiosResponse> =>
     apiClient.get("/admin/lessons", { params: { module_id: moduleId } }),
 
@@ -114,4 +110,56 @@ export const adminAPI = {
 
   deleteLesson: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/lessons/${id}`),
+
+  /* ==========================================
+     MATERIALLAR MANAGEMENT (YANGI QO'SHILDI)
+     ========================================== */
+
+  /* --- GRAMMARS (Grammatikalar) --- */
+  getGrammars: (levelId?: number): Promise<AxiosResponse> =>
+    apiClient.get("/admin/grammars", { params: { level_id: levelId } }),
+
+  getGrammarById: (id: number): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/grammars/${id}`),
+
+  createGrammar: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/grammars", data),
+
+  updateGrammar: (id: number, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/grammars/${id}`, data),
+
+  deleteGrammar: (id: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/grammars/${id}`),
+
+  /* --- KANJIS (Kanjilar) --- */
+  getKanjis: (levelId?: number): Promise<AxiosResponse> =>
+    apiClient.get("/admin/kanjis", { params: { level_id: levelId } }),
+
+  getKanjiById: (id: number): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/kanjis/${id}`),
+
+  createKanji: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/kanjis", data),
+
+  updateKanji: (id: number, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/kanjis/${id}`, data),
+
+  deleteKanji: (id: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/kanjis/${id}`),
+
+  /* --- VOCABULARIES (Lug'atlar) --- */
+  getVocabularies: (levelId?: number): Promise<AxiosResponse> =>
+    apiClient.get("/admin/vocabularies", { params: { level_id: levelId } }),
+
+  getVocabularyById: (id: number): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/vocabularies/${id}`),
+
+  createVocabulary: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/vocabularies", data),
+
+  updateVocabulary: (id: number, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/vocabularies/${id}`, data),
+
+  deleteVocabulary: (id: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/vocabularies/${id}`),
 };

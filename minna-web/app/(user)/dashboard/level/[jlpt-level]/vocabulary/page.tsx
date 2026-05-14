@@ -41,7 +41,11 @@ export default function VocabularyPage({ params }: PageProps) {
   useEffect(() => {
     const fetchVocabularies = async () => {
       try {
+<<<<<<< HEAD
         const res = await (userAPI as any).getLevelVocabularies(levelSlug);
+=======
+        const res = await userAPI.getLevelVocabularies(levelSlug);
+>>>>>>> f772e41a8597cf7950eb6ca64fab6eafe2880767
         const fetchedVocabs = res.data?.data || res.data || [];
         setVocabularies(fetchedVocabs);
         
