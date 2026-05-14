@@ -1,8 +1,9 @@
 "use client";
-import { unlockNextStage } from "@/components/user-components/home-fuctions/games/japan-map-rpg/data";
+
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { unlockNextStage } from "../japan-map-rpg/data";
 
 const WORDS_LIST = [
   { ja: "猫", uz: "Mushuk" },
