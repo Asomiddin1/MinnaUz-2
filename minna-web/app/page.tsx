@@ -1,4 +1,3 @@
-"use client";
 
 import Navbar from '../components/minna-uz/Navbar';
 import Hero from '../components/minna-uz/Hero';
@@ -12,6 +11,53 @@ import DuolingoABC from '../components/minna-uz/DuolingoABC';
 import AppDownload from '../components/minna-uz/AppDownload';
 import Footer from '../components/minna-uz/Footer';
 import Mentors from '../components/minna-uz/Mentors';
+
+
+export const metadata = {
+  title: "MinnaUz - JLPT va Yapon tili o‘rganish platformasi",
+  description:
+    "MinnaUz orqali yapon tili va JLPT (N5-N2) imtihonlariga interaktiv testlar, lug'atlar va darslar bilan tayyorlaning.",
+
+  keywords: [
+    "JLPT",
+    "yapon tili",
+    "kanji o'rganish",
+    "hiragana katakana",
+    "N5",
+    "N4",
+    "N3",
+    "N2",
+    "minnauz",
+    "yapon tili o'rganish online",
+  ],
+
+  openGraph: {
+    title: "MinnaUz - JLPT tayyorlov platformasi",
+    description:
+      "Yapon tili va JLPT N5-N2 imtihonlariga tayyorlanish uchun interaktiv platforma",
+    url: "https://minna.uz",
+    siteName: "MinnaUz",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "MinnaUz",
+    description: "JLPT va yapon tili o‘rganish platformasi",
+    images: ["/og-image.png"],
+  },
+
+  icons: {
+    icon: "/favicon.ico",
+  },
+};;
 
 export default function Home() {
   return (

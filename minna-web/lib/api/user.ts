@@ -58,17 +58,17 @@ export const userAPI = {
   searchMaterials: (query: string): Promise<AxiosResponse> => 
     apiClient.get("/search", { params: { q: query } }),
 
-  // ==========================================
-  // VIDEO DARSLAR (YANGI QO'SHILDI)
+// ==========================================
+  // VIDEO DARSLAR (USER)
   // ==========================================
 
-  // Barcha videolarni olish (Kategoriya bo'yicha filterlash mumkin)
-  getVideos: (category?: string): Promise<AxiosResponse> => 
-    apiClient.get("/videos", { params: { category } }),
+  // Barcha videolarni olish (Kategoriya va tillar bo'yicha filterlash mumkin)
+  getVideos: (category?: string, lang?: string): Promise<AxiosResponse> => 
+    apiClient.get("/videos", { params: { category, lang } }),
 
-  // Bitta videoni o'qish (ko'rishlar soni avtomat oshadi)
-  getVideoById: (id: number): Promise<AxiosResponse> => 
-    apiClient.get(`/videos/${id}`),
+  // Bitta videoni o'qish (Kerakli tillarni vergul bilan yuborish mumkin: 'uz,ja')
+  getVideoById: (id: number, lang?: string): Promise<AxiosResponse> => 
+    apiClient.get(`/videos/${id}`, { params: { lang } }),
 
   // ==========================================
   // USER INTERAKSIYALARI (Faqat ro'yxatdan o'tganlar uchun)

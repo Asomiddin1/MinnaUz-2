@@ -1,5 +1,5 @@
-"use client"
-
+'use client'
+import { useState, useEffect } from "react" // <-- useState va useEffect qo'shildi
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels/jlpt-levels"
-import BannerCarousel from "@/components/user-components/banner-carousel"
+import BannerCarousel from "@/components/user-components/banner/banner-carousel"
 import GamesList from "@/components/user-components/home-fuctions/games/games"
 import Lugat from "@/components/user-components/home-fuctions/lugat/lugat"
 
@@ -58,6 +58,23 @@ const MENU_ITEMS = [
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
+  
+  // Hydration muammosini oldini olish uchun state
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Komponent faqat client-side'da yuklanganidan keyin true bo'ladi
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Agar hali serverda yoki hydration jarayonida bo'lsak, hech narsa (yoki loading skeleton) qaytaramiz
+  if (!isMounted) {
+    return (
+      <div className="w-full flex h-[50vh] items-center justify-center">
+        <div className="text-slate-500">Yuklanmoqda...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full">
@@ -154,9 +171,7 @@ export default function DashboardPage() {
 
           {/* BANNER VA KALENDAR TAB KONTENTI (Desktop) */}
           <TabsContent value="jlpt" className="mt-4 w-full outline-none">
-            {/* Flex-row qat'iy saqlanadi */}
             <div className="flex w-full flex-row items-start gap-4">
-              {/* 1. Banner qismi: flex-1 va overflow-hidden qo'shildi (toshmasligi uchun) */}
               <div className="w-full min-w-0 flex-1 overflow-hidden">
                 <BannerCarousel />
               </div>
@@ -174,9 +189,6 @@ export default function DashboardPage() {
             <TabsContent value="dictionary" className="mt-4 w-full outline-none">
               <Lugat />
           </TabsContent>
-
-          
-          
         </Tabs>
       </div>
     </div>

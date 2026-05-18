@@ -4,59 +4,72 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\VideoLesson;
+use App\Http\Resources\VideoLessonResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http; // Http fasadini qo'shamiz
+use Illuminate\Support\Facades\Http;
 
 class VideoLessonController extends Controller
 {
     public function index()
     {
-        return response()->json(VideoLesson::latest()->get());
+        $videos = VideoLesson::latest()->get();
+        return VideoLessonResource::collection($videos);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'category' => 'required|string|max:255',
-            'title' => 'required|string|max:255',
-            'thumbnail' => 'nullable|string|url',
+            'category'    => 'required|string|max:255',
+            'title'       => 'required|string|max:255',
+            'thumbnail'   => 'nullable|string|url',
             'description' => 'nullable|string',
-            'youtube_id' => 'nullable|string',
-            'transcript' => 'nullable|array',
+            'youtube_id'  => 'nullable|string',
+            'transcript'  => 'nullable|array', // ['uz' => '...', 'ja' => '...'] formatda qabul qiladi
         ]);
 
         $video = VideoLesson::create($validated);
-        return response()->json(['message' => 'Video muvaffaqiyatli qo\'shildi', 'data' => $video], 201);
+        
+        return response()->json([
+            'message' => 'Video muvaffaqiyatli qo\'shildi', 
+            'data'    => new VideoLessonResource($video)
+        ], 201);
     }
 
-    public function show(VideoLesson $videoLesson) // route model binding
+    // Diqqat: argument nomi {video} ga moslab $video qilindi
+    public function show(VideoLesson $video) 
     {
-        return response()->json($videoLesson);
+        return new VideoLessonResource($video);
     }
 
-    public function update(Request $request, VideoLesson $videoLesson)
+    // Diqqat: argument nomi {video} ga moslab $video qilindi
+    public function update(Request $request, VideoLesson $video)
     {
         $validated = $request->validate([
-            'category' => 'sometimes|string|max:255',
-            'title' => 'sometimes|string|max:255',
-            'thumbnail' => 'nullable|string|url',
+            'category'    => 'sometimes|string|max:255',
+            'title'       => 'sometimes|string|max:255',
+            'thumbnail'   => 'nullable|string|url',
             'description' => 'nullable|string',
-            'youtube_id' => 'nullable|string',
-            'transcript' => 'nullable|array',
+            'youtube_id'  => 'nullable|string',
+            'transcript'  => 'nullable|array',
         ]);
 
-        $videoLesson->update($validated);
-        return response()->json(['message' => 'Video yangilandi', 'data' => $videoLesson]);
+        $video->update($validated);
+        
+        return response()->json([
+            'message' => 'Video yangilandi', 
+            'data'    => new VideoLessonResource($video)
+        ]);
     }
 
-    public function destroy(VideoLesson $videoLesson)
+    // Diqqat: argument nomi {video} ga moslab $video qilindi
+    public function destroy(VideoLesson $video)
     {
-        $videoLesson->delete();
+        $video->delete();
         return response()->json(['message' => 'Video o\'chirildi']);
     }
 
     // ==========================================
-    // YOUTUBE DAN MA'LUMOT TORTISH (YANGI)
+    // YOUTUBE DAN MA'LUMOT TORTISH
     // ==========================================
     public function fetchFromYoutube(Request $request)
     {
@@ -66,7 +79,6 @@ class VideoLessonController extends Controller
 
         $url = $request->url;
 
-        // URL ichidan YouTube ID ni qirqib olish uchun Regex
         preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/\s]{11})%i', $url, $match);
         $youtube_id = $match[1] ?? null;
 
@@ -75,7 +87,6 @@ class VideoLessonController extends Controller
         }
 
         try {
-            // YouTube ning ochiq oEmbed API'siga so'rov yuboramiz
             $response = Http::get("https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={$youtube_id}&format=json");
 
             if ($response->successful()) {
@@ -83,9 +94,8 @@ class VideoLessonController extends Controller
                 
                 return response()->json([
                     'youtube_id' => $youtube_id,
-                    'title' => $data['title'] ?? '',
-                    // Sifatli rasmni ID orqali o'zimiz yasab olamiz
-                    'thumbnail' => "https://img.youtube.com/vi/{$youtube_id}/maxresdefault.jpg",
+                    'title'      => $data['title'] ?? '',
+                    'thumbnail'  => "https://img.youtube.com/vi/{$youtube_id}/maxresdefault.jpg",
                 ]);
             }
 
