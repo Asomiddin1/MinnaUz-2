@@ -34,7 +34,7 @@ use App\Http\Controllers\Api\User\MaterialController as UserMaterialController;
 use App\Http\Controllers\Api\User\SearchController;
 
 // ==========================================
-// VIDEO DARSLAR CONTROLLERLARI (YANGI QO'SHILDI)
+// VIDEO DARSLAR CONTROLLERLARI
 // ==========================================
 use App\Http\Controllers\Api\Admin\VideoLessonController as AdminVideoController;
 use App\Http\Controllers\Api\User\VideoLessonController as UserVideoController;
@@ -51,7 +51,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 });
 
-// Kurslar ro'yxati va kurs haqida ma'lumotni sotish/ko'rsatish maqsadida ochiq qoldiramiz
+// Kurslar ro'yxati va ma'lumotlar ochiq qoldirilgan
 Route::get('/levels', [UserLevelController::class, 'index']);
 Route::get('/levels/{slug}', [UserLevelController::class, 'show']);
 
@@ -68,18 +68,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user/streaks', [UserProfileController::class, 'getStreaks']);
 
-    // ==========================================
-    // YOPILGAN MATERIALLAR (Faqat userlar ko'radi)
-    // ==========================================
+    // YOPILGAN MATERIALLAR
     Route::get('/levels/{slug}/grammars', [UserMaterialController::class, 'getGrammars']);
     Route::get('/levels/{slug}/kanjis', [UserMaterialController::class, 'getKanjis']);
     Route::get('/levels/{slug}/vocabularies', [UserMaterialController::class, 'getVocabularies']);
     Route::get('/search', [SearchController::class, 'search']);
     
-    // Video Darslar (Yangi qo'shildi)
+    // Video Darslar (User qismi)
     Route::get('/videos', [UserVideoController::class, 'index']);
     Route::get('/videos/{id}', [UserVideoController::class, 'show']);
-    // ==========================================
 
     // User harakatlari va Test qismi
     Route::prefix('user')->group(function () {
@@ -101,25 +98,24 @@ Route::middleware('auth:sanctum')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-    // Mavjud admin routelar
+    // Admin user va test boshqaruvi
     Route::apiResource('users', AdminUserController::class)->except(['store']);
     Route::post('/users/{id}/toggle-premium', [AdminUserController::class, 'togglePremium']);
     Route::apiResource('tests', AdminTestController::class);
     Route::get('/tests/{testId}/questions', [AdminTestController::class, 'getQuestions']);
     Route::apiResource('questions', AdminQuestionController::class);
 
-    // LMS Admin routelar
+    // LMS Admin
     Route::apiResource('levels', AdminLevelController::class);
     Route::apiResource('modules', AdminModuleController::class);
     Route::apiResource('lessons', AdminLessonController::class);
 
-    // Materiallarni boshqarish (CRUD)
+    // Materiallar (CRUD)
     Route::apiResource('grammars', AdminGrammarController::class);
     Route::apiResource('kanjis', AdminKanjiController::class);
     Route::apiResource('vocabularies', AdminVocabularyController::class);
 
-    // Video Darslarni boshqarish (YANGI QO'SHILDI)
-    // Diqqat: fetch-youtube doim apiResource dan oldin turishi kerak!
+    // Video Darslar Admin (CRUD + YouTube API)
     Route::post('/videos/fetch-youtube', [AdminVideoController::class, 'fetchFromYoutube']);
     Route::apiResource('videos', AdminVideoController::class);
 });

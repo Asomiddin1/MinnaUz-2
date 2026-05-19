@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\LoginHistory; // <-- 1. MANA SHU QO'SHILDI
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Hash;
@@ -88,6 +89,12 @@ class AuthController extends Controller
             }
             $user->last_login_at = $now;
             $user->save();
+
+            // 2. MANA SHU YERDA KALENDAR UCHUN BAZAGA YOZAMIZ
+            LoginHistory::firstOrCreate([
+                'user_id' => $user->id,
+                'login_date' => Carbon::today() // Faqat sanani o'zi (2026-05-18 00:00:00) yoziladi
+            ]);
 
             // Device limit
             $limit = $user->deviceLimit();
@@ -190,6 +197,12 @@ class AuthController extends Controller
         }
         $user->last_login_at = $now;
         $user->save();
+
+        // 3. MANA SHU YERDA HAM KALENDAR UCHUN BAZAGA YOZAMIZ
+        LoginHistory::firstOrCreate([
+            'user_id' => $user->id,
+            'login_date' => Carbon::today()
+        ]);
 
         // Device limit
         $limit = $user->deviceLimit();

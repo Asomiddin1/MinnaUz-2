@@ -38,7 +38,8 @@ import {
   Clock,
   Type,
   Upload,
-  FileText
+  FileText,
+  Languages
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -59,10 +60,17 @@ interface Video {
   description: string;
   youtube_id: string;
   views: number;
-  transcript: TranscriptRow[];
+  transcript: Record<string, TranscriptRow[]>; // Tillarga moslandi
 }
 
 const CATEGORIES = ["Anime tili", "Yaponiyada hayot", "Vloglar", "Madaniyat", "Qiziqarli faktlar", "Shorts"];
+
+const AVAILABLE_LANGUAGES = [
+  { code: "uz", label: "O'zbekcha" },
+  { code: "ja", label: "Yaponcha" },
+  { code: "en", label: "Inglizcha" },
+  { code: "ru", label: "Ruscha" }
+];
 
 export default function AdminVideoPage() {
   const { status } = useSession()
@@ -73,6 +81,7 @@ export default function AdminVideoPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [isFetchingYoutube, setIsFetchingYoutube] = useState(false)
+  const [activeLang, setActiveLang] = useState<string>("uz") // Aktiv til state'i
 
   // Youtube va Form statelari
   const [youtubeUrl, setYoutubeUrl] = useState("")
@@ -82,7 +91,7 @@ export default function AdminVideoPage() {
     thumbnail: "",
     description: "",
     youtube_id: "",
-    transcript: [] as TranscriptRow[]
+    transcript: { uz: [], ja: [], en: [], ru: [] } as Record<string, TranscriptRow[]>
   })
 
   // =====================
@@ -141,30 +150,34 @@ export default function AdminVideoPage() {
       const newTranscript: TranscriptRow[] = [];
       let lastTime = "";
 
-      // Vaqtni aniqlash uchun Regex: 0:00, 12:34, 1:23:45 formatlari uchun
       const timeRegex = /^(\d{1,2}:)?\d{1,2}:\d{2}$/;
 
       lines.forEach((line, index) => {
         if (timeRegex.test(line)) {
-          lastTime = line; // Bu qator vaqt bo'lsa, eslab qolamiz
+          lastTime = line;
         } else if (lastTime !== "") {
-          // Bu qator matn bo'lsa va undan oldin vaqt kelgan bo'lsa
-          if (!line.startsWith('[') && !line.endsWith(']')) { // [音楽] kabilarni tashlaymiz
+          if (!line.startsWith('[') && !line.endsWith(']')) {
             newTranscript.push({
               id: `raw-${Date.now()}-${index}`,
               time: lastTime,
               text: line
             });
-            lastTime = ""; // Juftlik topilgach, vaqtni tozalaymiz
+            lastTime = "";
           }
         }
       });
 
-      setFormData(prev => ({ ...prev, transcript: [...prev.transcript, ...newTranscript] }));
-      toast.success(`${newTranscript.length} qator matn qo'shildi`);
+      setFormData(prev => ({
+        ...prev,
+        transcript: {
+          ...prev.transcript,
+          [activeLang]: [...(prev.transcript[activeLang] || []), ...newTranscript]
+        }
+      }));
+      toast.success(`${AVAILABLE_LANGUAGES.find(l => l.code === activeLang)?.label} tiliga ${newTranscript.length} qator qo'shildi`);
     };
     reader.readAsText(file);
-    e.target.value = ""; // Reset input
+    e.target.value = "";
   };
 
   // =====================
@@ -173,18 +186,30 @@ export default function AdminVideoPage() {
   const addTranscriptRow = () => {
     setFormData(p => ({
       ...p, 
-      transcript: [...p.transcript, { id: Date.now(), time: "", text: "" }]
+      transcript: {
+        ...p.transcript,
+        [activeLang]: [...(p.transcript[activeLang] || []), { id: Date.now(), time: "", text: "" }]
+      }
     }))
   }
 
   const removeTranscriptRow = (id: number | string) => {
-    setFormData(p => ({ ...p, transcript: p.transcript.filter(r => r.id !== id) }))
+    setFormData(p => ({
+      ...p,
+      transcript: {
+        ...p.transcript,
+        [activeLang]: (p.transcript[activeLang] || []).filter(r => r.id !== id)
+      }
+    }))
   }
 
   const updateTranscriptRow = (id: number | string, field: "time" | "text", value: string) => {
     setFormData(p => ({
       ...p,
-      transcript: p.transcript.map(r => r.id === id ? { ...r, [field]: value } : r)
+      transcript: {
+        ...p.transcript,
+        [activeLang]: (p.transcript[activeLang] || []).map(r => r.id === id ? { ...r, [field]: value } : r)
+      }
     }))
   }
 
@@ -194,20 +219,40 @@ export default function AdminVideoPage() {
   const openCreateModal = () => {
     setEditingId(null)
     setYoutubeUrl("")
-    setFormData({ category: "Yaponiyada hayot", title: "", thumbnail: "", description: "", youtube_id: "", transcript: [] })
+    setFormData({ 
+      category: "Yaponiyada hayot", 
+      title: "", 
+      thumbnail: "", 
+      description: "", 
+      youtube_id: "", 
+      transcript: { uz: [], ja: [], en: [], ru: [] } 
+    })
+    setActiveLang("uz")
     setIsModalOpen(true)
   }
 
   const openEditModal = (video: Video) => {
     setEditingId(video.id)
+    
+    // Eski ma'lumotlar Array bo'lib qolgan bo'lsa xato bermasligi uchun tekshiruv
+    const incomingTranscript = video.transcript && typeof video.transcript === 'object' && !Array.isArray(video.transcript)
+      ? video.transcript
+      : { uz: Array.isArray(video.transcript) ? video.transcript : [], ja: [], en: [], ru: [] };
+
     setFormData({
       category: video.category,
       title: video.title,
       thumbnail: video.thumbnail,
       description: video.description || "",
       youtube_id: video.youtube_id,
-      transcript: video.transcript || []
+      transcript: {
+        uz: incomingTranscript.uz || [],
+        ja: incomingTranscript.ja || [],
+        en: incomingTranscript.en || [],
+        ru: incomingTranscript.ru || [],
+      }
     })
+    setActiveLang("uz")
     setIsModalOpen(true)
   }
 
@@ -239,6 +284,12 @@ export default function AdminVideoPage() {
     }
   }
 
+  // Jami transkript qatorlarini hisoblash helperi
+  const getTotalTranscriptLines = (transcriptObj: Record<string, TranscriptRow[]>) => {
+    if (!transcriptObj || typeof transcriptObj !== 'object' || Array.isArray(transcriptObj)) return 0;
+    return Object.values(transcriptObj).reduce((acc, curr) => acc + (curr?.length || 0), 0);
+  }
+
   return (
     <div className="mx-auto w-full max-w-7xl p-4 md:p-8">
       {/* HEADER */}
@@ -248,7 +299,7 @@ export default function AdminVideoPage() {
             <PlayCircle className="h-6 w-6 text-blue-500" />
             Video Darslar
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Video kutubxonasi va transkriptlarni boshqarish.</p>
+          <p className="text-sm text-slate-500 mt-1">Video kutubxonasi va ko'p tilli transkriptlarni boshqarish.</p>
         </div>
         
         <div className="flex items-center gap-2">
@@ -292,7 +343,7 @@ export default function AdminVideoPage() {
                   </TableCell>
                   <TableCell className="text-center">
                     <div className="text-sm font-bold text-slate-600 dark:text-slate-400">{video.views} ko'rish</div>
-                    <div className="text-[10px] text-slate-400 mt-1">{video.transcript?.length || 0} qator matn</div>
+                    <div className="text-[10px] text-slate-400 mt-1">{getTotalTranscriptLines(video.transcript)} qator (jami)</div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
@@ -369,7 +420,7 @@ export default function AdminVideoPage() {
 
             {/* TRANSCRIPT SECTION */}
             <div className="border-t border-slate-100 dark:border-slate-800 pt-8">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-500">
                     <FileText className="h-5 w-5" />
@@ -377,7 +428,7 @@ export default function AdminVideoPage() {
                   <h3 className="font-bold text-lg text-slate-900 dark:text-white">Video Matni (Transkript)</h3>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <input type="file" id="bulk-txt" className="hidden" accept=".txt" onChange={handleTranscriptFileUpload} />
                   <Button 
                     variant="outline" 
@@ -392,8 +443,33 @@ export default function AdminVideoPage() {
                 </div>
               </div>
 
+              {/* DYNAMIC LANGUAGE SELECTION TABS */}
+              <div className="flex gap-1 mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit border border-slate-200/50 dark:border-slate-700">
+                {AVAILABLE_LANGUAGES.map(lang => (
+                  <Button
+                    key={lang.code}
+                    type="button"
+                    variant={activeLang === lang.code ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setActiveLang(lang.code)}
+                    className={`gap-1.5 px-4 h-9 rounded-lg font-medium transition-all ${
+                      activeLang === lang.code 
+                        ? "bg-blue-600 hover:bg-blue-700 text-white shadow-sm" 
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                    }`}
+                  >
+                    <Languages className="h-3.5 w-3.5 opacity-70" />
+                    {lang.label}
+                    <Badge className={`ml-1 px-1.5 py-0 text-[10px] ${activeLang === lang.code ? "bg-white text-blue-600" : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"}`}>
+                      {formData.transcript[lang.code]?.length || 0}
+                    </Badge>
+                  </Button>
+                ))}
+              </div>
+
+              {/* TRANSCRIPT ROWS (FOR ACTIVE LANGUAGE ONLY) */}
               <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
-                {formData.transcript.map((row) => (
+                {(formData.transcript[activeLang] || []).map((row) => (
                   <div key={row.id} className="flex gap-3 items-start group bg-slate-50/50 dark:bg-slate-800/30 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <div className="w-28 shrink-0">
                       <div className="relative">
@@ -408,7 +484,7 @@ export default function AdminVideoPage() {
                     </div>
                     <div className="flex-1">
                       <Input 
-                        placeholder="Matnni yozing..." 
+                        placeholder={`${AVAILABLE_LANGUAGES.find(l => l.code === activeLang)?.label} matnni yozing...`} 
                         className="h-10 text-sm bg-white dark:bg-slate-950" 
                         value={row.text}
                         onChange={(e) => updateTranscriptRow(row.id, "text", e.target.value)}
@@ -424,10 +500,13 @@ export default function AdminVideoPage() {
                     </Button>
                   </div>
                 ))}
-                {formData.transcript.length === 0 && (
+                
+                {(!formData.transcript[activeLang] || formData.transcript[activeLang].length === 0) && (
                   <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl text-slate-400">
                     <Type className="h-10 w-10 mb-2 opacity-20" />
-                    <p className="text-sm">Hali transkript qo'shilmadi. TXT orqali yoki qo'lda qo'shing.</p>
+                    <p className="text-sm">
+                      {AVAILABLE_LANGUAGES.find(l => l.code === activeLang)?.label} tilida transkript yo'q. TXT orqali yoki qo'lda qo'shing.
+                    </p>
                   </div>
                 )}
               </div>

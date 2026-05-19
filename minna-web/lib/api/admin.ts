@@ -163,19 +163,22 @@ export const adminAPI = {
   deleteVocabulary: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/vocabularies/${id}`),
 
-  /* ==========================================
-     VIDEO DARSLAR (YANGI QO'SHILDI)
+/* ==========================================
+     VIDEO DARSLAR (ADMIN)
      ========================================== */
   
-  getVideos: (): Promise<AxiosResponse> =>
-    apiClient.get("/admin/videos"),
+  // Barcha videolarni olish (Ixtiyoriy tillar bo'yicha filterlash mumkin)
+  getVideos: (lang?: string): Promise<AxiosResponse> =>
+    apiClient.get("/admin/videos", { params: { lang } }),
 
-  getVideoById: (id: number): Promise<AxiosResponse> =>
-    apiClient.get(`/admin/videos/${id}`),
+  // Bitta videoni olish (Ixtiyoriy tillar bo'yicha: masalan 'uz' yoki 'uz,ja')
+  getVideoById: (id: number, lang?: string): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/videos/${id}`, { params: { lang } }),
 
   createVideo: (data: any): Promise<AxiosResponse> =>
     apiClient.post("/admin/videos", data),
 
+  // Admin yangilayotganda transcriptni butun boshli obyekt shaklida yuboradi
   updateVideo: (id: number, data: any): Promise<AxiosResponse> =>
     apiClient.put(`/admin/videos/${id}`, data),
 
