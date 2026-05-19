@@ -14,7 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-        // ✅ CORS middleware (MUHIM)
         $middleware->append(HandleCors::class);
 
         // Custom middleware alias
@@ -25,4 +24,4 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })
-    ->create();
+    ->create(); 
