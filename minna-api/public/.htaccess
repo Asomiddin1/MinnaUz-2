@@ -1,3 +1,17 @@
+# 🔴 CORS BLOCK START
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "https://www.minna.uz"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept, X-XSRF-TOKEN"
+    Header set Access-Control-Allow-Credentials "true"
+
+    # OPTIONS (Preflight) so'rovlarini Laravelga o'tkazmasdan shu yerda ijobiy javob bilan qaytarish
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ - [R=200,L]
+</IfModule>
+# 🔴 CORS BLOCK END
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
