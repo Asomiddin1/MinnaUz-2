@@ -146,10 +146,13 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
   }, [currentVideo, selectedLangs]);
 
   useEffect(() => {
-    if (transcriptRefs.current[activeSubtitle]) {
-      transcriptRefs.current[activeSubtitle]?.scrollIntoView({
+    const container = document.getElementById("transcript-scroll-container");
+    const target = transcriptRefs.current[activeSubtitle];
+    
+    if (container && target) {
+      container.scrollTo({
+        top: target.offsetTop - container.clientHeight / 2 + target.clientHeight / 2,
         behavior: "smooth",
-        block: "center",
       });
     }
   }, [activeSubtitle]);
@@ -218,11 +221,11 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-0 md:p-6 h-screen lg:h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-0 lg:gap-6 overflow-hidden bg-white dark:bg-[#0f111a]">
+    <div className="w-full max-w-[1600px] mx-auto p-0 lg:p-6 h-[100dvh] lg:h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-0 lg:gap-6 overflow-hidden bg-white dark:bg-[#0f111a]">
       
       {/* 1. CHAP TOMON: Video Player */}
       <div className="w-full lg:w-[55%] xl:w-[60%] flex flex-col shrink-0">
-        <div className="relative z-30 w-full aspect-video bg-black md:rounded-2xl overflow-hidden shadow-sm border-b md:border border-gray-200 dark:border-gray-800">
+        <div className="relative z-30 w-full aspect-video bg-black lg:rounded-2xl overflow-hidden shadow-sm border-b lg:border border-gray-200 dark:border-gray-800">
           <button onClick={handleBack} className="absolute top-4 left-4 z-40 p-2 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white rounded-full border border-white/10 transition-all"><ArrowLeft className="w-5 h-5" /></button>
 
           {!isPlaying && (
@@ -256,10 +259,10 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
           )}
         </div>
 
-        <div className="flex flex-col p-4 md:p-5 bg-white dark:bg-[#0f111a]">
+        <div className="flex flex-col p-4 lg:p-5 bg-white dark:bg-[#0f111a]">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h1 className={`text-[17px] md:text-2xl font-bold text-gray-900 dark:text-white transition-all ${!isDetailsExpanded ? "line-clamp-1" : "line-clamp-3"}`}>{currentVideo.title}</h1>
+              <h1 className={`text-[17px] lg:text-2xl font-bold text-gray-900 dark:text-white transition-all ${!isDetailsExpanded ? "line-clamp-1" : "line-clamp-3"}`}>{currentVideo.title}</h1>
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1.5"><Eye className="w-4 h-4" /> {currentVideo.views?.toLocaleString() || 0} ko'rish</span>
                 <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {currentVideo.postedAt}</span>
@@ -279,25 +282,24 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* 2. O'NG TOMON: Transkript (Multi-Language Timeline) */}
-      <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#0f111a] border-t lg:border border-gray-200 dark:border-gray-800 lg:rounded-2xl overflow-hidden mt-4 lg:mt-0">
-        <div className="shrink-0 p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-[#0f111a] z-10">
-          <div className="flex items-center gap-2.5">
-            <AlignLeft className="w-5 h-5 text-blue-500" />
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Video matni</h2>
+      <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#0f111a] border-t lg:border border-gray-200 dark:border-gray-800 lg:rounded-2xl overflow-hidden mt-2 lg:mt-0">
+        <div className="shrink-0 px-3 py-2.5 sm:p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-[#0f111a] z-10">
+          <div className="flex items-center gap-2 shrink-0">
+            <AlignLeft className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Video matni</h2>
           </div>
           
-          {/* ✅ TILLAR ENDI DOIM KO'RINIB TURADI */}
-          <div className="flex flex-wrap gap-1 bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200/40">
+          {/* Gorizontal skroll bo'ladigan tillar qatori */}
+          <div className="flex overflow-x-auto no-scrollbar gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200/40 w-full sm:w-auto">
             {AVAILABLE_LANGUAGES.map(lang => {
               const isSelected = selectedLangs.includes(lang.code);
-              // Matn bor yoki yo'qligini tekshiramiz
               const hasText = currentVideo.transcript?.[lang.code]?.length > 0;
               
               return (
                 <button
                   key={lang.code}
                   onClick={() => handleLangToggle(lang.code)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all relative ${
+                  className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 text-[11px] sm:text-xs font-semibold rounded-md transition-all relative ${
                     isSelected
                       ? "bg-blue-600 text-white shadow-sm font-bold"
                       : "text-gray-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
@@ -306,7 +308,6 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                   {isSelected ? <Check className="w-3 h-3 stroke-[3]" /> : <Languages className="w-3 h-3 opacity-60" />}
                   {lang.label}
                   
-                  {/* Matn bor tillarga yashil chiroq yonadi */}
                   {hasText && (
                     <span className={`w-1.5 h-1.5 rounded-full ml-0.5 ${isSelected ? "bg-white" : "bg-green-500"}`} />
                   )}
@@ -316,7 +317,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-2 space-y-2 no-scrollbar pb-10">
+        <div id="transcript-scroll-container" className="relative flex-1 overflow-y-auto p-2 space-y-2 no-scrollbar pb-10">
           {combinedTimeline.length > 0 ? (
             combinedTimeline.map((item, index) => {
               const isActive = index === activeSubtitle;
