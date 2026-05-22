@@ -1,5 +1,5 @@
-import { AxiosResponse } from "axios";
-import apiClient from "./axios";
+import { AxiosResponse } from "axios"
+import apiClient from "./axios"
 
 export const adminAPI = {
   /* --- USERS MANAGEMENT --- */
@@ -16,10 +16,9 @@ export const adminAPI = {
     apiClient.post(`/admin/users/${id}/toggle-premium`),
 
   /* --- JLPT TESTS MANAGEMENT --- */
-  getTests: (): Promise<AxiosResponse> =>
-    apiClient.get("/admin/tests"),
+  getTests: (): Promise<AxiosResponse> => apiClient.get("/admin/tests"),
 
-  getTestById: (id: number): Promise<AxiosResponse> => 
+  getTestById: (id: number): Promise<AxiosResponse> =>
     apiClient.get(`/admin/tests/${id}`),
 
   createTest: (data: any): Promise<AxiosResponse> =>
@@ -27,12 +26,12 @@ export const adminAPI = {
 
   updateTest: (id: number, data: any): Promise<AxiosResponse> => {
     if (data instanceof FormData) {
-      data.append("_method", "PUT");
+      data.append("_method", "PUT")
       return apiClient.post(`/admin/tests/${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
-      });
+      })
     }
-    return apiClient.put(`/admin/tests/${id}`, data);
+    return apiClient.put(`/admin/tests/${id}`, data)
   },
 
   deleteTest: (id: number): Promise<AxiosResponse> =>
@@ -49,11 +48,11 @@ export const adminAPI = {
 
   updateQuestion: (id: number, data: FormData): Promise<AxiosResponse> => {
     if (data instanceof FormData) {
-        data.append("_method", "PUT");
+      data.append("_method", "PUT")
     }
     return apiClient.post(`/admin/questions/${id}`, data, {
       headers: { "Content-Type": "multipart/form-data" },
-    });
+    })
   },
 
   deleteQuestion: (id: number): Promise<AxiosResponse> =>
@@ -64,8 +63,7 @@ export const adminAPI = {
      ========================================== */
 
   /* --- LEVELS (Darajalar) --- */
-  getLevels: (): Promise<AxiosResponse> =>
-    apiClient.get("/admin/levels"),
+  getLevels: (): Promise<AxiosResponse> => apiClient.get("/admin/levels"),
 
   getLevelById: (id: number): Promise<AxiosResponse> =>
     apiClient.get(`/admin/levels/${id}`),
@@ -128,9 +126,9 @@ export const adminAPI = {
   updateGrammar: (id: number, data: any): Promise<AxiosResponse> =>
     apiClient.put(`/admin/grammars/${id}`, data),
 
-deleteGrammar: (id: number): Promise<AxiosResponse> =>
+  deleteGrammar: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/grammars/${id}`),
-bulkDeleteGrammars: (ids: number[]): Promise<AxiosResponse> =>
+  bulkDeleteGrammars: (ids: number[]): Promise<AxiosResponse> =>
     apiClient.post("/admin/grammars/bulk-delete", { ids }),
 
   /* --- KANJIS (Kanjilar) --- */
@@ -165,10 +163,10 @@ bulkDeleteGrammars: (ids: number[]): Promise<AxiosResponse> =>
   deleteVocabulary: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/vocabularies/${id}`),
 
-/* ==========================================
+  /* ==========================================
      VIDEO DARSLAR (ADMIN)
      ========================================== */
-  
+
   // Barcha videolarni olish (Ixtiyoriy tillar bo'yicha filterlash mumkin)
   getVideos: (lang?: string): Promise<AxiosResponse> =>
     apiClient.get("/admin/videos", { params: { lang } }),
@@ -190,4 +188,27 @@ bulkDeleteGrammars: (ids: number[]): Promise<AxiosResponse> =>
   // YOUTUBE DAN AVTOMAT MA'LUMOT OLISH
   fetchYoutubeData: (url: string): Promise<AxiosResponse> =>
     apiClient.post("/admin/videos/fetch-youtube", { url }),
-};
+
+  // Groq API orqali grammatika yaratish
+  // Groq API orqali grammatika yaratish
+  generateGrammarWithGroq: (
+    grammarTitle: string,
+    levelTitle: string
+  ): Promise<AxiosResponse> =>
+    apiClient.post("/admin/groq/grammar", { grammarTitle, levelTitle }),
+
+  generateGrammarExamplesWithGroq: (
+    grammarTitle: string,
+    levelTitle: string
+  ): Promise<AxiosResponse> =>
+    apiClient.post("/admin/groq/grammar/examples", {
+      grammarTitle,
+      levelTitle,
+    }),
+
+  fillGrammarWithGroq: (
+    grammarTitle: string,
+    levelTitle: string
+  ): Promise<AxiosResponse> =>
+    apiClient.post("/admin/groq/grammar/fill", { grammarTitle, levelTitle }),
+}

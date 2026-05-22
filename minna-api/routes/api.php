@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\User\ExamController as UserExamController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\TestController as AdminTestController;
 use App\Http\Controllers\Api\Admin\QuestionController as AdminQuestionController;
+use App\Http\Controllers\Api\Admin\GroqController;
 
 // ==========================================
 // LMS (O'QUV KURS) CONTROLLERLARI
@@ -119,4 +120,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     // Video Darslar Admin (CRUD + YouTube API)
     Route::post('/videos/fetch-youtube', [AdminVideoController::class, 'fetchFromYoutube']);
     Route::apiResource('videos', AdminVideoController::class);
+
+    // Groq API orqali grammatika qo'shish
+Route::post('/groq/grammar', [GroqController::class, 'fillGrammar']);  // generateGrammar emas
+Route::post('/groq/grammar/examples', [GroqController::class, 'getExamples']);  // generateGrammarExamples emas
+Route::post('/groq/grammar/fill', [GroqController::class, 'fillGrammarInfo']); 
 });
