@@ -9,10 +9,11 @@ import {
   Languages,
   BookMarked,
   Layers,
-  FileText
+  FileText,
+  Type
 } from "lucide-react"
 import Link from "next/link"
-import { userAPI } from "@/lib/api/user" // API yo'lini o'zingizga to'g'rilab oling
+import { userAPI } from "@/lib/api/user"
 import { notFound } from "next/navigation"
 
 interface PageProps {
@@ -30,8 +31,8 @@ interface LevelData {
 const JlptLevelsPage = async ({ params }: PageProps) => {
   const resolvedParams = await params
   const levelSlug = resolvedParams["jlpt-level"].toLowerCase()
+  const isHiraKata = levelSlug === "hira-kata"
   
-  // API dan faqat daraja ma'lumotlarini (sarlavha, teglar) olish
   let levelData: LevelData | null = null;
   try {
     const res = await userAPI.getLevelBySlug(levelSlug);
@@ -43,8 +44,8 @@ const JlptLevelsPage = async ({ params }: PageProps) => {
 
   if (!levelData) return null;
 
-  // Daraja uchun statik materiallar ro'yxati
-  const materials = [
+  // Barcha darajalar uchun materiallar
+  const allMaterials = [
     {
       id: 1,
       title: "Barcha Grammatikalar",
@@ -68,19 +69,26 @@ const JlptLevelsPage = async ({ params }: PageProps) => {
     },
     {
       id: 4,
-      title: "Testlar",
-      description: "O'tilganlarni mustahkamlash uchun testlar",
-      route: "tests",
-      icon: <CheckCircle2 className="h-5 w-5" />
-    },
-    {
-      id: 5,
       title: "PDF Materiallar",
       description: "Yuklab olish uchun qo'llanma va kitoblar",
       route: "materials",
       icon: <FileText className="h-5 w-5" />
     }
   ];
+
+  // hira-kata uchun maxsus materiallar
+  const hiraKataMaterials = [
+    {
+      id: 1,
+      title: "Alifbo",
+      description: "Hiragana va Katakana alifbolarini o'rganish",
+      route: "alphabet",
+      icon: <Type className="h-5 w-5" />
+    }
+  ];
+
+  // Qaysi materiallarni ko'rsatish
+  const materials = isHiraKata ? hiraKataMaterials : allMaterials;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-10 dark:bg-slate-950">
@@ -102,13 +110,15 @@ const JlptLevelsPage = async ({ params }: PageProps) => {
             {/* DARAJA UCHUN MATERIALLAR */}
             <div className="mt-12">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Daraja uchun materiallar</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {isHiraKata ? "Alifbo" : "Daraja uchun materiallar"}
+                </h2>
                 <span className="rounded-full bg-slate-200/50 px-3 py-1 text-xs font-semibold text-slate-500">
                   {materials.length} ta bo'lim
                 </span>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className={`grid gap-4 ${isHiraKata ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"}`}>
                 {materials.map((item) => (
                   <Link 
                     key={item.id} 
@@ -141,7 +151,9 @@ const JlptLevelsPage = async ({ params }: PageProps) => {
           <div className="w-full lg:w-[380px]">
             <div className="sticky top-6 rounded-[32px] bg-white p-8 shadow-xl border border-slate-100 dark:bg-slate-900 dark:border-slate-800">
               <div>
-                  <h1 className="text-xl font-bold text-slate-900 dark:text-white">Daraja uchun video darslar</h1>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                  {isHiraKata ? "Alifbo video darslari" : "Daraja uchun video darslar"}
+                </h1>
               </div>
               <Link href={`/dashboard/level/${levelSlug}/watch`} className="block">
                 <button className="mt-6 md:mt-8 w-full rounded-2xl bg-[#0047FF] py-3 md:py-4 font-bold text-white shadow-lg shadow-blue-200 transition-transform hover:scale-[1.02] active:scale-[0.98]">
@@ -152,7 +164,7 @@ const JlptLevelsPage = async ({ params }: PageProps) => {
               <div className="mt-10 space-y-5 border-t pt-8">
                 <p className="flex items-center gap-3 text-[15px] font-semibold text-slate-800 dark:text-slate-200">
                   <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  Kurs nimalarni o'z ichiga oladi:
+                  {isHiraKata ? "Alifbo kursi nimalarni o'z ichiga oladi:" : "Kurs nimalarni o'z ichiga oladi:"}
                 </p>
                 
                 <div className="space-y-4 text-slate-600 dark:text-slate-400">
@@ -160,18 +172,33 @@ const JlptLevelsPage = async ({ params }: PageProps) => {
                     <PlayCircle className="h-5 w-5 text-blue-600" />
                     <span>Video darslar va tushuntirishlar</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <BookMarked className="h-5 w-5 text-blue-600" />
-                    <span>Dinamik lug'at bazasi</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Layers className="h-5 w-5 text-blue-600" />
-                    <span>Kanji chizish mashqlari</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Code2 className="h-5 w-5 text-blue-600" />
-                    <span>Barcha PDF materiallar</span>
-                  </div>
+                  {isHiraKata ? (
+                    <>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Type className="h-5 w-5 text-blue-600" />
+                        <span>Hiragana va Katakana alifbosi</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <BookMarked className="h-5 w-5 text-blue-600" />
+                        <span>Yozish mashqlari</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-3 text-sm">
+                        <BookMarked className="h-5 w-5 text-blue-600" />
+                        <span>Dinamik lug'at bazasi</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Layers className="h-5 w-5 text-blue-600" />
+                        <span>Kanji chizish mashqlari</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm">
+                        <Code2 className="h-5 w-5 text-blue-600" />
+                        <span>Barcha PDF materiallar</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex items-center gap-3 text-sm">
                     <Clock className="h-5 w-5 text-blue-600" />
                     <span>Cheksiz umrbod ruxsat</span>

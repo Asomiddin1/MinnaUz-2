@@ -112,6 +112,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
 
     // Materiallar (CRUD)
     Route::apiResource('grammars', AdminGrammarController::class);
+    Route::patch( 'grammars/{grammar}/translation', [AdminGrammarController::class, 'updateTranslation'] );
     Route::apiResource('kanjis', AdminKanjiController::class);
     Route::apiResource('vocabularies', AdminVocabularyController::class);
 

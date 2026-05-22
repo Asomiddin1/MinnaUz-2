@@ -128,8 +128,10 @@ export const adminAPI = {
   updateGrammar: (id: number, data: any): Promise<AxiosResponse> =>
     apiClient.put(`/admin/grammars/${id}`, data),
 
-  deleteGrammar: (id: number): Promise<AxiosResponse> =>
+deleteGrammar: (id: number): Promise<AxiosResponse> =>
     apiClient.delete(`/admin/grammars/${id}`),
+bulkDeleteGrammars: (ids: number[]): Promise<AxiosResponse> =>
+    apiClient.post("/admin/grammars/bulk-delete", { ids }),
 
   /* --- KANJIS (Kanjilar) --- */
   getKanjis: (levelId?: number): Promise<AxiosResponse> =>

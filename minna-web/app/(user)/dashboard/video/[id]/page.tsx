@@ -36,10 +36,10 @@ interface VideoData {
 }
 
 const AVAILABLE_LANGUAGES = [
-  { code: "uz", label: "O'zbekcha" },
-  { code: "ja", label: "Yaponcha" },
-  { code: "en", label: "Inglizcha" },
-  { code: "ru", label: "Ruscha" }
+  { code: "ja", label: "JA" },
+  { code: "uz", label: "UZ" },
+  { code: "en", label: "EN" },
+  { code: "ru", label: "RU" }
 ];
 
 export default function VideoDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -54,7 +54,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
   const [activeSubtitle, setActiveSubtitle] = useState(0);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
   const [playedSeconds, setPlayedSeconds] = useState(0);
-  const [selectedLangs, setSelectedLangs] = useState<string[]>(["uz"]);
+  const [selectedLangs, setSelectedLangs] = useState<string[]>(["ja"]);
   
   const playerRef = useRef<ReactPlayer>(null);
   const transcriptRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -78,39 +78,48 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
           const date = new Date(videoData.created_at);
           videoData.postedAt = `${date.getDate()}-${date.toLocaleString('uz-UZ', { month: 'short' })} ${date.getFullYear()}`;
           
-          let parsedTranscript: Record<string, TranscriptLine[]> = { uz: [], ja: [], en: [], ru: [] };
+          let parsedTranscript: Record<string, TranscriptLine[]> = { ja: [], uz: [], en: [], ru: [] };
           
           if (videoData.transcript) {
             if (typeof videoData.transcript === 'string') {
               try {
                 const parsed = JSON.parse(videoData.transcript);
-                parsedTranscript = Array.isArray(parsed) ? { uz: parsed, ja: [], en: [], ru: [] } : parsed;
+                parsedTranscript = Array.isArray(parsed) ? { ja: parsed, uz: [], en: [], ru: [] } : parsed;
               } catch (e) {
                 console.error("Transcript JSON error:", e);
               }
             } else if (typeof videoData.transcript === 'object') {
-              parsedTranscript = Array.isArray(videoData.transcript) ? { uz: videoData.transcript, ja: [], en: [], ru: [] } : videoData.transcript;
+              parsedTranscript = Array.isArray(videoData.transcript) ? { ja: videoData.transcript, uz: [], en: [], ru: [] } : videoData.transcript;
             }
           }
           
           videoData.transcript = parsedTranscript;
           setCurrentVideo(videoData);
 
-          const savedLangs = localStorage.getItem("user_preferred_langs");
           const availableLangs = Object.keys(parsedTranscript).filter(lang => parsedTranscript[lang]?.length > 0);
+          const savedLangs = localStorage.getItem("user_preferred_langs");
+          
+          let initialLangs: string[] = ["ja"];
           
           if (savedLangs) {
-            const parsedSaved = JSON.parse(savedLangs) as string[];
-            const validSaved = parsedSaved.filter(l => AVAILABLE_LANGUAGES.some(al => al.code === l));
-            if (validSaved.length > 0) {
-              setSelectedLangs(validSaved);
-              return;
+            try {
+              const parsedSaved = JSON.parse(savedLangs) as string[];
+              const validSaved = parsedSaved.filter(l => availableLangs.includes(l));
+              if (validSaved.length > 0) {
+                initialLangs = validSaved.includes("ja") ? validSaved : ["ja", ...validSaved];
+              } else {
+                const additionalLang = availableLangs.find(l => l !== "ja");
+                if (additionalLang) initialLangs.push(additionalLang);
+              }
+            } catch (e) {
+              console.error("Error parsing saved languages:", e);
             }
+          } else {
+            const additionalLang = availableLangs.find(l => l !== "ja");
+            if (additionalLang) initialLangs.push(additionalLang);
           }
           
-          if (availableLangs.length > 0) {
-            setSelectedLangs(availableLangs.includes("uz") ? ["uz"] : [availableLangs[0]]);
-          }
+          setSelectedLangs(initialLangs);
         } else {
           setError(true);
         }
@@ -195,7 +204,6 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
     }
     setSelectedLangs(updated);
     localStorage.setItem("user_preferred_langs", JSON.stringify(updated));
-    setActiveSubtitle(0);
   };
 
   const handleBack = () => {
@@ -205,7 +213,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
 
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-white dark:bg-[#0f111a]">
+      <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
       </div>
     );
@@ -223,38 +231,39 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="w-full max-w-[1600px] mx-auto p-0 lg:p-6 h-[100dvh] lg:h-[calc(100vh-80px)] flex flex-col lg:flex-row gap-0 lg:gap-6 overflow-hidden bg-white dark:bg-[#0f111a]">
       
-      {/* 1. CHAP TOMON: Video Player */}
+      {/* CHAP TOMON: Video Player */}
       <div className="w-full lg:w-[55%] xl:w-[60%] flex flex-col shrink-0">
         <div className="relative z-30 w-full aspect-video bg-black lg:rounded-2xl overflow-hidden shadow-sm border-b lg:border border-gray-200 dark:border-gray-800">
-          <button onClick={handleBack} className="absolute top-4 left-4 z-40 p-2 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white rounded-full border border-white/10 transition-all"><ArrowLeft className="w-5 h-5" /></button>
+          <button onClick={handleBack} className="absolute top-4 left-4 z-40 p-2 bg-black/50 hover:bg-black/70 backdrop-blur-md text-white rounded-full border border-white/10 transition-all">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
 
-          {!isPlaying && (
+          <ReactPlayer
+            ref={playerRef}
+            url={`https://www.youtube.com/watch?v=${currentVideo.youtube_id}`}
+            playing={isPlaying}
+            controls={true}
+            width="100%"
+            height="100%"
+            onProgress={handleProgress}
+            onPause={() => setIsPlaying(false)}
+            onPlay={() => setIsPlaying(true)}
+            config={{ 
+              playerVars: { 
+                autoplay: 0, 
+                modestbranding: 1, 
+                rel: 0,
+                showinfo: 0
+              } 
+            }}
+            style={{ position: 'absolute', top: 0, left: 0 }}
+          />
+
+          {!isPlaying && playedSeconds === 0 && (
             <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/20" onClick={() => setIsPlaying(true)}>
               <div className="w-20 h-20 bg-blue-600/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl cursor-pointer hover:scale-110 transition-transform">
                 <Play className="w-10 h-10 text-white ml-1.5" fill="currentColor" />
               </div>
-            </div>
-          )}
-
-          {isPlaying ? (
-            <div className="w-full h-full">
-              <ReactPlayer
-                ref={playerRef}
-                url={`https://www.youtube.com/watch?v=${currentVideo.youtube_id}`}
-                playing={isPlaying}
-                controls={true}
-                width="100%"
-                height="100%"
-                onProgress={handleProgress}
-                onPause={() => setIsPlaying(false)}
-                onPlay={() => setIsPlaying(true)}
-                config={{ playerVars: { autoplay: 1, modestbranding: 1, rel: 0 } }}
-                style={{ position: 'absolute', top: 0, left: 0 }}
-              />
-            </div>
-          ) : (
-            <div className="relative w-full h-full cursor-pointer group" onClick={() => setIsPlaying(true)}>
-              <img src={currentVideo.thumbnail} alt={currentVideo.title} className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" loading="lazy" />
             </div>
           )}
         </div>
@@ -262,7 +271,9 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
         <div className="flex flex-col p-4 lg:p-5 bg-white dark:bg-[#0f111a]">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <h1 className={`text-[17px] lg:text-2xl font-bold text-gray-900 dark:text-white transition-all ${!isDetailsExpanded ? "line-clamp-1" : "line-clamp-3"}`}>{currentVideo.title}</h1>
+              <h1 className={`text-[17px] lg:text-2xl font-bold text-gray-900 dark:text-white transition-all ${!isDetailsExpanded ? "line-clamp-1" : "line-clamp-3"}`}>
+                {currentVideo.title}
+              </h1>
               <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1.5"><Eye className="w-4 h-4" /> {currentVideo.views?.toLocaleString() || 0} ko'rish</span>
                 <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {currentVideo.postedAt}</span>
@@ -281,7 +292,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
-      {/* 2. O'NG TOMON: Transkript (Multi-Language Timeline) */}
+      {/* O'NG TOMON: Transkript */}
       <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-[#0f111a] border-t lg:border border-gray-200 dark:border-gray-800 lg:rounded-2xl overflow-hidden mt-2 lg:mt-0">
         <div className="shrink-0 px-3 py-2.5 sm:p-4 border-b border-gray-100 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white dark:bg-[#0f111a] z-10">
           <div className="flex items-center gap-2 shrink-0">
@@ -289,7 +300,7 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
             <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">Video matni</h2>
           </div>
           
-          {/* Gorizontal skroll bo'ladigan tillar qatori */}
+          {/* Til tanlash tugmalari */}
           <div className="flex overflow-x-auto no-scrollbar gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-200/40 w-full sm:w-auto">
             {AVAILABLE_LANGUAGES.map(lang => {
               const isSelected = selectedLangs.includes(lang.code);
@@ -299,10 +310,13 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                 <button
                   key={lang.code}
                   onClick={() => handleLangToggle(lang.code)}
-                  className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 text-[11px] sm:text-xs font-semibold rounded-md transition-all relative ${
+                  disabled={!hasText}
+                  className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                     isSelected
-                      ? "bg-blue-600 text-white shadow-sm font-bold"
-                      : "text-gray-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : hasText
+                      ? "text-gray-600 dark:text-gray-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+                      : "text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50"
                   }`}
                 >
                   {isSelected ? <Check className="w-3 h-3 stroke-[3]" /> : <Languages className="w-3 h-3 opacity-60" />}
@@ -355,11 +369,11 @@ export default function VideoDetailPage({ params }: { params: Promise<{ id: stri
                               : "text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200"
                           } ${
                             isJapanese 
-                              ? "text-[16px] font-medium tracking-wide font-sans text-indigo-950 dark:text-indigo-200" 
+                              ? "text-[16px] font-medium tracking-wide text-indigo-950 dark:text-indigo-200" 
                               : "text-[14px] opacity-90 italic"
                           }`}
                         >
-                          {isActive && selectedLangs[0] === langCode && (
+                          {isActive && isJapanese && (
                             <Volume2 className="w-3.5 h-3.5 text-blue-500 inline mr-2 animate-pulse" />
                           )}
                           {text}
