@@ -17,9 +17,6 @@ export default function VideoPage() {
 
   const filters = ["Barchasi", "Anime tili", "Yaponiyada hayot", "Vloglar", "Madaniyat", "Qiziqarli faktlar", "Shorts"];
 
-  // =====================
-  // API DAN VIDEOLARNI OLISH
-  // =====================
   useEffect(() => {
     const fetchVideos = async () => {
       try {

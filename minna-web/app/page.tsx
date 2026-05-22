@@ -6,7 +6,6 @@ import LanguageStrip from '../components/minna-uz/LanguageStrip';
 import Features from '../components/minna-uz/Features';
 import SuperDuolingo from '../components/minna-uz/SuperDuolingo';
 import EnglishTest from '../components/minna-uz/EnglishTest';
-import ForSchools from '../components/minna-uz/ForSchools';
 import DuolingoABC from '../components/minna-uz/DuolingoABC';
 import AppDownload from '../components/minna-uz/AppDownload';
 import Footer from '../components/minna-uz/Footer';

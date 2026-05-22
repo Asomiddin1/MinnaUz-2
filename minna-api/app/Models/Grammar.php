@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\HasTranslations;
 
 class Grammar extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
 
-    // Ruxsat etilgan ustunlar (Mass assignment uchun)
     protected $fillable = [
         'level_id',
         'title',
@@ -18,16 +18,31 @@ class Grammar extends Model
         'examples',
     ];
 
-    // JSON ma'lumotni avtomatik ravishda PHP Array ga o'tkazish uchun
+    public $translatable = [
+        'title',
+        'meaning',
+        'description',
+        'examples',
+    ];
+
     protected $casts = [
+        'level_id' => 'integer',
         'examples' => 'array',
     ];
 
-    /**
-     * Grammatika qaysi darajaga (Level) tegishli ekanligini belgilash
-     */
     public function level()
     {
         return $this->belongsTo(Level::class);
+    }
+
+    // ✅ FIX: missing method (ENG MUHIM)
+    public function translateField($field, $locale = 'en')
+    {
+        return $this->getTranslation($field, $locale) ?? null;
+    }
+
+    public function getTitleIn($locale = 'en')
+    {
+        return $this->getTranslation('title', $locale);
     }
 }
