@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from "react" // <-- useState va useEffect qo'shildi
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -18,34 +18,58 @@ import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels/j
 import BannerCarousel from "@/components/user-components/banner/banner-carousel"
 import GamesList from "@/components/user-components/home-fuctions/games/games"
 import Lugat from "@/components/user-components/home-fuctions/lugat/lugat"
+import { useRouter } from "next/navigation"
 
+// isTab xususiyati qo'shildi
 const MENU_ITEMS = [
   {
     id: "dictionary",
     label: "Lug'at",
     icon: Copy,
     href: "/dashboard/dictionary",
+    isTab: true, // TabsContent ichida bor
   },
-  { id: "games", label: "O'yinlar", icon: Gamepad2, href: "/dashboard/games" },
-  { id: "books", label: "Kitoblar", icon: BookOpen, href: "/dashboard/books" },
+  { 
+    id: "games", 
+    label: "O'yinlar", 
+    icon: Gamepad2, 
+    href: "/dashboard/games",
+    isTab: true, // TabsContent ichida bor
+  },
+  { 
+    id: "dokkay", 
+    label: "Dokkay", 
+    icon: BookOpen, 
+    href: "/dashboard/dokkay",
+    isTab: false, // Alohida sahifa qildik
+  },
   {
     id: "kanji",
     label: "Kanji",
     icon: GraduationCap,
     href: "/dashboard/kanji",
+    isTab: false, 
   },
-  { id: "shop", label: "Do'kon", icon: ShoppingCart, href: "/dashboard/shop" },
+  { 
+    id: "shop", 
+    label: "Do'kon", 
+    icon: ShoppingCart, 
+    href: "/dashboard/shop",
+    isTab: false,
+  },
   {
     id: "translator",
     label: "Tarjimon",
     icon: Languages,
     href: "/dashboard/translator",
+    isTab: false,
   },
   {
     id: "ai",
     label: "Sun'iy intellekt",
     icon: Sparkles,
     href: "/dashboard/ai",
+    isTab: false,
   },
   {
     id: "premium",
@@ -53,27 +77,39 @@ const MENU_ITEMS = [
     icon: Gem,
     href: "/dashboard/premium",
     color: "text-amber-500 dark:text-amber-400",
+    isTab: false,
   },
 ]
 
 export default function DashboardPage() {
+  const router = useRouter()
   const { data: session, status } = useSession()
-  
-  // Hydration muammosini oldini olish uchun state
   const [isMounted, setIsMounted] = useState(false)
 
-  // Komponent faqat client-side'da yuklanganidan keyin true bo'ladi
+  // Asosiy ko'rinib turadigan tabni boshqarish uchun state
+  const [activeTab, setActiveTab] = useState("jlpt")
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Agar hali serverda yoki hydration jarayonida bo'lsak, hech narsa (yoki loading skeleton) qaytaramiz
   if (!isMounted) {
     return (
       <div className="w-full flex h-[50vh] items-center justify-center">
         <div className="text-slate-500">Yuklanmoqda...</div>
       </div>
     )
+  }
+
+  // Menyu tugmasi bosilganda ishlaydigan funksiya
+  const handleTabClick = (item: any) => {
+    if (item.isTab) {
+      // Agar Tab bo'lsa, URL o'zgarmaydi, faqat oyna almashadi
+      setActiveTab(item.id)
+    } else {
+      // Agar alohida sahifa bo'lsa (masalan, Dokkay), boshqa manzilga ketadi
+      router.push(item.href)
+    }
   }
 
   return (
@@ -111,20 +147,19 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* MOBIL UCHUN KARUSEL BANNER */}
         <div className="w-full">
           <BannerCarousel />
         </div>
 
-        {/* MENU */}
+        {/* MOBIL UCHUN MENU (Ular ham logikaga moslandi) */}
         <div className="grid grid-cols-4 gap-x-2 gap-y-5">
           {MENU_ITEMS.map((item) => (
-            <Link
+            <button
               key={item.id}
-              href={item.href}
-              className="group flex flex-col items-center gap-2 transition-transform active:scale-95"
+              onClick={() => handleTabClick(item)}
+              className="group flex flex-col items-center gap-2 transition-transform active:scale-95 bg-transparent border-none p-0 cursor-pointer"
             >
-              <div className="flex h-[68px] w-[68px] items-center justify-center rounded-[20px] border border-slate-50 bg-white shadow-[0_4px_15px_rgba(0,0,0,0.03)] transition-colors dark:border-slate-800/80 dark:bg-slate-900 dark:shadow-none">
+              <div className={`flex h-[68px] w-[68px] items-center justify-center rounded-[20px] border border-slate-50 shadow-[0_4px_15px_rgba(0,0,0,0.03)] transition-colors dark:border-slate-800/80 dark:bg-slate-900 dark:shadow-none ${activeTab === item.id ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white'}`}>
                 <item.icon
                   className={`h-7 w-7 ${item.color ? item.color : "text-slate-800 dark:text-slate-300"}`}
                   strokeWidth={1.5}
@@ -133,25 +168,28 @@ export default function DashboardPage() {
               <span className="text-center text-[11px] leading-none font-medium text-slate-700 dark:text-slate-400">
                 {item.label}
               </span>
-            </Link>
+            </button>
           ))}
         </div>
 
-        {/* MOBIL UCHUN KALENDAR VA JLPT */}
         <div className="flex flex-col gap-4">
             <div className="px-4">
                <h1 className="text-[24px] font-semibold">Jlpt darajalari</h1>
             </div>
-            <JlptLevels />
+            {/* Mobil uchun faqat JLPT yoki tanlangan Tab ko'rinishi */}
+            {activeTab === 'jlpt' && <JlptLevels />}
+            {activeTab === 'games' && <GamesList />}
+            {activeTab === 'dictionary' && <Lugat />}
         </div>
       </div>
 
       {/* 💻 DESKTOP KO'RINISh */}
       <div className="hidden md:block">
-        <Tabs defaultValue="jlpt" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="flex w-full snap-x justify-start overflow-x-auto rounded-xl border border-transparent bg-slate-200/70 px-2 py-1.5 dark:border-slate-800 dark:bg-slate-800/50">
             <TabsTrigger
               value="jlpt"
+              onClick={() => setActiveTab("jlpt")}
               className="flex shrink-0 snap-start items-center gap-2 rounded-lg px-4 py-2 text-slate-600 transition-all data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm dark:text-slate-400 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-white"
             >
               <Layers className="h-4 w-4" /> JLPT Darajalari
@@ -161,6 +199,11 @@ export default function DashboardPage() {
               <TabsTrigger
                 key={tab.id}
                 value={tab.id}
+                // onClick o'rniga yozilgan funksiya ishlaydi
+                onClick={(e) => {
+                  e.preventDefault(); 
+                  handleTabClick(tab);
+                }}
                 className="flex shrink-0 snap-start items-center gap-2 rounded-lg px-4 py-2 text-slate-600 transition-all data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm dark:text-slate-400 dark:data-[state=active]:bg-slate-900 dark:data-[state=active]:text-white"
               >
                 <tab.icon className={`h-4 w-4 ${tab.color ? tab.color : ""}`} />{" "}
@@ -169,26 +212,27 @@ export default function DashboardPage() {
             ))}
           </TabsList>
 
-          {/* BANNER VA KALENDAR TAB KONTENTI (Desktop) */}
+          {/* BANNER VA KALENDAR TAB KONTENTI */}
           <TabsContent value="jlpt" className="mt-4 w-full outline-none">
             <div className="flex w-full flex-row items-start gap-4">
               <div className="w-full min-w-0 flex-1 overflow-hidden">
                 <BannerCarousel />
               </div>
             </div>
-
             <div className="mt-6">
               <JlptLevels />
             </div>
           </TabsContent>
 
-           <TabsContent value="games" className="mt-4 w-full outline-none">
-              <GamesList />
+          {/* Qolgan Tablar o'z joyida qoladi */}
+          <TabsContent value="games" className="mt-4 w-full outline-none">
+            <GamesList />
           </TabsContent>
 
-            <TabsContent value="dictionary" className="mt-4 w-full outline-none">
-              <Lugat />
+          <TabsContent value="dictionary" className="mt-4 w-full outline-none">
+            <Lugat />
           </TabsContent>
+          
         </Tabs>
       </div>
     </div>
