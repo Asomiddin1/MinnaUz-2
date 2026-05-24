@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http; // <-- HTTP fasadi qo'shildi
 
 // ==========================================
 // MAVJUD CONTROLLERLAR
@@ -40,6 +41,16 @@ use App\Http\Controllers\Api\User\SearchController;
 use App\Http\Controllers\Api\Admin\VideoLessonController as AdminVideoController;
 use App\Http\Controllers\Api\User\VideoLessonController as UserVideoController;
 
+
+// ==========================================
+// AI MODELLARINI TEKSHIRISH ROUTE'I (VAQTINCHALIK)
+// ==========================================
+Route::get('/ai/test-models', function () {
+    $apiKey = env('GEMINI_API_KEY');
+    $response = Http::withoutVerifying()->get("https://generativelanguage.googleapis.com/v1beta/models?key={$apiKey}");
+    return $response->json();
+});
+
 /*
 |--------------------------------------------------------------------------
 | PUBLIC ROUTELAR (Hamma ko'ra oladi)
@@ -66,6 +77,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return response()->json($request->user());
     });
+
+    // -------- AI ROUTELARI --------
+    Route::post('/ai/chat', [\App\Http\Controllers\AiController::class, 'chat']);
+    Route::get('/ai/history', [\App\Http\Controllers\AiController::class, 'history']);
+    // ------------------------------
 
     Route::get('/user/streaks', [UserProfileController::class, 'getStreaks']);
 
