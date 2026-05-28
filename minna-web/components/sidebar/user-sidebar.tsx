@@ -48,7 +48,9 @@ export function UserSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="border-r border-slate-200 bg-gradient-to-b from-[#f5f7fa] to-[#e0e4ea] dark:border-slate-800 dark:bg-slate-900 dark:bg-none"
+      // DIQQAT: Sidebar rangi Layout bilan 100% bir xil qilindi: dark:!bg-[#0B0F19]
+      // Shadcn CSS ni majburan bosib ketish uchun !bg ishlatilgan
+      className="border-r border-slate-200 !bg-white dark:!border-[#1F2937] dark:!bg-[#0B0F19]"
     >
       <SidebarContent className="flex h-full flex-col overflow-hidden">
         {/* LOGO */}
@@ -57,20 +59,30 @@ export function UserSidebar() {
         >
           {!collapsed ? (
             <div className="flex items-center gap-3">
-              <Image src={require("./logo.png")} alt="Logo" width={32} height={32} />
+              <Image
+                src={require("./logo.png")}
+                alt="Logo"
+                width={32}
+                height={32}
+              />
               <span className="text-sm font-bold tracking-widest text-slate-900 dark:text-slate-100">
                 MinnaUz
               </span>
             </div>
           ) : (
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
-              <Image src={require("./logo.png")} alt="Logo" width={32} height={32} />
+              <Image
+                src={require("./logo.png")}
+                alt="Logo"
+                width={32}
+                height={32}
+              />
             </div>
           )}
 
           <button
             onClick={toggleSidebar}
-            className={`text-slate-400 hover:text-slate-600 dark:text-slate-500 ${collapsed ? "hidden" : "block"}`}
+            className={`text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 ${collapsed ? "hidden" : "block"}`}
           >
             <PanelLeftClose size={20} />
           </button>
@@ -80,7 +92,7 @@ export function UserSidebar() {
         {collapsed && (
           <button
             onClick={toggleSidebar}
-            className="mx-auto mb-4 text-slate-400 hover:text-slate-600"
+            className="mx-auto mb-4 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
           >
             <PanelLeft size={20} />
           </button>
@@ -104,8 +116,9 @@ export function UserSidebar() {
                     href={item.href}
                     className={`flex h-11 items-center rounded-xl transition-all ${collapsed ? "w-11 justify-center" : "w-full gap-3 px-4"} ${
                       isActive
-                        ? "border border-slate-200 bg-white text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                        : "text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800/50"
+                        ? // Aktiv bo'lganda ajralib turishi uchun sal yorqinroq fon berdik (dark:bg-[#1E293B])
+                          "border border-slate-200 bg-slate-100 text-slate-900 shadow-sm dark:border-transparent dark:bg-[#1E293B] dark:text-white"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-[#1E293B]/50 dark:hover:text-slate-200"
                     }`}
                   >
                     <item.icon className="h-5 w-5" />
@@ -117,32 +130,30 @@ export function UserSidebar() {
           })}
         </SidebarMenu>
 
-        {/* ADMIN PANEL BUTTON - ROLE ORQALI TEKSHIRISH */}
+        {/* ADMIN PANEL BUTTON */}
         {session?.user?.role === "admin" && (
           <Link href={"/admin"} className="flex justify-center px-4 py-2">
-            <button className="w-full cursor-pointer rounded-2xl bg-[#4b4b4b] hover:bg-gray-700 transition-colors py-1.5 text-white text-sm font-medium">
+            <button className="w-full cursor-pointer rounded-2xl border border-transparent bg-slate-800 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-700 dark:bg-[#1E293B] dark:hover:bg-[#334155]">
               {collapsed ? "A" : "Admin Panel"}
             </button>
           </Link>
         )}
 
         {/* USER INFO */}
-        <div className="mt-auto border-t border-slate-200/60 p-4 dark:border-slate-800/80">
+        <div className="mt-auto border-t border-slate-200/80 p-4 dark:border-[#1F2937]">
           <div
             className={`flex items-center ${collapsed ? "justify-center" : "gap-3"}`}
           >
-            {/* Loading holatida avatar skeleton */}
             {status === "loading" ? (
-              <Skeleton className="h-9 w-9 rounded-full" />
-            ) : // Avatar (yuklanganda)
-            session?.user?.image ? (
+              <Skeleton className="h-9 w-9 rounded-full dark:bg-[#1E293B]" />
+            ) : session?.user?.image ? (
               <img
                 src={session.user.image}
                 alt="avatar"
-                className="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-slate-700"
+                className="h-9 w-9 rounded-full border border-slate-200 object-cover dark:border-transparent"
               />
             ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 font-bold text-white">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 font-bold text-white shadow-sm">
                 {userName?.charAt(0)?.toUpperCase() || "U"}
               </div>
             )}
@@ -150,19 +161,17 @@ export function UserSidebar() {
             {!collapsed && (
               <div className="flex flex-col space-y-1.5">
                 {status === "loading" ? (
-                  // Skeleton matnlar
                   <>
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
+                    <Skeleton className="h-4 w-24 dark:bg-[#1E293B]" />
+                    <Skeleton className="h-3 w-32 dark:bg-[#1E293B]" />
                   </>
                 ) : (
-                  // Haqiqiy ma'lumotlar
                   <>
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                    <span className="line-clamp-1 text-sm font-semibold text-slate-700 dark:text-slate-200">
                       {userName}
                     </span>
                     {userEmail && (
-                      <span className="text-xs text-slate-500">
+                      <span className="line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
                         {userEmail}
                       </span>
                     )}
@@ -174,10 +183,10 @@ export function UserSidebar() {
         </div>
 
         {/* LOGOUT */}
-        <div className="border-t border-slate-200/60 px-2 pb-3 dark:border-slate-800/80">
+        <div className="border-t border-slate-200/80 px-2 pb-3 dark:border-[#1F2937]">
           <button
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
-            className={`flex h-10 w-full items-center rounded-xl text-red-500 hover:bg-red-500/10 dark:text-red-400 ${collapsed ? "justify-center" : "gap-3 px-4"}`}
+            className={`flex h-10 w-full items-center rounded-xl text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 ${collapsed ? "justify-center" : "gap-3 px-4"}`}
           >
             <LogOut className="h-5 w-5" />
             {!collapsed && <span className="font-medium">Logout</span>}

@@ -52,7 +52,9 @@ export default function JlptLevels() {
           <Card
             key={level.id}
             onClick={() => router.push(`/dashboard/level/${level.id}`)}
-            className="mx-auto w-full cursor-pointer overflow-hidden rounded-[24px] border border-slate-100 pt-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-slate-800"
+            // DIQQAT: Card foni Dark rejimda `dark:bg-slate-900/80` ga o'zgartirildi
+            // va dark:border rangi ham shu tizimga mos ravishda to'q kulrang qilindi
+            className="mx-auto w-full cursor-pointer overflow-hidden rounded-[24px] border border-slate-100 bg-white pt-0 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80"
           >
             <Image
               src={require(`./images/${level.image}`)}
