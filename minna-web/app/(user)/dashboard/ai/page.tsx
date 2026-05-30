@@ -16,6 +16,11 @@ function CharacterModel({ isListening, isSpeaking, audioRef }: { isListening: bo
     const { scene, animations } = useGLTF('/3d/shibahu.glb'); 
     const { actions, names } = useAnimations(animations, group);
 
+
+    useEffect(() => {
+        console.log("Modeldagi animatsiyalar ro'yxati:", names);
+    }, [names]);
+
     const analyserRef = useRef<any>(null);
     const dataArrayRef = useRef<any>(null);
 
@@ -29,6 +34,8 @@ function CharacterModel({ isListening, isSpeaking, audioRef }: { isListening: bo
         });
         return meshes;
     }, [scene]);
+
+    
 
     // 2. Ovozni tahlil qilish tizimini (AudioContext) ulaymiz
     useEffect(() => {
@@ -140,9 +147,29 @@ function CharacterModel({ isListening, isSpeaking, audioRef }: { isListening: bo
 
   return (
     <group ref={group} dispose={null}>
-        <primitive object={scene} scale={2.2} position={[0, -2.5, 0]} />
+        <primitive object={scene} scale={0.5} position={[0, -0.01, 0]} />
     </group>
 );
+
+
+// MODELDA OG'IZ QIMIRLASH XUSUSIYATI BOR-YO'QLIGINI TEKSHIRISH
+useEffect(() => {
+    console.log("=== YANGI MODELNI TEKSHIRISH ===");
+    let hasMorphTargets = false;
+
+    scene.traverse((child: any) => {
+        // Agar qism mesh bo'lsa va unda yuz mushaklari ro'yxati bo'lsa
+        if (child.isMesh && child.morphTargetDictionary) {
+            console.log(`✅ Topildi! Mesh nomi: ${child.name}`);
+            console.log("Yuz mushaklari (Morph Targets):", Object.keys(child.morphTargetDictionary));
+            hasMorphTargets = true;
+        }
+    });
+
+    if (!hasMorphTargets) {
+        console.warn("❌ Diqqat! Bu modelda Morph Targets yo'q. Kod yozsangiz ham og'zi qimirlamaydi.");
+    }
+}, [scene]);
 
 //    Agar 3d animatsiya ekranda to'liq turishi kerak bo'lsa pasdagi kod kerak //
 
@@ -486,8 +513,8 @@ export default function AiPage() {
             
             {/* Animatsiyali 3D Model */}
             <div className="w-full flex-1 flex items-center justify-center cursor-pointer z-10 mt-16 md:mt-20" onClick={handleStartListening}>
-                <Canvas camera={{ position: [0, 0, 3], fov: 45 }}>
-                {/* <Canvas camera={{ position: [0, 0, 8], fov: 45 }}> */}
+                {/* <Canvas camera={{ position: [0, 0, 3], fov: 45 }}> */}
+                <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
                     <ambientLight intensity={1.5} />
                     <directionalLight position={[5, 5, 5]} intensity={2} />
                     <directionalLight position={[-5, 5, -5]} intensity={1} />
