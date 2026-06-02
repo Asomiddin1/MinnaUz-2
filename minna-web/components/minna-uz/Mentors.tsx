@@ -74,13 +74,15 @@ export default function Team() {
               minna
             </div>
 
-            {/* Jamoa a'zosi rasmi (.png) */}
+            {/* Jamoa a'zosi rasmi (.png) - Xato bermasligi uchun to'g'ri kommentariyaga olindi */}
             <div className="absolute bottom-0 w-full h-[85%] z-10 flex justify-center items-end">
+              {/* 
               <img
                 src={member.image}
                 alt={member.name}
                 className="object-contain w-[90%] h-auto drop-shadow-2xl"
               />
+              */}
             </div>
 
             {/* Pastki qora gradient overlay */}

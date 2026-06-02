@@ -36,7 +36,7 @@ export default function TextAiPage() {
         if (window.innerWidth < 768) setIsSidebarOpen(false);
     };
 
-    const handleSend = async (msg = input) => {
+   const handleSend = async (msg = input) => {
         if (!msg.trim() || isLoading) return;
         
         let activeId = currentChatId;
@@ -55,20 +55,23 @@ export default function TextAiPage() {
         const historyToSend = chatSessions.find(c => c.id === activeId)?.messages || [];
         
         try {
+            // URL shakllanishi: apiUrl (127.0.0.1:8000) + /api/ai/chat
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-            
-            const res = await fetch(`${apiUrl}/api/ai/chat`, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${token || ''}` 
-                },
-                body: JSON.stringify({ 
-                    message: msg, 
-                    chat_id: activeId, 
-                    history: [...historyToSend, userMsg] 
-                })
-            });
+            const endpoint = 'http://127.0.0.1:8000/api/ai/chat'; 
+        
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${token || ''}`,
+                'Accept': 'application/json' 
+            },
+            body: JSON.stringify({ 
+                message: msg, 
+                chat_id: activeId, 
+                history: [...historyToSend, userMsg] 
+            })
+        });
 
             if (!res.ok) {
                 throw new Error(`Server xatosi: ${res.status}`);

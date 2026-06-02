@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http; // <-- HTTP fasadi qo'shildi
+use Illuminate\Support\Facades\Http; 
 
 // ==========================================
 // MAVJUD CONTROLLERLAR
@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\TestController as AdminTestController;
 use App\Http\Controllers\Api\Admin\QuestionController as AdminQuestionController;
 use App\Http\Controllers\Api\Admin\GroqController;
+use App\Http\Controllers\AiController;
 
 // ==========================================
 // LMS (O'QUV KURS) CONTROLLERLARI
@@ -79,10 +80,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // -------- AI ROUTELARI --------
-    Route::post('/ai/chat', [\App\Http\Controllers\AiController::class, 'chat']);
-    Route::get('/ai/history', [\App\Http\Controllers\AiController::class, 'history']);
+    Route::post('/ai/chat', [AiController::class, 'chat']);
+    Route::get('/ai/history', [AiController::class, 'history']);
+    Route::delete('/ai/history', [AiController::class, 'clearHistory']);
     // ------------------------------
-
+     
     Route::get('/user/streaks', [UserProfileController::class, 'getStreaks']);
 
     // YOPILGAN MATERIALLAR
@@ -138,7 +140,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::apiResource('videos', AdminVideoController::class);
 
     // Groq API orqali grammatika qo'shish
-Route::post('/groq/grammar', [GroqController::class, 'fillGrammar']);  // generateGrammar emas
-Route::post('/groq/grammar/examples', [GroqController::class, 'getExamples']);  // generateGrammarExamples emas
-Route::post('/groq/grammar/fill', [GroqController::class, 'fillGrammarInfo']); 
+    Route::post('/groq/grammar', [GroqController::class, 'fillGrammar']);
+    Route::post('/groq/grammar/examples', [GroqController::class, 'getExamples']);
+    Route::post('/groq/grammar/fill', [GroqController::class, 'fillGrammarInfo']); 
 });
