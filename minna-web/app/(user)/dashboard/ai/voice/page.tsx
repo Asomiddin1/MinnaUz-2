@@ -222,7 +222,6 @@ export default function VoiceChatPage() {
         }
     };
 
-    // AUDIO FAYL TEZLIGINI SEKINLASHTIRISH
     const playAudio = (base64Audio: string) => {
         if (audioRef.current) audioRef.current.pause();
         const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
@@ -239,7 +238,6 @@ export default function VoiceChatPage() {
         audio.play();
     };
 
-    // BRAUZER OVOZ TEZLIGINI SEKINLASHTIRISH
     const speak = (text: string) => {
         if (typeof window === 'undefined') return;
         window.speechSynthesis.cancel(); 
@@ -259,13 +257,13 @@ export default function VoiceChatPage() {
     };
 
     return (
-        <div className="flex-1 w-full h-[calc(100vh-80px)] flex flex-col bg-white dark:bg-[#0a0a0a] relative overflow-hidden font-sans">
+        <div className="flex w-full h-[calc(100dvh-80px)] flex-col bg-white dark:bg-[#0a0a0a] relative overflow-hidden font-sans">
             
             {/* Yuqori Panel (Nav) */}
-            <div className="w-full px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-900 z-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md">
+            <div className="w-full px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-900 z-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md shrink-0">
                 <button 
                     onClick={() => router.push('/dashboard/ai')} 
-                    className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition p-2"
+                    className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition p-2 -ml-2"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -276,10 +274,9 @@ export default function VoiceChatPage() {
                     <select 
                         value={topic} 
                         onChange={(e) => setTopic(e.target.value)}
-                        className="bg-transparent border-0 text-gray-700 dark:text-gray-300 text-sm font-medium focus:ring-0 cursor-pointer outline-none"
+                        className="bg-transparent border-0 text-gray-700 dark:text-gray-300 text-sm font-medium focus:ring-0 cursor-pointer outline-none text-center"
                     >
-                        {/* MANA SHU YERGA ERKIN MAVZU QO'SHILDI */}
-                        <option value="Erkin">Erkin mavzu</option>
+                        <option value="Erkin">Erkin</option>
                         <option value="Tanishtiruv">Tanishtiruv</option>
                         <option value="Oila">Oila</option>
                         <option value="Ish">Ish / O'qish</option>
@@ -291,7 +288,7 @@ export default function VoiceChatPage() {
                     <select 
                         value={level} 
                         onChange={(e) => setLevel(e.target.value)}
-                        className="bg-transparent border-0 text-gray-700 dark:text-gray-300 text-sm font-medium focus:ring-0 cursor-pointer outline-none"
+                        className="bg-transparent border-0 text-gray-700 dark:text-gray-300 text-sm font-medium focus:ring-0 cursor-pointer outline-none text-center"
                     >
                         <option value="N5">N5 Daraja</option>
                         <option value="N4">N4 Daraja</option>
@@ -303,7 +300,7 @@ export default function VoiceChatPage() {
                 <button 
                     onClick={handleClearMemory}
                     title="Xotirani tozalash"
-                    className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition p-2"
+                    className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition p-2 -mr-2"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -311,39 +308,42 @@ export default function VoiceChatPage() {
                 </button>
             </div>
 
-            {/* Asosiy Qism */}
-            <div className="flex-1 flex flex-col items-center justify-center relative p-6 overflow-y-auto">
-                
-                {/* 3D Shar */}
-                <div 
-                    className="w-full max-w-[280px] aspect-square flex items-center justify-center z-10 cursor-pointer flex-shrink-0" 
-                    onClick={handleStartListening}
-                >
-                    <Canvas camera={{ position: [0, 0, 4] }}>
-                        <ParticleSphere isListening={isListening} isSpeaking={isSpeaking} />
-                    </Canvas>
-                </div>
-
-                {/* Subtitr va Holat */}
-                <div className="mt-12 flex flex-col items-center w-full max-w-3xl px-4 min-h-[100px]">
-                    <p className="text-sm font-medium text-gray-400 dark:text-gray-500 tracking-wider uppercase mb-4">
-                        {statusText}
-                    </p>
+            {/* Asosiy Qism: To'liq markazlashgan va Skroll bo'ladigan */}
+            <div className="flex-1 w-full flex flex-col overflow-y-auto">
+                <div className="m-auto flex flex-col items-center justify-center w-full max-w-3xl px-4 py-8 min-h-max">
                     
-                    {subtitle && (
-                        <p className="text-lg md:text-xl font-medium text-center text-gray-800 dark:text-gray-200 leading-relaxed">
-                            {subtitle}
+                    {/* 3D Shar: O'lchamlari barqarorlashtirildi */}
+                    <div 
+                        className="w-full max-w-[180px] md:max-w-[240px] aspect-square flex items-center justify-center z-10 cursor-pointer shrink-0" 
+                        onClick={handleStartListening}
+                    >
+                        <Canvas camera={{ position: [0, 0, 4] }}>
+                            <ParticleSphere isListening={isListening} isSpeaking={isSpeaking} />
+                        </Canvas>
+                    </div>
+
+                    {/* Subtitr va Holat */}
+                    <div className="mt-8 flex flex-col items-center w-full">
+                        <p className="text-xs md:text-sm font-medium text-gray-400 dark:text-gray-500 tracking-wider uppercase mb-3 text-center">
+                            {statusText}
                         </p>
-                    )}
+                        
+                        {subtitle && (
+                            <p className="text-[16px] md:text-[18px] font-medium text-center text-gray-800 dark:text-gray-200 leading-relaxed max-w-2xl">
+                                {subtitle}
+                            </p>
+                        )}
+                    </div>
+
                 </div>
             </div>
 
-            {/* Pastki Boshqaruv Tugmalari */}
-            <div className="w-full pb-24 md:pb-10 flex justify-center gap-4 px-6 z-20 flex-shrink-0">
+            {/* Pastki Boshqaruv Tugmalari: O'lchami kichraytirildi va to'g'rilandi */}
+            <div className="w-full shrink-0 bg-white dark:bg-[#0a0a0a] pt-2 pb-24 md:pb-8 flex justify-center gap-4 px-4 border-t border-transparent">
                 <button 
                     onClick={handleStartListening}
                     disabled={isProcessing || isSpeaking}
-                    className={`px-8 py-3.5 rounded-lg text-sm font-medium transition-all ${
+                    className={`min-w-[140px] px-8 py-3.5 rounded-xl text-sm font-medium transition-all ${
                         isListening 
                             ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' 
                             : 'bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 disabled:opacity-50'
@@ -354,7 +354,7 @@ export default function VoiceChatPage() {
 
                 <button 
                     onClick={handleStopAll}
-                    className="px-8 py-3.5 rounded-lg text-sm font-medium bg-transparent border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-[#111] transition-all"
+                    className="min-w-[140px] px-8 py-3.5 rounded-xl text-sm font-medium bg-transparent border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-[#111] transition-all"
                 >
                     To'xtatish
                 </button>

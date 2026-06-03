@@ -47,35 +47,34 @@ class AiController extends Controller
                 'message' => $userMessage
             ]);
 
-            // DIQQAT: Takrorlashni oldini olish uchun Dinamik Qoida!
-            $isFirstMessage = (count($history) <= 1); // Agar tarix bo'sh bo'lsa yoki endi boshlangan bo'lsa
-            
-            $flowRule = $isFirstMessage 
-                ? "SUHBAT BOSHLANISHI: Bu birinchi xabar. O'zingni 'Kitsune-sensei' deb qisqacha, samimiy tanishtir. Foydalanuvchi bilan do'stona ko'rishib, u haqida (masalan ismini) so'ra. Suhbatni sekin-asta '{$topic}' mavzusiga burib yubor."
-                : "QAT'IY SHART: O'zingni qayta-qayta tanishtirma! 'Men Kitsune-senseiman' degan gapni UMUMAN ISHLATMA. To'g'ridan-to'g'ri foydalanuvchining gapiga javob ber va '{$topic}' mavzusida suhbatni davom ettir.";
-
+            // MAVZU QOIDASI
             $topicRule = ($topic === 'Erkin') 
                 ? "Foydalanuvchi 'Erkin mavzu' ni tanlagan. Hech qanday qoliplarsiz, u nimani xohlasa shu haqida tabiiy, qiziqarli suhbat qur."
                 : "Suhbatni aynan '{$topic}' mavzusiga yo'naltir va foydalanuvchini shu haqda gapirishga unda.";
 
-            // System Prompt
+            // ASOSIY SYSTEM PROMPT (Qoidalar to'plami)
             $systemPrompt = ($language === 'ja-JP') 
                 ? "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen faqat Yapon tilida gapirasan. 
                    
-                   {$flowRule}
-                   {$topicRule}
+                   SUHBAT BOSQICHLARI VA QOIDALAR:
+                   1. TANISHUV: Agar foydalanuvchi hali o'z ismini aytib tanishmagan bo'lsa, o'zingni qisqacha tanishtir va uning ismini so'ra. (Agar u qayta-qayta faqat salom bersa, tabiiy alik ol va yana ismini so'ra).
+                   2. MAVZUGA O'TISH: DIQQAT! Foydalanuvchi o'zini tanishtirmaguncha '{$topic}' mavzusiga ASLO o'tma! U ismini aytgandan keyingina (ismiga -san qo'shib) '{$topic}' mavzusida suhbatni boshla.
+                   3. TAKRORLAMASLIK: Suhbat davomida o'zingni qayta-qayta 'Men Kitsune-senseiman' deb tanishtirma. Bir marta tanishish yetarli. Oldingi gaplarni mantiqan tushunib, to'g'ri javob ber.
+                   4. {$topicRule}
                    
                    DARAJA QOIDASI ({$level}): {$levelInstructions}
                    
                    BOSHQA QOIDALAR:
-                   1. Qat'iy ravishda {$level} darajasi chegarasida javob ber.
-                   2. DIQQAT: Faqat va faqat Kanji, Hiragana va Katakana yozuvlaridan foydalan!
-                   3. MUXIM: Qavs ichida Romaji (lotin harflari), o'qilishi yoki tarjimasini ASLO YOZMA! Faqat sof yaponcha matn bo'lsin."
+                   - Qat'iy ravishda {$level} darajasi chegarasida javob ber.
+                   - MUXIM: Faqat va faqat Kanji, Hiragana va Katakana yozuvlaridan foydalan!
+                   - MUXIM: Qavs ichida Romaji (lotin harflari), o'qilishi yoki tarjimasini ASLO YOZMA! Faqat sof yaponcha matn bo'lsin."
                 
                 : "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen o'zbek tilida gapirasan.
                    
-                   {$flowRule}
-                   {$topicRule}
+                   SUHBAT BOSQICHLARI:
+                   1. Foydalanuvchi o'z ismini aytmaguncha, mavzuga o'tma, avval tanish.
+                   2. U o'zini tanishtirgachgina, {$topicRule}
+                   3. O'zingni qayta-qayta tanishtirib yotma.
                    
                    QOIDALAR:
                    1. {$level} darajasi tushunchalari asosida javob ber.
@@ -100,24 +99,26 @@ class AiController extends Controller
                 }
             }
 
+            // Agar history'da xabar bo'lmasa, qo'lda qo'shamiz
             if (!$hasCurrentMessage && !empty($userMessage)) {
                 $messagesArray[] = ["role" => "user", "content" => $userMessage];
             }
 
             $groqApiKey = env('GROQ_API_KEY'); 
             
-            // Groq API
+            // Groq API ga yuborish
             $response = Http::withoutVerifying()
                 ->withToken($groqApiKey)
                 ->post("https://api.groq.com/openai/v1/chat/completions", [
                     "model" => "llama-3.3-70b-versatile",
                     "messages" => $messagesArray,
-                    "temperature" => 0.5,
+                    "temperature" => 0.6, // Mantiqni yaxshi ushlab turishi uchun biroz ko'tarildi
                 ]);
 
             if ($response->successful()) {
                 $reply = $response->json()['choices'][0]['message']['content'];
                 
+                // Bazaga saqlash
                 ChatMessage::create([
                     'user_id' => $user->id, 
                     'role' => 'ai', 
@@ -128,9 +129,9 @@ class AiController extends Controller
                 $cleanText = preg_replace('/[*#_()（）]/u', '', $reply);
                 $audioBase64 = null;
 
-                // Google Translate zaxirasi
+                // Google Translate TTS
                 if (!$audioBase64) {
-                    $langCode = ($language === 'ja-JP') ? 'ja' : 'tr';
+                    $langCode = ($language === 'ja-JP') ? 'ja' : 'uz';
                     $textToSpeech = urlencode(mb_substr($cleanText, 0, 180));
                     $tts = Http::withoutVerifying()->get("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q={$textToSpeech}&tl={$langCode}");
                     
