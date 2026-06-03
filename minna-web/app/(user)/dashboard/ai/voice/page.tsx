@@ -7,11 +7,11 @@ import { useRouter } from 'next/navigation';
 import { Canvas, useFrame } from '@react-three/fiber';
 
 // ==========================================
-// 3D Zarrachali Shar Komponenti 
+// 3D Zarrachali Shar Komponenti
 // ==========================================
 function ParticleSphere({ isListening, isSpeaking }: { isListening: boolean, isSpeaking: boolean }) {
     const ref = useRef<any>(null);
-    const particlesCount = 3500; 
+    const particlesCount = 2500; 
 
     const [positions, originalPositions] = useMemo(() => {
         const pos = new Float32Array(particlesCount * 3);
@@ -63,7 +63,7 @@ function ParticleSphere({ isListening, isSpeaking }: { isListening: boolean, isS
             <bufferGeometry>
                 <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
             </bufferGeometry>
-            <pointsMaterial size={0.035} color="#3b82f6" transparent opacity={0.8} sizeAttenuation />
+            <pointsMaterial size={0.035} color="#4f46e5" transparent opacity={0.7} sizeAttenuation />
         </points>
     );
 }
@@ -72,11 +72,18 @@ function ParticleSphere({ isListening, isSpeaking }: { isListening: boolean, isS
 // ASOSIY SAHIFA
 // ==========================================
 export default function VoiceChatPage() {
-    const [statusText, setStatusText] = useState("Tugmani bosing va gapiring...");
+    const [statusText, setStatusText] = useState("Ovozli yordamchi tayyor");
     const [isListening, setIsListening] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
-    const [language, setLanguage] = useState<'uz-UZ' | 'ja-JP'>('uz-UZ');
     const [isProcessing, setIsProcessing] = useState(false); 
+    
+    // UI va Sozlamalar
+    const [topic, setTopic] = useState("Erkin");
+    const [level, setLevel] = useState("N5");
+    const [subtitle, setSubtitle] = useState("");
+    
+    // Suhbat xotirasi
+    const [chatHistory, setChatHistory] = useState<{role: string, content: string}[]>([]);
     
     const recognitionRef = useRef<any>(null);
     const audioRef = useRef<HTMLAudioElement | null>(null); 
@@ -84,115 +91,275 @@ export default function VoiceChatPage() {
     const { data: session, status } = useSession();
     const router = useRouter();
 
+    // Tozalash
+    useEffect(() => {
+        return () => handleStopAll();
+    }, []);
+
+    const handleStopAll = () => {
+        if (recognitionRef.current) recognitionRef.current.stop();
+        if (audioRef.current) audioRef.current.pause();
+        window.speechSynthesis.cancel();
+        setIsListening(false);
+        setIsSpeaking(false);
+        setIsProcessing(false);
+        setStatusText("To'xtatildi");
+    };
+
+    // Klaviaturadan 'X' ni bosganda to'xtatish
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key.toLowerCase() === 'x') handleStopAll();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
+    // Ovozni aniqlash sozlamalari 
     useEffect(() => {
         if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
             const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
             const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.onstart = () => { setIsListening(true); setIsSpeaking(false); setStatusText("Eshitmoqda..."); };
+            
+            recognition.continuous = false; 
+            recognition.interimResults = false; 
+            
+            recognition.onstart = () => { 
+                setIsListening(true); 
+                setIsSpeaking(false); 
+                setStatusText("Eshitmoqdaman..."); 
+                setSubtitle("...");
+            };
+
             recognition.onresult = (event: any) => {
                 const text = event.results[0][0].transcript;
                 setIsListening(false);
+                setSubtitle(`Siz: ${text}`);
+
                 if (status === 'authenticated' && (session as any)?.accessToken && !isProcessing) {
-                    setStatusText("O'ylamoqda...");
+                    setStatusText("Javob tayyorlanmoqda...");
                     sendToAi(text);
                 }
             };
-            recognition.onerror = () => { setIsListening(false); setStatusText("Xatolik."); };
+
+            recognition.onerror = () => { 
+                setIsListening(false); 
+                setStatusText("Tayyor"); 
+            };
+            
+            recognition.onend = () => {
+                setIsListening(false);
+            }
+
             recognitionRef.current = recognition;
         }
-    }, [status, session, isProcessing]);
+    }, [status, session, isProcessing, topic, level, chatHistory]);
 
+    // Eshitishni boshlash
     const handleStartListening = () => {
         if (isProcessing || isSpeaking) return;
-        if (isListening && recognitionRef.current) { recognitionRef.current.stop(); setIsListening(false); return; }
-
-        if (audioRef.current) { audioRef.current.pause(); setIsSpeaking(false); }
-        window.speechSynthesis.cancel();
+        
+        handleStopAll(); 
         
         const unlockMsg = new SpeechSynthesisUtterance('');
         window.speechSynthesis.speak(unlockMsg);
 
         if (recognitionRef.current) {
-            try { recognitionRef.current.lang = language; recognitionRef.current.start(); } 
-            catch (e) { console.log("Recognition allaqachon ishlamoqda"); }
+            try { 
+                recognitionRef.current.lang = 'ja-JP'; 
+                recognitionRef.current.start(); 
+            } catch (e) { console.log("Recognition is currently running"); }
         }
     };
 
+    // Xotirani tozalash
+    const handleClearMemory = () => {
+        setChatHistory([]);
+        setSubtitle("");
+        setStatusText("Xotira tozalandi. Tayyor");
+        handleStopAll();
+    };
+
+    // AI ga yuborish
     const sendToAi = async (text: string) => {
         setIsProcessing(true);
+        
+        const newHistory = [...chatHistory, { role: "user", content: text }];
+        setChatHistory(newHistory);
+
         try {
             const res = await fetch('http://127.0.0.1:8000/api/ai/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(session as any)?.accessToken}` },
-                body: JSON.stringify({ message: text, lang: language })
+                body: JSON.stringify({ 
+                    message: text, 
+                    lang: 'ja-JP', 
+                    topic: topic, 
+                    level: level,
+                    history: newHistory 
+                })
             });
             const data = await res.json();
             if (res.ok) {
+                const aiReply = data.reply;
+                setSubtitle(`Sensei: ${aiReply}`);
+                setChatHistory(prev => [...prev, { role: "assistant", content: aiReply }]);
+                
                 if (data.audio) {
-                    setStatusText("Kitsune-sensei gapirmoqda...");
-                    playAudio(data.audio); 
-                } else if (data.reply) {
                     setStatusText("Gapirmoqda...");
-                    speak(data.reply); 
+                    playAudio(data.audio); 
+                } else if (aiReply) {
+                    setStatusText("Gapirmoqda...");
+                    speak(aiReply); 
                 }
-            } else { setStatusText("Javob olinmadi."); setIsProcessing(false); }
-        } catch (e) { setStatusText("Ulanishda xatolik!"); setIsProcessing(false); }
+            } else { 
+                setStatusText("Javob olinmadi."); 
+                setIsProcessing(false); 
+            }
+        } catch (e) { 
+            setStatusText("Ulanishda xatolik!"); 
+            setIsProcessing(false); 
+        }
     };
 
+    // AUDIO FAYL TEZLIGINI SEKINLASHTIRISH
     const playAudio = (base64Audio: string) => {
         if (audioRef.current) audioRef.current.pause();
         const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
+        
+        audio.playbackRate = 0.90; 
+        
         audioRef.current = audio;
         audio.onplay = () => setIsSpeaking(true);
-        audio.onended = () => { setIsSpeaking(false); setIsProcessing(false); setStatusText("Yana savol bering..."); };
+        audio.onended = () => { 
+            setIsSpeaking(false); 
+            setIsProcessing(false); 
+            setStatusText("Tayyor"); 
+        };
         audio.play();
     };
 
+    // BRAUZER OVOZ TEZLIGINI SEKINLASHTIRISH
     const speak = (text: string) => {
         if (typeof window === 'undefined') return;
         window.speechSynthesis.cancel(); 
         const cleanText = text.replace(/[*#_()]/g, '').trim();
         const u = new SpeechSynthesisUtterance(cleanText);
+        u.lang = 'ja-JP';
         
-        // Yaponcha bo'lsa ja-JP, aks holda o'zbekcha
-        u.lang = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(cleanText) ? 'ja-JP' : 'uz-UZ';
+        u.rate = 0.8; 
         
         u.onstart = () => setIsSpeaking(true);
-        u.onend = () => { setIsSpeaking(false); setIsProcessing(false); setStatusText("Yana savol bering..."); };
+        u.onend = () => { 
+            setIsSpeaking(false); 
+            setIsProcessing(false); 
+            setStatusText("Tayyor"); 
+        };
         window.speechSynthesis.speak(u);
     };
 
     return (
-        <div className="flex-1 w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-gray-50 relative overflow-hidden">
-            <button onClick={() => router.push('/dashboard/ai')} className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full shadow-sm border border-gray-200 z-50 text-xl">←</button>
-            <div className="w-full h-[400px] flex items-center justify-center cursor-pointer z-10" onClick={handleStartListening}>
-                <Canvas camera={{ position: [0, 0, 4] }}><ParticleSphere isListening={isListening} isSpeaking={isSpeaking} /></Canvas>
-            </div>
-            <div className="z-10 text-center mt-2 px-4">
-                <h2 className="text-2xl font-semibold text-gray-900">{statusText}</h2>
-            </div>
-            <div className="z-10 flex gap-6 mt-8">
+        <div className="flex-1 w-full h-[calc(100vh-80px)] flex flex-col bg-white dark:bg-[#0a0a0a] relative overflow-hidden font-sans">
+            
+            {/* Yuqori Panel (Nav) */}
+            <div className="w-full px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-gray-900 z-20 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md">
                 <button 
-                    onClick={() => { 
-                        setLanguage('uz-UZ'); 
-                        setStatusText("Til o'zgartirildi: O'zbekcha"); 
-                    }} 
-                    className={`px-8 py-3 rounded-full text-lg font-medium transition ${language === 'uz-UZ' ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+                    onClick={() => router.push('/dashboard/ai')} 
+                    className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition p-2"
                 >
-                    🇺🇿 O'zbek
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
                 </button>
+
+                <div className="flex gap-4">
+                    <select 
+                        value={topic} 
+                        onChange={(e) => setTopic(e.target.value)}
+                        className="bg-transparent border-0 text-gray-700 dark:text-gray-300 text-sm font-medium focus:ring-0 cursor-pointer outline-none"
+                    >
+                        {/* MANA SHU YERGA ERKIN MAVZU QO'SHILDI */}
+                        <option value="Erkin">Erkin mavzu</option>
+                        <option value="Tanishtiruv">Tanishtiruv</option>
+                        <option value="Oila">Oila</option>
+                        <option value="Ish">Ish / O'qish</option>
+                        <option value="Ko'cha">Ko'cha</option>
+                    </select>
+                    
+                    <span className="text-gray-300 dark:text-gray-700">|</span>
+
+                    <select 
+                        value={level} 
+                        onChange={(e) => setLevel(e.target.value)}
+                        className="bg-transparent border-0 text-gray-700 dark:text-gray-300 text-sm font-medium focus:ring-0 cursor-pointer outline-none"
+                    >
+                        <option value="N5">N5 Daraja</option>
+                        <option value="N4">N4 Daraja</option>
+                        <option value="N3">N3 Daraja</option>
+                        <option value="N2">N2 Daraja</option>
+                    </select>
+                </div>
+
                 <button 
-                    onClick={() => { 
-                        setLanguage('ja-JP'); 
-                        setStatusText("言語が日本語に変更されました"); 
-                    }} 
-                    className={`px-8 py-3 rounded-full text-lg font-medium transition ${language === 'ja-JP' ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+                    onClick={handleClearMemory}
+                    title="Xotirani tozalash"
+                    className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition p-2"
                 >
-                    🇯🇵 日本語
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                 </button>
             </div>
+
+            {/* Asosiy Qism */}
+            <div className="flex-1 flex flex-col items-center justify-center relative p-6 overflow-y-auto">
+                
+                {/* 3D Shar */}
+                <div 
+                    className="w-full max-w-[280px] aspect-square flex items-center justify-center z-10 cursor-pointer flex-shrink-0" 
+                    onClick={handleStartListening}
+                >
+                    <Canvas camera={{ position: [0, 0, 4] }}>
+                        <ParticleSphere isListening={isListening} isSpeaking={isSpeaking} />
+                    </Canvas>
+                </div>
+
+                {/* Subtitr va Holat */}
+                <div className="mt-12 flex flex-col items-center w-full max-w-3xl px-4 min-h-[100px]">
+                    <p className="text-sm font-medium text-gray-400 dark:text-gray-500 tracking-wider uppercase mb-4">
+                        {statusText}
+                    </p>
+                    
+                    {subtitle && (
+                        <p className="text-lg md:text-xl font-medium text-center text-gray-800 dark:text-gray-200 leading-relaxed">
+                            {subtitle}
+                        </p>
+                    )}
+                </div>
+            </div>
+
+            {/* Pastki Boshqaruv Tugmalari */}
+            <div className="w-full pb-24 md:pb-10 flex justify-center gap-4 px-6 z-20 flex-shrink-0">
+                <button 
+                    onClick={handleStartListening}
+                    disabled={isProcessing || isSpeaking}
+                    className={`px-8 py-3.5 rounded-lg text-sm font-medium transition-all ${
+                        isListening 
+                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' 
+                            : 'bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100 disabled:opacity-50'
+                    }`}
+                >
+                    {isListening ? 'Eshitilmoqda...' : 'Gapirish'}
+                </button>
+
+                <button 
+                    onClick={handleStopAll}
+                    className="px-8 py-3.5 rounded-lg text-sm font-medium bg-transparent border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-[#111] transition-all"
+                >
+                    To'xtatish
+                </button>
+            </div>
+
         </div>
     );
 }

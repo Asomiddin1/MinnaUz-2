@@ -15,74 +15,137 @@ class AiController extends Controller
             $userMessage = $request->input('message');
             $user = $request->user(); 
             $language = $request->input('lang', 'uz-UZ');
-
-            ChatMessage::create(['user_id' => $user->id, 'role' => 'user', 'message' => $userMessage]);
-
-            // Tilga qarab aniq buyruq beramiz
-            // Tilga qarab aniq va mukammal buyruq
-$systemPrompt = ($language === 'ja-JP') 
-    ? "Sen 'Kitsune-sensei' ismli tajribali va nazokatli yapon tili o'qituvchisisan. Sen faqat Yapon tilida gapirasan. Yapon tili, grammatika, madaniyat yoki umumiy savollar bo'yicha aniq, boy va tushunarli javob ber. O'zbekcha so'zlarni ishlatma. Javoblaringda Kanji, Hiragana va Katakana yozuvlaridan to'g'ri foydalan."
-    : "Sen 'Kitsune-sensei' ismli tajribali, dono va nazokatli yapon tili o'qituvchisisan. Sen o'zbek tilida gapirasan.
-       Qoidalaring:
-       1. Har qanday savolga aniq, qisqa va sifatli javob ber.
-       2. Yaponcha so'z yoki ibora ishlatsang, majburiy formatdan foydalan: 'Yozuv (O'qilishi - Tarjimasi)'.
-          Masalan: 'こんにちは (Konnichiwa - Salom)'. 
-          Yozuvsiz (Kanji/Kana) javob berma.
-       3. Agar foydalanuvchi yapon tiliga aloqador bo'lmagan savol bersa, o'z nazakatingni saqlagan holda javob ber.
-       4. Har doim o'quvchini rag'batlantiruvchi ohangda javob ber.";
             
+            // Frontenddan kelayotgan parametrlar
+            $topic = $request->input('topic', 'Erkin');
+            $level = $request->input('level', 'N5');
+            $history = $request->input('history', []);
+
+            // Darajaga qarab qoidalar
+            $levelInstructions = "";
+            switch($level) {
+                case 'N5':
+                    $levelInstructions = "Juda oddiy boshlang'ich so'zlar, qisqa gaplar va 'Desu / Masu' shaklidan foydalan. Qiyin Kanji ishlatma.";
+                    break;
+                case 'N4':
+                    $levelInstructions = "Boshlang'ich-o'rta daraja. Kundalik hayotiy so'zlar, 'te-form', 'ta-form' kabi oddiy grammatikadan foydalan.";
+                    break;
+                case 'N3':
+                    $levelInstructions = "O'rta daraja. Turli xil fe'l shakllari, kundalik o'rta daraja so'z va Kanjilar ishlating. Tabiiy yapon tiliga yaqin gapir.";
+                    break;
+                case 'N2':
+                    $levelInstructions = "Yuqori daraja. Murakkab grammatika, boy va ilmiy/ish so'z boyligi, Keigo va murakkab Kanjilardan erkin foydalan.";
+                    break;
+                default:
+                    $levelInstructions = "Talabaning darajasiga mos tushunarli tilda javob ber.";
+            }
+
+            // Xabarni bazaga saqlash
+            ChatMessage::create([
+                'user_id' => $user->id, 
+                'role' => 'user', 
+                'message' => $userMessage
+            ]);
+
+            // DIQQAT: Takrorlashni oldini olish uchun Dinamik Qoida!
+            $isFirstMessage = (count($history) <= 1); // Agar tarix bo'sh bo'lsa yoki endi boshlangan bo'lsa
+            
+            $flowRule = $isFirstMessage 
+                ? "SUHBAT BOSHLANISHI: Bu birinchi xabar. O'zingni 'Kitsune-sensei' deb qisqacha, samimiy tanishtir. Foydalanuvchi bilan do'stona ko'rishib, u haqida (masalan ismini) so'ra. Suhbatni sekin-asta '{$topic}' mavzusiga burib yubor."
+                : "QAT'IY SHART: O'zingni qayta-qayta tanishtirma! 'Men Kitsune-senseiman' degan gapni UMUMAN ISHLATMA. To'g'ridan-to'g'ri foydalanuvchining gapiga javob ber va '{$topic}' mavzusida suhbatni davom ettir.";
+
+            $topicRule = ($topic === 'Erkin') 
+                ? "Foydalanuvchi 'Erkin mavzu' ni tanlagan. Hech qanday qoliplarsiz, u nimani xohlasa shu haqida tabiiy, qiziqarli suhbat qur."
+                : "Suhbatni aynan '{$topic}' mavzusiga yo'naltir va foydalanuvchini shu haqda gapirishga unda.";
+
+            // System Prompt
+            $systemPrompt = ($language === 'ja-JP') 
+                ? "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen faqat Yapon tilida gapirasan. 
+                   
+                   {$flowRule}
+                   {$topicRule}
+                   
+                   DARAJA QOIDASI ({$level}): {$levelInstructions}
+                   
+                   BOSHQA QOIDALAR:
+                   1. Qat'iy ravishda {$level} darajasi chegarasida javob ber.
+                   2. DIQQAT: Faqat va faqat Kanji, Hiragana va Katakana yozuvlaridan foydalan!
+                   3. MUXIM: Qavs ichida Romaji (lotin harflari), o'qilishi yoki tarjimasini ASLO YOZMA! Faqat sof yaponcha matn bo'lsin."
+                
+                : "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen o'zbek tilida gapirasan.
+                   
+                   {$flowRule}
+                   {$topicRule}
+                   
+                   QOIDALAR:
+                   1. {$level} darajasi tushunchalari asosida javob ber.
+                   2. Yaponcha so'z ishlatsang: 'Yozuv (O'qilishi - Tarjimasi)' formatida yoz.";
+            
+            // Xabarlar ro'yxatini yig'ish
+            $messagesArray = [
+                ["role" => "system", "content" => $systemPrompt]
+            ];
+
+            // Frontenddan kelgan tarixni qo'shish
+            $hasCurrentMessage = false;
+            if (is_array($history) && count($history) > 0) {
+                foreach ($history as $msg) {
+                    if (isset($msg['role']) && isset($msg['content'])) {
+                        $role = ($msg['role'] === 'ai' || $msg['role'] === 'assistant') ? 'assistant' : 'user';
+                        $messagesArray[] = ["role" => $role, "content" => $msg['content']];
+                        if ($msg['content'] === $userMessage) {
+                            $hasCurrentMessage = true;
+                        }
+                    }
+                }
+            }
+
+            if (!$hasCurrentMessage && !empty($userMessage)) {
+                $messagesArray[] = ["role" => "user", "content" => $userMessage];
+            }
+
             $groqApiKey = env('GROQ_API_KEY'); 
             
-            // Kontekstni tozalash uchun faqat sistem prompt va hozirgi xabarni yuboramiz
+            // Groq API
             $response = Http::withoutVerifying()
                 ->withToken($groqApiKey)
                 ->post("https://api.groq.com/openai/v1/chat/completions", [
                     "model" => "llama-3.3-70b-versatile",
-                    "messages" => [
-                        ["role" => "system", "content" => $systemPrompt],
-                        ["role" => "user", "content" => $userMessage]
-                    ]
+                    "messages" => $messagesArray,
+                    "temperature" => 0.5,
                 ]);
 
             if ($response->successful()) {
                 $reply = $response->json()['choices'][0]['message']['content'];
-                ChatMessage::create(['user_id' => $user->id, 'role' => 'ai', 'message' => $reply]);
+                
+                ChatMessage::create([
+                    'user_id' => $user->id, 
+                    'role' => 'ai', 
+                    'message' => $reply
+                ]);
 
+                // Matndagi ortiqcha belgilarni (jumladan yaponcha qavslarni ham) tozalash (audio uchun)
+                $cleanText = preg_replace('/[*#_()（）]/u', '', $reply);
                 $audioBase64 = null;
-                $cleanText = preg_replace('/[*#_()]/', '', $reply);
 
-                // ElevenLabs bloklanganligi uchun ushbu qism kommentga olindi (xatolarni to'xtatish uchun)
-                /*
-                $elevenLabsKey = env('ELEVENLABS_API_KEY');
-                if (!empty($elevenLabsKey)) {
-                    $voiceId = 'sB7vwSCyX0tQmU24cW2C';
-                    $tts = Http::withHeaders([
-                        'xi-api-key' => $elevenLabsKey, 
-                        'Content-Type' => 'application/json'
-                    ])->post("https://api.elevenlabs.io/v1/text-to-speech/{$voiceId}", [
-                        'text' => $cleanText,
-                        'model_id' => 'eleven_multilingual_v2',
-                        'voice_settings' => ['stability' => 0.5, 'similarity_boost' => 0.75]
-                    ]);
-
+                // Google Translate zaxirasi
+                if (!$audioBase64) {
+                    $langCode = ($language === 'ja-JP') ? 'ja' : 'tr';
+                    $textToSpeech = urlencode(mb_substr($cleanText, 0, 180));
+                    $tts = Http::withoutVerifying()->get("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q={$textToSpeech}&tl={$langCode}");
+                    
                     if ($tts->successful()) {
                         $audioBase64 = base64_encode($tts->body());
                     }
                 }
-                */
-
-                // Zaxira: Google Translate (har doim ishlaydi)
-                if (!$audioBase64) {
-                    $langCode = ($language === 'ja-JP') ? 'ja' : 'tr';
-                    $tts = Http::withoutVerifying()->get("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=" . urlencode(mb_substr($cleanText, 0, 180)) . "&tl=" . $langCode);
-                    if ($tts->successful()) $audioBase64 = base64_encode($tts->body());
-                }
 
                 return response()->json(['reply' => $reply, 'audio' => $audioBase64]);
             }
-            return response()->json(['reply' => "Xatolik."], 500);
+            
+            return response()->json(['reply' => "Xatolik yuz berdi. Iltimos qayta urinib ko'ring."], 500);
         } catch (\Exception $e) {
-            return response()->json(['reply' => "Server xatosi: " . $e->getMessage()], 500);
+            Log::error("AiController Xatosi: " . $e->getMessage());
+            return response()->json(['reply' => "Server xatosi yuz berdi."], 500);
         }
     }
 }
