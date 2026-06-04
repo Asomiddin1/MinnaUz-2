@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class GroqController extends Controller
 {
@@ -320,6 +321,45 @@ class GroqController extends Controller
     }
 
     /**
+     * Yaponcha matnni Dokkai formati uchun so'zlar massiviga aylantiradi (AI orqali).
+     */
+    public function generateDokkaiContent(Request $request)
+    {
+        $request->validate([
+            'text' => 'required|string',
+        ]);
+
+        $rawText = $request->text;
+        
+        $prompt = "You are a professional Japanese language tutor. 
+        Analyze the following Japanese text and break it down word by word, including particles, into a strict JSON array.
+        
+        Rules:
+        1. Every single word and particle must be a separate object.
+        2. Provide 'furigana' only for kanji. If the word is hiragana/katakana, leave 'furigana' empty.
+        3. Provide 'translation' in Uzbek.
+        4. Provide 'grammar' (e.g., Ot, Fe'l, Sifat, Yuklama, Qo'shimcha).
+        5. Provide 'level' (N5, N4, N3, N2, N1) if applicable, otherwise empty string.
+        6. Determine 'sentenceIndex' (which sentence it belongs to, starting from 1).
+        7. Punctuation marks (。 , 、) should also be separate objects with grammar 'Tinish belgisi' and empty translation/level.
+        
+        Text to analyze: '{$rawText}'
+
+        Respond ONLY with a valid JSON format exactly like this example, nothing else:
+        {
+          \"content\": [
+            { \"word\": \"私\", \"furigana\": \"わたし\", \"translation\": \"Men\", \"grammar\": \"Olmosh\", \"level\": \"N5\", \"paragraphIndex\": 1, \"sentenceIndex\": 1 },
+            { \"word\": \"は\", \"furigana\": \"\", \"translation\": \"(Ega yuklamasi)\", \"grammar\": \"Yuklama\", \"level\": \"\", \"paragraphIndex\": 1, \"sentenceIndex\": 1 },
+            { \"word\": \"学生\", \"furigana\": \"がくせい\", \"translation\": \"Talaba\", \"grammar\": \"Ot\", \"level\": \"N5\", \"paragraphIndex\": 1, \"sentenceIndex\": 1 },
+            { \"word\": \"です\", \"furigana\": \"\", \"translation\": \"man\", \"grammar\": \"Qo'shimcha\", \"level\": \"\", \"paragraphIndex\": 1, \"sentenceIndex\": 1 },
+            { \"word\": \"。\", \"furigana\": \"\", \"translation\": \"\", \"grammar\": \"Tinish belgisi\", \"level\": \"\", \"paragraphIndex\": 1, \"sentenceIndex\": 1 }
+          ]
+        }";
+
+        return $this->callGroqAPI($prompt);
+    }
+
+    /**
      * Darajaga qarab kanji chegarasini aniqlash
      */
     private function getKanjiLevel($level)
@@ -368,7 +408,7 @@ class GroqController extends Controller
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'Sen yapon tili o\'qituvchisisiz va grammatika bo\'yicha mutaxassissan. Har doim aniq, to\'liq va foydali ma\'lumot ber. formula.affirmative, negative, past, te_form maydonlarida FAQAT formulaning o\'zini yoz (masalan: "V（て形）+ てもいいですか"). formula.description ichida esa har bir formula uchun【...】belgisi bilan alohida qatorda formulani ham ko\'rsatib batafsil tushuntir. Kanjilarni darajaga mos ravishda ishlat. JSON formatda javob qaytar.'
+                        'content' => 'Sen yapon tili o\'qituvchisisiz va mutaxassissan. Har doim aniq, to\'liq va foydali ma\'lumot ber. Faqat valid JSON formatda javob qaytar.'
                     ],
                     [
                         'role' => 'user',
@@ -389,7 +429,7 @@ class GroqController extends Controller
                 return response()->json($result);
             }
 
-            \Log::error('Groq API error', [
+            Log::error('Groq API error', [
                 'status' => $response->status(),
                 'body' => $response->body()
             ]);
@@ -399,7 +439,7 @@ class GroqController extends Controller
             ], 500);
 
         } catch (\Exception $e) {
-            \Log::error('Groq API exception', [
+            Log::error('Groq API exception', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()

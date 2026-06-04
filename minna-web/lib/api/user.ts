@@ -1,41 +1,45 @@
-import { AxiosResponse } from "axios";
-import apiClient from "./axios"; // Asosiy axios sozlamasini chaqiramiz
+import { AxiosResponse } from "axios"
+import apiClient from "./axios" // Asosiy axios sozlamasini chaqiramiz
 
 export const userAPI = {
   // ==========================================
   // MAVJUD PROFIL VA TEST API LARI
   // ==========================================
-  getProfile: (): Promise<AxiosResponse> => 
-    apiClient.get("/user"),
+  getProfile: (): Promise<AxiosResponse> => apiClient.get("/user"),
 
   getStreaks: (year?: number, month?: number): Promise<AxiosResponse> =>
     apiClient.get("/user/streaks", { params: { year, month } }),
 
-  getTests: (level?: string): Promise<AxiosResponse> => 
+  getTests: (level?: string): Promise<AxiosResponse> =>
     apiClient.get("/user/tests", { params: { level } }),
 
-  getTestDetails: (id: number): Promise<AxiosResponse> => 
+  getTestDetails: (id: number): Promise<AxiosResponse> =>
     apiClient.get(`/user/tests/${id}`),
 
-  submitExam: (testId: number, answers: any, timeSpent?: number): Promise<AxiosResponse> =>
-    apiClient.post(`/user/tests/${testId}/submit`, { answers, time_spent: timeSpent || 0 }),
+  submitExam: (
+    testId: number,
+    answers: any,
+    timeSpent?: number
+  ): Promise<AxiosResponse> =>
+    apiClient.post(`/user/tests/${testId}/submit`, {
+      answers,
+      time_spent: timeSpent || 0,
+    }),
 
   getTestResult: (resultId: number): Promise<AxiosResponse> =>
     apiClient.get(`/user/results/${resultId}`),
 
-  getMyResults: (): Promise<AxiosResponse> => 
-    apiClient.get("/user/results"),
+  getMyResults: (): Promise<AxiosResponse> => apiClient.get("/user/results"),
 
   // ==========================================
   // YANGI L.M.S (O'QUV KURS) API LARI
   // ==========================================
 
   // Barcha darajalarni olish (N5, N4, Hira-kata ro'yxati)
-  getLevels: (): Promise<AxiosResponse> => 
-    apiClient.get("/levels"),
+  getLevels: (): Promise<AxiosResponse> => apiClient.get("/levels"),
 
   // Bitta daraja haqida to'liq ma'lumot
-  getLevelBySlug: (slug: string): Promise<AxiosResponse> => 
+  getLevelBySlug: (slug: string): Promise<AxiosResponse> =>
     apiClient.get(`/levels/${slug}`),
 
   // ==========================================
@@ -43,31 +47,31 @@ export const userAPI = {
   // ==========================================
 
   // Daraja uchun barcha grammatikalarni olish
-  getLevelGrammars: (slug: string): Promise<AxiosResponse> => 
+  getLevelGrammars: (slug: string): Promise<AxiosResponse> =>
     apiClient.get(`/levels/${slug}/grammars`),
 
   // Daraja uchun barcha kanjilarni olish
-  getLevelKanjis: (slug: string): Promise<AxiosResponse> => 
+  getLevelKanjis: (slug: string): Promise<AxiosResponse> =>
     apiClient.get(`/levels/${slug}/kanjis`),
 
   // Daraja uchun barcha lug'atlarni olish
-  getLevelVocabularies: (slug: string): Promise<AxiosResponse> => 
+  getLevelVocabularies: (slug: string): Promise<AxiosResponse> =>
     apiClient.get(`/levels/${slug}/vocabularies`),
 
   // Baza bo'ylab so'z va namunalardan qidirish
-  searchMaterials: (query: string): Promise<AxiosResponse> => 
+  searchMaterials: (query: string): Promise<AxiosResponse> =>
     apiClient.get("/search", { params: { q: query } }),
 
-// ==========================================
+  // ==========================================
   // VIDEO DARSLAR (USER)
   // ==========================================
 
   // Barcha videolarni olish (Kategoriya va tillar bo'yicha filterlash mumkin)
-  getVideos: (category?: string, lang?: string): Promise<AxiosResponse> => 
+  getVideos: (category?: string, lang?: string): Promise<AxiosResponse> =>
     apiClient.get("/videos", { params: { category, lang } }),
 
   // Bitta videoni o'qish (Kerakli tillarni vergul bilan yuborish mumkin: 'uz,ja')
-  getVideoById: (id: number, lang?: string): Promise<AxiosResponse> => 
+  getVideoById: (id: number, lang?: string): Promise<AxiosResponse> =>
     apiClient.get(`/videos/${id}`, { params: { lang } }),
 
   // ==========================================
@@ -75,10 +79,27 @@ export const userAPI = {
   // ==========================================
 
   // Darsni saqlash yoki saqlanganlardan olib tashlash (Like/Unlike)
-  toggleLessonLike: (lessonId: number): Promise<AxiosResponse> => 
+  toggleLessonLike: (lessonId: number): Promise<AxiosResponse> =>
     apiClient.post(`/user/lessons/${lessonId}/like`),
 
   // Darsga izoh qoldirish
-  addLessonComment: (lessonId: number, comment: string): Promise<AxiosResponse> => 
+  addLessonComment: (
+    lessonId: number,
+    comment: string
+  ): Promise<AxiosResponse> =>
     apiClient.post(`/user/lessons/${lessonId}/comments`, { comment }),
-};
+  // Article dokkai
+  getArticles: (page = 1, search = "", level = ""): Promise<AxiosResponse> =>
+    apiClient.get("/articles", { params: { page, search, level } }),
+
+  // 1. Bitta maqolani to'liq ma'lumoti bilan ochish (Views oshadi)
+  getArticleById: (id: string | number): Promise<AxiosResponse> =>
+    apiClient.get(`/articles/${id}`),
+
+  // 2. Maqola oxiridagi Dokkai testini ishlagach, javoblarni jo'natish
+  submitArticleQuiz: (
+    id: string | number,
+    data: { answers: any[] }
+  ): Promise<AxiosResponse> =>
+    apiClient.post(`/articles/${id}/submit-quiz`, data),
+}

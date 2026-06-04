@@ -211,4 +211,25 @@ export const adminAPI = {
     levelTitle: string
   ): Promise<AxiosResponse> =>
     apiClient.post("/admin/groq/grammar/fill", { grammarTitle, levelTitle }),
+
+  /* ==========================================
+     DOKKAI / ARTICLES (MAQOLALAR) MANAGEMENT
+     ========================================== */
+
+  getArticles: (page = 1, search = "", level = ""): Promise<AxiosResponse> =>
+    apiClient.get("/admin/articles", { params: { page, search, level } }),
+
+  getArticleById: (id: number | string): Promise<AxiosResponse> =>
+    apiClient.get(`/admin/articles/${id}`),
+
+  createArticle: (data: any): Promise<AxiosResponse> =>
+    apiClient.post("/admin/articles", data),
+
+  updateArticle: (id: number | string, data: any): Promise<AxiosResponse> =>
+    apiClient.put(`/admin/articles/${id}`, data),
+
+  deleteArticle: (id: number | string): Promise<AxiosResponse> =>
+    apiClient.delete(`/admin/articles/${id}`),
+  generateDokkaiContent: (data: { text: string }): Promise<AxiosResponse> =>
+    apiClient.post("/admin/groq/dokkai-generate", data),
 }
