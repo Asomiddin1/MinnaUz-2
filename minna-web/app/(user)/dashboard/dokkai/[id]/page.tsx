@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect, use } from "react"
-import { useRouter, usePathname } from "next/navigation"
-import { userAPI } from "@/lib/api/user" // <-- API ulangan joy
+import { useRouter } from "next/navigation"
+import { userAPI } from "@/lib/api/user"
 import {
   ArrowLeft,
   Play,
@@ -12,7 +12,10 @@ import {
   BookOpen,
   ALargeSmall,
   SplitSquareHorizontal,
-  Loader2, // <-- Yuklanish animatsiyasi uchun
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  BrainCircuit,
 } from "lucide-react"
 
 // 1. Interaktiv so'z komponenti
@@ -33,9 +36,8 @@ const InteractiveWord = ({
     if (showTooltip) {
       timer = setTimeout(() => {
         setShowTooltip(false)
-      }, 3000) // 3000 millisekund = 3 soniya
+      }, 3000)
     }
-    // Komponent unmount bo'lsa yoki qayta ishlaganda taymerni tozalash
     return () => clearTimeout(timer)
   }, [showTooltip])
 
@@ -97,16 +99,22 @@ export default function ArticlePage({
   params: Promise<{ id: string }>
 }) {
   const router = useRouter()
-  const pathname = usePathname()
   const resolvedParams = use(params)
 
-  // State'lar
   const [article, setArticle] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showFurigana, setShowFurigana] = useState(true)
   const [addSpace, setAddSpace] = useState(false)
 
-  // API dan ma'lumotni olish
+  // Lug'at <-> Test almashtirish
+  const [activeSection, setActiveSection] = useState<"vocab" | "quiz">("vocab")
+
+  // Test javoblari uchun state: { quizId: optionId }
+  const [selectedAnswers, setSelectedAnswers] = useState<
+    Record<number, number>
+  >({})
+  const [isQuizSubmitted, setIsQuizSubmitted] = useState(false)
+
   useEffect(() => {
     const fetchArticle = async () => {
       try {
@@ -124,7 +132,34 @@ export default function ArticlePage({
     fetchArticle()
   }, [resolvedParams.id])
 
-  // Yuklanayotgan holat
+  // Test variantini tanlash
+  const handleOptionSelect = (quizId: number, optionId: number) => {
+    if (isQuizSubmitted) return
+    setSelectedAnswers((prev) => ({ ...prev, [quizId]: optionId }))
+  }
+
+  // Test natijalarini saqlash va tekshirish
+  const handleQuizSubmit = async () => {
+    const total = article.quizzes?.length ?? 0
+    if (Object.keys(selectedAnswers).length < total) {
+      return alert("Iltimos, barcha savollarga javob bering.")
+    }
+
+    setIsQuizSubmitted(true)
+
+    try {
+      const answersArray = Object.entries(selectedAnswers).map(
+        ([quizId, optionId]) => ({ quizId: Number(quizId), optionId })
+      )
+
+      await userAPI.submitArticleQuiz(resolvedParams.id, {
+        answers: answersArray,
+      })
+    } catch (error) {
+      console.error("Test yuborishda xatolik:", error)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-900">
@@ -133,7 +168,6 @@ export default function ArticlePage({
     )
   }
 
-  // Topilmagan holat
   if (!article) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-white dark:bg-gray-900">
@@ -154,7 +188,6 @@ export default function ArticlePage({
     <div className="min-h-screen w-full bg-white dark:bg-gray-900">
       <div className="mx-auto max-w-4xl pb-20">
         <div className="p-4 md:p-6">
-          {/* Orqaga qaytish */}
           <button
             onClick={() => router.back()}
             className="mb-6 flex w-fit items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -162,7 +195,6 @@ export default function ArticlePage({
             <ArrowLeft className="h-4 w-4" /> Ortga qaytish
           </button>
 
-          {/* Sarlavha va statistika */}
           <h1 className="mb-4 text-2xl font-bold text-gray-900 md:text-3xl dark:text-white">
             {article.title}
           </h1>
@@ -179,7 +211,6 @@ export default function ArticlePage({
             </div>
           </div>
 
-          {/* Rasm */}
           <div className="mb-6 aspect-video w-full overflow-hidden rounded-lg bg-gray-100 md:aspect-[21/9] dark:bg-gray-800">
             <img
               src={
@@ -191,7 +222,6 @@ export default function ArticlePage({
             />
           </div>
 
-          {/* Audio Player */}
           <div className="mb-6 flex items-center justify-between rounded-lg border bg-gray-50 px-4 py-2 dark:border-gray-800 dark:bg-gray-800/50">
             <button className="rounded-full bg-blue-100 p-2 text-blue-600 transition hover:bg-blue-200">
               <Play className="ml-0.5 h-5 w-5" />
@@ -206,16 +236,6 @@ export default function ArticlePage({
             </div>
           </div>
 
-          {/* <div className="mb-8 grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 rounded-md border py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-gray-800">
-              <BookOpen className="h-4 w-4" /> Bilingual Translation
-            </button>
-            <button className="flex items-center justify-center gap-2 rounded-md border py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-              <Plus className="h-4 w-4" /> Add Translation
-            </button>
-          </div> */}
-
-          {/* Sozlamalar */}
           <div className="mb-6 flex flex-wrap items-center gap-4 rounded-xl border bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/50">
             <h3 className="mr-auto text-sm font-bold text-gray-700 dark:text-gray-300">
               O'qishni sozlash:
@@ -229,8 +249,7 @@ export default function ArticlePage({
                   : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
               }`}
             >
-              <ALargeSmall className="h-4 w-4" />
-              Furigana
+              <ALargeSmall className="h-4 w-4" /> Furigana
               <div
                 className={`ml-2 h-4 w-8 rounded-full p-0.5 transition-colors ${showFurigana ? "bg-blue-500" : "bg-gray-400"}`}
               >
@@ -248,8 +267,7 @@ export default function ArticlePage({
                   : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
               }`}
             >
-              <SplitSquareHorizontal className="h-4 w-4" />
-              So'z oralig'i
+              <SplitSquareHorizontal className="h-4 w-4" /> So'z oralig'i
               <div
                 className={`ml-2 h-4 w-8 rounded-full p-0.5 transition-colors ${addSpace ? "bg-green-500" : "bg-gray-400"}`}
               >
@@ -260,7 +278,6 @@ export default function ArticlePage({
             </button>
           </div>
 
-          {/* MATN */}
           <div className="mb-8 border-b pb-8 dark:border-gray-800">
             <div className="flex flex-wrap items-end rounded-xl border bg-gray-50/50 p-4 md:p-6 dark:border-gray-800 dark:bg-gray-800/20">
               {article.content?.map((item: any, index: number) => (
@@ -274,7 +291,6 @@ export default function ArticlePage({
             </div>
           </div>
 
-          {/* Statistika (Grammatika darajasi) */}
           {article.stats && article.stats.length > 0 && (
             <div className="mb-12 flex flex-wrap items-center justify-between gap-y-4 rounded-xl border bg-white p-4 shadow-sm md:p-6 dark:border-gray-700 dark:bg-gray-800">
               {article.stats.map((stat: any, idx: number) => (
@@ -292,43 +308,168 @@ export default function ArticlePage({
             </div>
           )}
 
-          {/* LUG'AT */}
-          {article.vocabulary && article.vocabulary.length > 0 && (
+          {/* LUG'AT / TEST ALMASHTIRGICH */}
+          {((article.vocabulary?.length ?? 0) > 0 ||
+            (article.quizzes?.length ?? 0) > 0) && (
             <div>
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Vocabulary (Lug'at)
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                {article.vocabulary.map((vocab: any) => (
-                  <div
-                    key={vocab.id}
-                    className="flex flex-col rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+              {/* Toggle tugmalar */}
+              <div className="mb-6 flex gap-2 border-b dark:border-gray-800">
+                {article.vocabulary?.length > 0 && (
+                  <button
+                    onClick={() => setActiveSection("vocab")}
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
+                      activeSection === "vocab"
+                        ? "border-b-2 border-blue-600 text-blue-600"
+                        : "text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
+                    }`}
                   >
-                    <div className="mb-2 flex items-start justify-between">
-                      <div className="flex flex-col">
-                        <span className="mb-0.5 text-xs text-gray-500">
-                          {vocab.furigana || " "}
-                        </span>
-                        <span className="text-lg font-bold dark:text-white">
-                          {vocab.kanji}
+                    <BookOpen className="h-4 w-4" /> Vocabulary (Lug'at)
+                  </button>
+                )}
+                {article.quizzes?.length > 0 && (
+                  <button
+                    onClick={() => setActiveSection("quiz")}
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-bold transition-colors ${
+                      activeSection === "quiz"
+                        ? "border-b-2 border-indigo-600 text-indigo-600"
+                        : "text-gray-500 hover:text-gray-800 dark:hover:text-gray-300"
+                    }`}
+                  >
+                    <BrainCircuit className="h-4 w-4" /> Test
+                  </button>
+                )}
+              </div>
+
+              {/* LUG'AT */}
+              {activeSection === "vocab" && article.vocabulary?.length > 0 && (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {article.vocabulary.map((vocab: any) => (
+                    <div
+                      key={vocab.id}
+                      className="flex flex-col rounded-lg border bg-white p-4 dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      <div className="mb-2 flex items-start justify-between">
+                        <div className="flex flex-col">
+                          <span className="mb-0.5 text-xs text-gray-500">
+                            {vocab.furigana || " "}
+                          </span>
+                          <span className="text-lg font-bold dark:text-white">
+                            {vocab.kanji}
+                          </span>
+                        </div>
+                        <span className="rounded bg-[#3B704E] px-2 py-0.5 text-xs font-bold text-white">
+                          {vocab.level}
                         </span>
                       </div>
-                      <span
-                        className={`rounded bg-[#3B704E] px-2 py-0.5 text-xs font-bold text-white`}
-                      >
-                        {vocab.level}
-                      </span>
+                      <div className="mt-2 flex items-end justify-between">
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          {vocab.meaning}
+                        </span>
+                      </div>
                     </div>
-                    <div className="mt-2 flex items-end justify-between">
-                      <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {vocab.meaning}
-                      </span>
+                  ))}
+                </div>
+              )}
+
+              {/* TEST (QUIZ) */}
+              {activeSection === "quiz" && article.quizzes?.length > 0 && (
+                <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50/30 p-6 dark:border-indigo-900/50 dark:bg-indigo-900/10">
+                  <div className="mb-6 flex items-center gap-3">
+                    <div className="rounded-xl bg-indigo-500 p-2 text-white shadow-lg">
+                      <BrainCircuit className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        Matnni tushunish testi
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Matnni qanchalik yaxshi tushunganingizni tekshiring.
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="flex flex-col gap-6">
+                    {article.quizzes.map((quiz: any, index: number) => (
+                      <div
+                        key={quiz.id}
+                        className="rounded-xl border bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                      >
+                        <h4 className="mb-4 text-base font-medium text-gray-800 dark:text-gray-200">
+                          <span className="mr-2 text-indigo-500">
+                            {index + 1}.
+                          </span>{" "}
+                          {quiz.question}
+                        </h4>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                          {quiz.options.map((option: any) => {
+                            const isSelected =
+                              selectedAnswers[quiz.id] === option.id
+                            let optionStyle =
+                              "border-gray-200 bg-white hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-800"
+
+                            if (isSelected && !isQuizSubmitted) {
+                              optionStyle =
+                                "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
+                            } else if (isQuizSubmitted) {
+                              if (option.isCorrect) {
+                                optionStyle =
+                                  "border-green-500 bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                              } else if (isSelected && !option.isCorrect) {
+                                optionStyle =
+                                  "border-red-500 bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+                              } else {
+                                optionStyle =
+                                  "border-gray-200 bg-gray-50 text-gray-400 opacity-60 dark:border-gray-700 dark:bg-gray-900"
+                              }
+                            }
+
+                            return (
+                              <button
+                                key={option.id}
+                                onClick={() =>
+                                  handleOptionSelect(quiz.id, option.id)
+                                }
+                                disabled={isQuizSubmitted}
+                                className={`flex items-center justify-between rounded-lg border-2 p-3 text-left transition-all ${optionStyle}`}
+                              >
+                                <span className="text-sm font-medium">
+                                  {option.text}
+                                </span>
+
+                                {isQuizSubmitted && option.isCorrect && (
+                                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                                )}
+                                {isQuizSubmitted &&
+                                  isSelected &&
+                                  !option.isCorrect && (
+                                    <XCircle className="h-5 w-5 text-red-500" />
+                                  )}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        {isQuizSubmitted && quiz.explanation && (
+                          <div className="mt-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                            <span className="font-bold">Izoh: </span>{" "}
+                            {quiz.explanation}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {!isQuizSubmitted && (
+                    <div className="mt-6 flex justify-end">
+                      <button
+                        onClick={handleQuizSubmit}
+                        className="rounded-xl bg-indigo-600 px-8 py-3 font-bold text-white shadow-md transition-all hover:bg-indigo-700 hover:shadow-lg"
+                      >
+                        Natijani tekshirish
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
