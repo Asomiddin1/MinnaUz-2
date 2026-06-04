@@ -23,7 +23,7 @@ import {
   PlayCircle,
   BookMarked,
   PenTool,
-  Languages
+  Languages,
 } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 
@@ -33,18 +33,19 @@ export function AdminSidebar() {
   const collapsed = state === "collapsed"
   const { data: session, status } = useSession()
 
- const menuItems = [
-  { name: "Dashboard", href: "/admin", icon: Home },
-  { name: "Videolar", href: "/admin/videos", icon: PlayCircle },
-  { name: "Darajalar", href: "/admin/levels", icon: Layers },      
-  { name: "Bo'limlar", href: "/admin/modules", icon: BookOpen },  
-  { name: "Video Darslar", href: "/admin/lessons", icon: PlayCircle },
-  { name: "Grammatika", href: "/admin/grammars", icon: Languages },
-  { name: "Kanjilar", href: "/admin/kanjis", icon: PenTool },
-  { name: "Lug'atlar", href: "/admin/vocabularies", icon: BookMarked },
-  { name: "JLPT Testlar", href: "/admin/tests", icon: GraduationCap },
-  { name: "Foydalanuvchilar", href: "/admin/users", icon: Users }
-];
+  const menuItems = [
+    { name: "Dashboard", href: "/admin", icon: Home },
+    { name: "Videolar", href: "/admin/videos", icon: PlayCircle },
+    { name: "Darajalar", href: "/admin/levels", icon: Layers },
+    { name: "Bo'limlar", href: "/admin/modules", icon: BookOpen },
+    { name: "Video Darslar", href: "/admin/lessons", icon: PlayCircle },
+    { name: "Create Dokkai", href: "/admin/dokkai", icon: Languages },
+    { name: "Grammatika", href: "/admin/grammars", icon: Languages },
+    { name: "Kanjilar", href: "/admin/kanjis", icon: PenTool },
+    { name: "Lug'atlar", href: "/admin/vocabularies", icon: BookMarked },
+    { name: "JLPT Testlar", href: "/admin/tests", icon: GraduationCap },
+    { name: "Foydalanuvchilar", href: "/admin/users", icon: Users },
+  ]
   const userName = session?.user?.name || "Guest User"
   const userEmail = session?.user?.email || ""
 
@@ -103,10 +104,14 @@ export function AdminSidebar() {
 
             return (
               <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton asChild isActive={isActive} tooltip={item.name}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive}
+                  tooltip={item.name}
+                >
                   <Link
                     href={item.href}
-                    className={`flex h-10 items-center  rounded-md transition-colors ${
+                    className={`flex h-10 items-center rounded-md transition-colors ${
                       collapsed ? "w-10 justify-center" : "w-full gap-3 px-3"
                     }`}
                   >
@@ -120,7 +125,7 @@ export function AdminSidebar() {
         </SidebarMenu>
         {session?.user?.role === "admin" && (
           <Link href={"/dashboard"} className="flex justify-center px-4 py-2">
-            <button className="w-full cursor-pointer rounded-2xl bg-[#4b4b4b] hover:bg-gray-700 transition-colors py-1.5 text-white text-sm font-medium">
+            <button className="w-full cursor-pointer rounded-2xl bg-[#4b4b4b] py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-700">
               {collapsed ? "D" : "Back to Dashboard"}
             </button>
           </Link>
@@ -171,7 +176,7 @@ export function AdminSidebar() {
         </div>
 
         {/* LOGOUT */}
-        <div className="border-t px-3 pb-3 pt-2">
+        <div className="border-t px-3 pt-2 pb-3">
           <button
             onClick={() => signOut({ callbackUrl: "/auth/login" })}
             className={`flex h-10 w-full items-center rounded-md text-destructive transition-colors hover:bg-destructive/10 ${

@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http; // <-- HTTP fasadi qo'shildi
+use Illuminate\Support\Facades\Http;
 
 // ==========================================
 // MAVJUD CONTROLLERLAR
@@ -41,6 +41,11 @@ use App\Http\Controllers\Api\User\SearchController;
 use App\Http\Controllers\Api\Admin\VideoLessonController as AdminVideoController;
 use App\Http\Controllers\Api\User\VideoLessonController as UserVideoController;
 
+// ==========================================
+// DOKKAI (MAQOLALAR) CONTROLLERLARI
+// ==========================================
+use App\Http\Controllers\Api\Admin\ArticleController as AdminArticleController;
+use App\Http\Controllers\Api\User\ArticleController as UserArticleController;
 
 // ==========================================
 // AI MODELLARINI TEKSHIRISH ROUTE'I (VAQTINCHALIK)
@@ -83,6 +88,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/ai/history', [\App\Http\Controllers\AiController::class, 'history']);
     // ------------------------------
 
+    // DOKKAI / MAQOLALAR (USER QISMI)
+    Route::prefix('articles')->group(function () {
+        Route::get('/', [UserArticleController::class, 'index']); // Barcha maqolalarni qidiruv/filtr bilan olish
+        Route::get('/{id}', [UserArticleController::class, 'show']); // Bitta maqolani o'qish (va views oshirish)
+        Route::post('/{id}/submit-quiz', [UserArticleController::class, 'submitQuiz']); // Test javoblarini yuborish
+    });
+    
     Route::get('/user/streaks', [UserProfileController::class, 'getStreaks']);
 
     // YOPILGAN MATERIALLAR
@@ -129,7 +141,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
 
     // Materiallar (CRUD)
     Route::apiResource('grammars', AdminGrammarController::class);
-    Route::patch( 'grammars/{grammar}/translation', [AdminGrammarController::class, 'updateTranslation'] );
+    Route::patch('grammars/{grammar}/translation', [AdminGrammarController::class, 'updateTranslation']);
     Route::apiResource('kanjis', AdminKanjiController::class);
     Route::apiResource('vocabularies', AdminVocabularyController::class);
 
@@ -137,8 +149,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::post('/videos/fetch-youtube', [AdminVideoController::class, 'fetchFromYoutube']);
     Route::apiResource('videos', AdminVideoController::class);
 
-    // Groq API orqali grammatika qo'shish
-Route::post('/groq/grammar', [GroqController::class, 'fillGrammar']);  // generateGrammar emas
-Route::post('/groq/grammar/examples', [GroqController::class, 'getExamples']);  // generateGrammarExamples emas
-Route::post('/groq/grammar/fill', [GroqController::class, 'fillGrammarInfo']); 
+    // Dokkai / Maqolalar Admin (CRUD)
+    Route::apiResource('articles', AdminArticleController::class);
+
+    // Groq API (va yangi qo'shilgan Dokkai AI marshruti)
+    Route::post('/groq/grammar', [GroqController::class, 'fillGrammar']);  
+    Route::post('/groq/grammar/examples', [GroqController::class, 'getExamples']);  
+    Route::post('/groq/grammar/fill', [GroqController::class, 'fillGrammarInfo']); 
+    Route::post('/groq/dokkai-generate', [GroqController::class, 'generateDokkaiContent']); // AI orqali matnni parchalash
 });
