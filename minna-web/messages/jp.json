@@ -158,7 +158,8 @@
         "user": "ユーザー",
         "light": "ライト",
         "dark": "ダーク",
-        "system": "システム"
+        "system": "システム",
+        "expansion":"拡張"
     },
     "Sidebar": {
         "home": "ホーム",

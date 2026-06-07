@@ -158,7 +158,8 @@
         "user": "Foydalanuvchi",
         "light": "Yorug‘",
         "dark": "Qorong‘i",
-        "system": "Tizim"
+        "system": "Tizim",
+        "expansion":"Kengaytirish"
     },
     "Sidebar": {
         "home": "Home",
