@@ -12,8 +12,6 @@ import {
   Sparkles,
   Gem,
   Layers,
-  Settings,
-  MoreVertical,
   Maximize,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -263,7 +261,8 @@ export default function DashboardPage() {
                   title="Sahifani to'liq ekranda ochish"
                 >
                   <Maximize className="h-4 w-4 transition-transform group-hover:scale-110" />
-                  Kengaytirish
+                  
+                 {t('expansion')}
                 </button>
               </div>
             </div>
