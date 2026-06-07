@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 import {
   CheckCircle2,
   XCircle,
@@ -32,6 +33,7 @@ export default function ScoreBreakdown({
   passed,
   passingScore = 90,
 }: ScoreBreakdownProps) {
+  const t = useTranslations("ScoreBreakdown");
   const scaledScore =
     totalPoints > 0
       ? Math.round((earnedPoints / totalPoints) * maxPoints)
@@ -54,7 +56,7 @@ export default function ScoreBreakdown({
   return (
     <Card className="p-6 rounded-2xl bg-white dark:bg-slate-900 shadow-sm">
       <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-        <Target className="w-5 h-5 text-indigo-500" /> Ball taqsimoti (JLPT {maxPoints} ball)
+        <Target className="w-5 h-5 text-indigo-500" /> {t("titleJlpt", { max: maxPoints })}
       </h3>
 
       <div className="space-y-6">
@@ -76,7 +78,7 @@ export default function ScoreBreakdown({
         {/* Progress bar */}
         <div>
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-slate-500">To'plangan ball</span>
+            <span className="text-slate-500">{t("earned")}</span>
             <span className="font-bold text-slate-700 dark:text-slate-300">
               {scaledScore} / {maxPoints}
             </span>
@@ -164,7 +166,7 @@ export default function ScoreBreakdown({
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
               <span className="text-sm text-amber-700 dark:text-amber-400 font-medium">
-                Javob berilmagan
+                {t("unanswered")}
               </span>
             </div>
             <p className="text-xl font-bold text-amber-700 dark:text-amber-400 mt-1">

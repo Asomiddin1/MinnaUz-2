@@ -2,14 +2,15 @@
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { userAPI } from "@/lib/api/user" // O'zingizning to'g'ri API yo'lingizni ko'rsating
+import { userAPI } from "@/lib/api/user"
+import { useTranslations } from "next-intl"
 import {
   Search,
   Eye,
   Clock,
   ChevronRight,
   Loader2,
-  BookOpen, // Yuklanayotganda aylanadigan ikonka
+  BookOpen,
 } from "lucide-react"
 
 // Darajalar uchun chegaralar rangini belgilash
@@ -27,6 +28,7 @@ export default function DokkaiListComponent() {
   const [articles, setArticles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const pathname = usePathname()
+  const t = useTranslations("Dokkai")
 
   // API dan ma'lumotlarni tortib olish
   useEffect(() => {
@@ -65,7 +67,7 @@ export default function DokkaiListComponent() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Matn qidirish..."
+              placeholder={t("searchPlaceholder")}
               className="w-full rounded-2xl border-2 border-slate-100 bg-white py-3 pr-4 pl-12 shadow-sm transition-all outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800"
             />
             <Search className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400 group-focus-within:text-amber-500" />
@@ -97,7 +99,7 @@ export default function DokkaiListComponent() {
         ) : articles.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center text-slate-500">
             <BookOpen className="mb-4 h-12 w-12 opacity-20" />
-            <p>Hozircha maqolalar topilmadi.</p>
+            <p>{t("noArticles")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -137,7 +139,7 @@ export default function DokkaiListComponent() {
                       </div>
                       <div className="mt-3 flex items-center justify-between">
                         <span className="flex items-center gap-1 text-xs text-slate-400">
-                          <Eye className="h-3.5 w-3.5" /> {art.views} marta
+                          <Eye className="h-3.5 w-3.5" /> {art.views} {t("views")}
                         </span>
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 transition-colors group-hover:bg-amber-500 group-hover:text-white dark:bg-slate-700">
                           <ChevronRight className="h-5 w-5" />

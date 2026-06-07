@@ -26,6 +26,7 @@ import {
 import { useTheme } from "next-themes"
 import { signOut, useSession } from "next-auth/react"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 export function UserSidebar() {
   const pathname = usePathname()
@@ -33,13 +34,14 @@ export function UserSidebar() {
   const collapsed = state === "collapsed"
 
   const { data: session, status } = useSession()
+  const t = useTranslations("Sidebar")
 
   const menuItems = [
-    { name: "Home", href: "/dashboard", icon: Home },
-    { name: "Videolar", href: "/dashboard/video", icon: MonitorPlay },
-    { name: "Jlpt", href: "/dashboard/jlpt", icon: GraduationCap },
-    { name: "Premium", href: "/dashboard/premium", icon: Gem },
-    { name: "Profile", href: "/dashboard/profile", icon: User },
+    { name: t("home"), href: "/dashboard", icon: Home },
+    { name: t("videos"), href: "/dashboard/video", icon: MonitorPlay },
+    { name: t("jlpt"), href: "/dashboard/jlpt", icon: GraduationCap },
+    { name: t("premium"), href: "/dashboard/premium", icon: Gem },
+    { name: t("profile"), href: "/dashboard/profile", icon: User },
   ]
 
   const userName = session?.user?.name || "Guest User"
@@ -134,7 +136,7 @@ export function UserSidebar() {
         {session?.user?.role === "admin" && (
           <Link href={"/admin"} className="flex justify-center px-4 py-2">
             <button className="w-full cursor-pointer rounded-2xl border border-transparent bg-slate-800 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-700 dark:bg-[#1E293B] dark:hover:bg-[#334155]">
-              {collapsed ? "A" : "Admin Panel"}
+              {collapsed ? "A" : t("adminPanel")}
             </button>
           </Link>
         )}
@@ -189,7 +191,7 @@ export function UserSidebar() {
             className={`flex h-10 w-full items-center rounded-xl text-red-500 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 ${collapsed ? "justify-center" : "gap-3 px-4"}`}
           >
             <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="font-medium">Logout</span>}
+            {!collapsed && <span className="font-medium">{t("logout")}</span>}
           </button>
         </div>
       </SidebarContent>

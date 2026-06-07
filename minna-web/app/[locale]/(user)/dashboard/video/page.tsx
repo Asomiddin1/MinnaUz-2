@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 // Papkalar ierarxiyasiga mos import yo'llari (o'zingiznikini tekshirib oling)
-import VideoCard from '../../../../components/user-components/video-app/video-card';
+import VideoCard from '@/components/user-components/video-app/video-card';
 import { userAPI } from "@/lib/api/user"; // API ni import qildik
 import { PlayCircle, Sparkles, Eye, Clock, Loader2 } from 'lucide-react';
 

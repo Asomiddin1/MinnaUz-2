@@ -4,8 +4,10 @@ import * as React from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent } from "@/components/ui/card"
 import { userAPI } from "@/lib/api/user"
+import { useTranslations } from "next-intl"
 
 export function StreakCalendar() {
+  const t = useTranslations("StreakCalendar")
   const [isMounted, setIsMounted] = React.useState(false)
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date())
   const [currentMonth, setCurrentMonth] = React.useState<Date>(new Date())
@@ -75,7 +77,7 @@ export function StreakCalendar() {
   if (!isMounted) {
     return (
       <Card className="w-full h-full p-1 border-none shadow-md dark:bg-slate-900 rounded-xl flex items-center justify-center">
-        <div className="text-slate-400 text-sm">Kalendar yuklanmoqda...</div>
+        <div className="text-slate-400 text-sm">{t("loading")}</div>
       </Card>
     )
   }
@@ -85,7 +87,7 @@ export function StreakCalendar() {
       <CardContent className="p-0 flex justify-center items-center">
         {isLoading && (
           <div className="absolute top-2 right-4 text-xs text-slate-400 animate-pulse">
-            Yuklanmoqda...
+            {t("syncing")}
           </div>
         )}
 

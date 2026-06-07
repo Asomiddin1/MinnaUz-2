@@ -26,25 +26,27 @@ import {
   Languages,
 } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
+import { useTranslations } from "next-intl"
 
 export function AdminSidebar() {
   const pathname = usePathname()
   const { state, toggleSidebar } = useSidebar()
   const collapsed = state === "collapsed"
   const { data: session, status } = useSession()
+  const t = useTranslations("AdminSidebar")
 
   const menuItems = [
-    { name: "Dashboard", href: "/admin", icon: Home },
-    { name: "Videolar", href: "/admin/videos", icon: PlayCircle },
-    { name: "Darajalar", href: "/admin/levels", icon: Layers },
-    { name: "Bo'limlar", href: "/admin/modules", icon: BookOpen },
-    { name: "Video Darslar", href: "/admin/lessons", icon: PlayCircle },
-    { name: "Create Dokkai", href: "/admin/dokkai", icon: Languages },
-    { name: "Grammatika", href: "/admin/grammars", icon: Languages },
-    { name: "Kanjilar", href: "/admin/kanjis", icon: PenTool },
-    { name: "Lug'atlar", href: "/admin/vocabularies", icon: BookMarked },
-    { name: "JLPT Testlar", href: "/admin/tests", icon: GraduationCap },
-    { name: "Foydalanuvchilar", href: "/admin/users", icon: Users },
+    { name: t("dashboard"), href: "/admin", icon: Home },
+    { name: t("videos"), href: "/admin/videos", icon: PlayCircle },
+    { name: t("levels"), href: "/admin/levels", icon: Layers },
+    { name: t("modules"), href: "/admin/modules", icon: BookOpen },
+    { name: t("videoLessons"), href: "/admin/lessons", icon: PlayCircle },
+    { name: t("createDokkai"), href: "/admin/dokkai", icon: Languages },
+    { name: t("grammar"), href: "/admin/grammars", icon: Languages },
+    { name: t("kanjis"), href: "/admin/kanjis", icon: PenTool },
+    { name: t("vocabularies"), href: "/admin/vocabularies", icon: BookMarked },
+    { name: t("jlptTests"), href: "/admin/tests", icon: GraduationCap },
+    { name: t("users"), href: "/admin/users", icon: Users },
   ]
   const userName = session?.user?.name || "Guest User"
   const userEmail = session?.user?.email || ""
@@ -126,7 +128,7 @@ export function AdminSidebar() {
         {session?.user?.role === "admin" && (
           <Link href={"/dashboard"} className="flex justify-center px-4 py-2">
             <button className="w-full cursor-pointer rounded-2xl bg-[#4b4b4b] py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-700">
-              {collapsed ? "D" : "Back to Dashboard"}
+              {collapsed ? "D" : t("backToDashboard")}
             </button>
           </Link>
         )}
@@ -184,7 +186,7 @@ export function AdminSidebar() {
             }`}
           >
             <LogOut className="h-5 w-5" />
-            {!collapsed && <span className="font-medium">Logout</span>}
+            {!collapsed && <span className="font-medium">{t("logout")}</span>}
           </button>
         </div>
       </SidebarContent>

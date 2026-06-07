@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function InteractiveLoginPage() {
   const router = useRouter();
+  const t = useTranslations("Login");
 
   // --- UI Holatlari (States) ---
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
@@ -67,10 +69,10 @@ export default function InteractiveLoginPage() {
       if (res.ok) {
         setStep(2);
       } else {
-        setError(data.message || "Xatolik yuz berdi");
+        setError(data.message || t("errorDefault"));
       }
     } catch (err) {
-      setError("Server bilan ulanishda xatolik!");
+      setError(t("errorServer"));
     } finally {
       setLoading(false);
     }
@@ -89,7 +91,7 @@ export default function InteractiveLoginPage() {
     });
 
     if (res?.error) {
-      setError("Kod xato yoki muddati o'tgan");
+      setError(t("errorOtp"));
       setLoading(false);
     } else {
       const session = await getSession();
@@ -127,8 +129,8 @@ export default function InteractiveLoginPage() {
             
             
             <h2 className="mt-12 text-3xl font-extrabold text-center leading-tight tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500">
-              Find Your Tribe. <br/>
-              <span className="text-blue-600">Build Your Network.</span>
+              {t("heroTitle")} <br/>
+              <span className="text-blue-600">{t("heroHighlight")}</span>
             </h2>
           </div>
         </div>
@@ -138,12 +140,12 @@ export default function InteractiveLoginPage() {
           <div className="w-full max-w-md mx-auto space-y-8">
             <div className="text-left">
               <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight mb-2">
-                {step === 1 ? "Tizimga kirish" : "Kodni tasdiqlash"}
+                {step === 1 ? t("title") : t("verifyTitle")}
               </h1>
               <p className="text-slate-500 text-lg">
                 {step === 1 
-                  ? "Xush kelibsiz! Ma'lumotlaringizni kiriting." 
-                  : `${email} manziliga yuborilgan 6 xonali kodni kiriting`}
+                  ? t("welcome") 
+                  : `${email} ${t("otpSent")}`}
               </p>
             </div>
 
@@ -156,7 +158,7 @@ export default function InteractiveLoginPage() {
             {step === 1 ? (
               <form className="space-y-6" onSubmit={handleSendOtp}>
                 <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-slate-700 ml-1">Elektron pochta</label>
+                  <label className="block text-sm font-semibold text-slate-700 ml-1">{t("email")}</label>
                   <div className="relative">
                     <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                     <input
@@ -176,12 +178,12 @@ export default function InteractiveLoginPage() {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {loading ? "Yuborilmoqda..." : "Kodni olish"}
+                  {loading ? t("sending") : t("getCode")}
                 </button>
                 
                 <div className="relative flex items-center py-2">
                   <div className="flex-grow border-t border-slate-200"></div>
-                  <span className="flex-shrink-0 mx-4 text-slate-400 text-sm font-medium">yoki</span>
+                  <span className="flex-shrink-0 mx-4 text-slate-400 text-sm font-medium">{t("or")}</span>
                   <div className="flex-grow border-t border-slate-200"></div>
                 </div>
 
@@ -197,20 +199,20 @@ export default function InteractiveLoginPage() {
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                     <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
-                  Google orqali kirish
+                  {t("googleLogin")}
                 </button>
               </form>
             ) : (
               <form className="space-y-6" onSubmit={handleVerifyOtp}>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between ml-1">
-                    <label className="block text-sm font-semibold text-slate-700">Tasdiqlash kodi</label>
+                    <label className="block text-sm font-semibold text-slate-700">{t("verifyCode")}</label>
                     <button
                       type="button"
                       onClick={() => setStep(1)}
                       className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
                     >
-                      Emailni o'zgartirish
+                      {t("changeEmail")}
                     </button>
                   </div>
                   <div className="relative">
@@ -233,7 +235,7 @@ export default function InteractiveLoginPage() {
                   disabled={loading || otp.length !== 6}
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {loading ? "Tekshirilmoqda..." : "Tizimga kirish"}
+                  {loading ? t("checking") : t("login")}
                 </button>
               </form>
             )}
