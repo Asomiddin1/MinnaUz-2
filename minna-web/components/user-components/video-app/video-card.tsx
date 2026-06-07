@@ -1,4 +1,6 @@
+"use client";
 import React from 'react';
+import { useTranslations } from "next-intl";
 import Link from 'next/link';
 import { Play, CheckCircle, MoreVertical } from 'lucide-react';
 
@@ -14,6 +16,7 @@ interface VideoProps {
 }
 
 export default function VideoCard({ video }: { video: VideoProps }) {
+  const t = useTranslations("VideoCard");
   const isCompleted = video.progress === 100;
 
   return (
@@ -60,17 +63,17 @@ export default function VideoCard({ video }: { video: VideoProps }) {
             </div>
           </div>
           <div className="text-[13px] text-gray-500 dark:text-gray-400 mt-1.5 flex flex-col gap-0.5">
-            <span className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">MinnaUz Academy</span>
+            <span className="hover:text-gray-800 dark:hover:text-gray-200 transition-colors">{t("channel")}</span>
             <div className="flex items-center gap-1.5">
-              <span>{video.views || "1.2k ko'rish"}</span>
+              <span>{video.views || t("views")}</span>
               <span className="text-[10px]">●</span>
-              <span>{video.postedAt || "1 kun oldin"}</span>
+              <span>{video.postedAt || t("ago")}</span>
             </div>
           </div>
           {isCompleted && (
             <div className="flex items-center gap-1 mt-1.5 text-[12px] text-emerald-600 dark:text-emerald-500 font-medium bg-emerald-50 dark:bg-emerald-500/10 w-fit px-2 py-0.5 rounded-full">
               <CheckCircle className="w-3.5 h-3.5" />
-              Tugatilgan
+              {t("completed")}
             </div>
           )}
         </div>

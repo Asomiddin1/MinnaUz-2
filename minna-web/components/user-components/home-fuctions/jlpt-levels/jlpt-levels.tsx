@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { BookOpen, Package, Languages, ArrowRight } from "lucide-react"
 
 import { Card, CardContent } from "@/components/ui/card"
@@ -35,6 +36,7 @@ const levelsData = [
 export default function JlptLevels() {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const t = useTranslations("JlptLevels")
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 300)
@@ -72,17 +74,17 @@ export default function JlptLevels() {
               <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-medium text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-1.5">
                   <BookOpen className="h-4 w-4 text-blue-400" />
-                  <span>{level.grammar} grammatika</span>
+                  <span>{level.grammar} {t("grammar")}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
                   <Package className="h-4 w-4 text-purple-400" />
-                  <span>{level.vocab} lug&apos;at</span>
+                  <span>{level.vocab} {t("vocab")}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
                   <Languages className="h-4 w-4 text-green-400" />
-                  <span>{level.kanji} kanji</span>
+                  <span>{level.kanji} {t("kanji")}</span>
                 </div>
               </div>
 

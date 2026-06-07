@@ -1,21 +1,23 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/src/i18n/navigation";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations("Navbar");
 
-  // Siz so'ragan mantiqiy tartib
   const navLinks = [
-    { name: "Maktab haqida", href: "#about" },
-    { name: "Natijalar", href: "#results" },
-    { name: "Premium", href: "#premium" },
-    { name: "Aloqa", href: "#contact" },
+    { name: t("about"), href: "#about" },
+    { name: t("results"), href: "#results" },
+    { name: t("premium"), href: "#premium" },
+    { name: t("contact"), href: "#contact" },
   ];
 
   return (
-    <nav className="w-full fixed top-4 md:top-6 z-[1000] flex justify-center px-4">
+    <nav className="w-full fixed top-4 md:top-6 z-[50] flex justify-center px-4">
       <div className="max-w-7xl w-full bg-white/80 backdrop-blur-xl h-16 md:h-20 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.05)] border border-white/40 flex items-center justify-between px-6 md:px-10 relative z-[1001]">
         
         {/* LOGO */}
@@ -25,7 +27,7 @@ export default function Navbar() {
           </h2>
         </a>
 
-        {/* DESKTOP MENU (Katta ekranlar uchun) */}
+        {/* DESKTOP MENU */}
         <div className="hidden lg:flex items-center gap-10">
           {navLinks.map((link) => (
             <a
@@ -41,13 +43,15 @@ export default function Navbar() {
 
         {/* ACTIONS */}
         <div className="flex items-center gap-3">
-         <Link href={'/dashboard'}>
-             <button className="hidden sm:block bg-[#1454d2] text-white font-[1000] text-[12px] uppercase py-3 px-8 rounded-full border-b-[4px] border-[#164ea0] active:border-b-0 active:translate-y-1 transition-all shadow-lg shadow-blue-500/20">
-            Kirish
-          </button>
-         </Link>
+          <LanguageSwitcher />
 
-          {/* MOBILE MENU BUTTON (Faqat mobil uchun) */}
+          <Link href="/dashboard">
+            <button className="hidden sm:block bg-[#1454d2] text-white font-[1000] text-[12px] uppercase py-3 px-8 rounded-full border-b-[4px] border-[#164ea0] active:border-b-0 active:translate-y-1 transition-all shadow-lg shadow-blue-500/20">
+              {t("login")}
+            </button>
+          </Link>
+
+          {/* MOBILE MENU BUTTON */}
           <button 
             onClick={() => setIsOpen(!isOpen)}
             className="lg:hidden w-10 h-10 flex flex-col items-center justify-center gap-1.5 bg-slate-50 rounded-full border border-slate-100 relative z-[1002]"
@@ -68,11 +72,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* MOBILE MENU OVERLAY (Mobil menyu ochilganda tushadigan oyna) */}
+      {/* MOBILE MENU OVERLAY */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Orqa fonni xiralashtirish (Qora fon) */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -81,7 +84,6 @@ export default function Navbar() {
               className="fixed inset-0 bg-black/20 backdrop-blur-sm lg:hidden z-[998]"
             />
             
-            {/* Menyu oynasi */}
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -92,16 +94,18 @@ export default function Navbar() {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsOpen(false)} // Bosilganda menyu yopiladi
+                  onClick={() => setIsOpen(false)}
                   className="text-[#042c60] font-[1000] text-lg uppercase tracking-tighter hover:text-[#1a48c6] transition-colors"
                 >
                   {link.name}
                 </a>
               ))}
               <hr className="w-full border-slate-50" />
-              <button className="w-full bg-[#1745de] text-white font-[1000] py-4 rounded-3xl border-b-[6px] border-[#0f37ba] active:border-b-0 active:translate-y-1 transition-all">
-                Boshlash 
-              </button>
+              <Link href="/dashboard" className="w-full">
+                <button className="w-full bg-[#1745de] text-white font-[1000] py-4 rounded-3xl border-b-[6px] border-[#0f37ba] active:border-b-0 active:translate-y-1 transition-all">
+                  {t("start")}
+                </button>
+              </Link>
             </motion.div>
           </>
         )}

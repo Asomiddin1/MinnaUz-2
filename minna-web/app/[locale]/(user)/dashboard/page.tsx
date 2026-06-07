@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 // Komponentlarni import qilish
 import BannerCarousel from "@/components/user-components/banner/banner-carousel"
@@ -31,69 +32,21 @@ import AiComponent from "@/components/user-components/home-fuctions/ai/ai"
 import Kanji from "@/components/user-components/home-fuctions/kanji/kanji"
 import Premium from "@/components/user-components/home-fuctions/premium/premium"
 
-const MENU_ITEMS = [
-  {
-    id: "dictionary",
-    label: "Lug'at",
-    icon: Copy,
-    href: "/dashboard/dictionary",
-    isTab: true,
-  },
-  {
-    id: "games",
-    label: "O'yinlar",
-    icon: Gamepad2,
-    href: "/dashboard/games",
-    isTab: true,
-  },
-  {
-    id: "dokkai",
-    label: "Dokkai",
-    icon: BookOpen,
-    href: "/dashboard/dokkai",
-    isTab: true,
-  },
-  {
-    id: "kanji",
-    label: "Kanji",
-    icon: GraduationCap,
-    href: "/dashboard/kanji",
-    isTab: true,
-  },
-  {
-    id: "shop",
-    label: "Do'kon",
-    icon: ShoppingCart,
-    href: "/dashboard/shop",
-    isTab: true,
-  },
-  {
-    id: "translator",
-    label: "Tarjimon",
-    icon: Languages,
-    href: "/dashboard/translator",
-    isTab: true,
-  },
-  {
-    id: "ai",
-    label: "Sun'iy intellekt",
-    icon: Sparkles,
-    href: "/dashboard/ai",
-    isTab: true,
-  },
-  {
-    id: "premium",
-    label: "Premium",
-    icon: Gem,
-    href: "/dashboard/premium",
-    color: "text-amber-500 dark:text-amber-400",
-    isTab: true,
-  },
-]
-
 export default function DashboardPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
+  const t = useTranslations("Dashboard")
+
+  const MENU_ITEMS = [
+    { id: "dictionary", label: t("dictionary"), icon: Copy, href: "/dashboard/dictionary", isTab: true },
+    { id: "games", label: t("games"), icon: Gamepad2, href: "/dashboard/games", isTab: true },
+    { id: "dokkai", label: t("dokkai"), icon: BookOpen, href: "/dashboard/dokkai", isTab: true },
+    { id: "kanji", label: t("kanji"), icon: GraduationCap, href: "/dashboard/kanji", isTab: true },
+    { id: "shop", label: t("shop"), icon: ShoppingCart, href: "/dashboard/shop", isTab: true },
+    { id: "translator", label: t("translator"), icon: Languages, href: "/dashboard/translator", isTab: true },
+    { id: "ai", label: t("ai"), icon: Sparkles, href: "/dashboard/ai", isTab: true },
+    { id: "premium", label: t("premium"), icon: Gem, href: "/dashboard/premium", color: "text-amber-500 dark:text-amber-400", isTab: true },
+  ]
 
   // State'lar
   const [isMounted, setIsMounted] = useState(false)
@@ -274,7 +227,7 @@ export default function DashboardPage() {
                   onClick={() => setActiveTab("jlpt")}
                   className="relative flex min-w-fit shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-1.5 text-[13.5px] font-medium text-slate-600 transition-all outline-none hover:bg-slate-300/60 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm dark:text-slate-400 dark:hover:bg-slate-800/80 dark:data-[state=active]:bg-slate-950 dark:data-[state=active]:text-white"
                 >
-                  <Layers className="h-4 w-4" /> Bosh sahifa
+                  <Layers className="h-4 w-4" /> {t("main_page")}
                 </TabsTrigger>
 
                 {MENU_ITEMS.map((tab) => (
@@ -299,7 +252,7 @@ export default function DashboardPage() {
             <div className="flex w-full items-center justify-between border-b border-slate-200 bg-white/95 px-5 py-3 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/95">
               <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                 {activeTab === "jlpt"
-                  ? "Bosh sahifa"
+                  ?  `${t('main_page')}`
                   : MENU_ITEMS.find((i) => i.id === activeTab)?.label}
               </h1>
 

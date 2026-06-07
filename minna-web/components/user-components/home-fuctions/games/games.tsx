@@ -3,9 +3,11 @@
 import React, { useRef, useEffect } from "react";
 import Link from "next/link";
 import { Play, Home , Lock} from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const GamesList = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const t = useTranslations("Games");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -106,7 +108,7 @@ const GamesList = () => {
                 <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto w-max">
                   <Link href={banner.link} className="flex items-center gap-2 bg-white text-black px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold text-sm sm:text-base hover:scale-105 hover:bg-slate-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                     <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />
-                    O'ynash
+                    {t("play")}
                   </Link>
                 </div>
               </div>
@@ -116,14 +118,14 @@ const GamesList = () => {
         
         <div className="mb-5 flex items-center justify-between">
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-wide">
-            Sizga yoqishi mumkin
+            {t("youMayLike")}
           </h2>
           <Link 
             href={'/dashboard'} 
             className="group flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium text-slate-300 hover:text-white transition-all active:scale-95"
           >
             <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-110 transition-transform" />
-            <span className="hidden sm:inline">Bosh sahifa</span>
+            <span className="hidden sm:inline">{t("homePage")}</span>
           </Link>
         </div>
 

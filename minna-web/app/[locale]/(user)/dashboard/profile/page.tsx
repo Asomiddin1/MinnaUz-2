@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface User {
   id?: number
@@ -48,6 +49,7 @@ export default function ProfilePage() {
   const [results, setResults] = useState<ExamResultSummary[]>([])
   const [isFetching, setIsFetching] = useState(false)
   const [isFetchingResults, setIsFetchingResults] = useState(false)
+  const t = useTranslations("Profile")
 
   useEffect(() => {
     if (status === "authenticated" && session) {
@@ -102,7 +104,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <div className="mt-10 text-center text-slate-500 dark:text-slate-400">
-        Foydalanuvchi topilmadi. Tizimga qayta kiring.
+        {t("notFound")}
       </div>
     )
   }
@@ -162,7 +164,7 @@ export default function ProfilePage() {
           <RefreshCcw
             className={`h-4 w-4 text-[#8B5CF6] ${isFetching ? "animate-spin" : ""}`}
           />
-          Refresh Profile
+          {t("refreshProfile")}
         </button>
       </div>
 
@@ -184,7 +186,7 @@ export default function ProfilePage() {
               )}
             </p>
             <p className="mt-1 text-sm font-medium text-slate-400 dark:text-slate-500">
-              Minna Coins
+              {t("coins")}
             </p>
           </div>
         </div>
@@ -210,7 +212,7 @@ export default function ProfilePage() {
               )}
             </p>
             <p className="mt-1 text-sm font-medium text-slate-400 dark:text-slate-500">
-              Day Streak
+              {t("streak")}
             </p>
           </div>
         </div>
@@ -228,7 +230,7 @@ export default function ProfilePage() {
               </span>
             </p>
             <p className="mt-1 text-sm font-medium text-slate-400 dark:text-slate-500">
-              Active Devices
+              {t("devices")}
             </p>
           </div>
         </div>
@@ -240,7 +242,7 @@ export default function ProfilePage() {
             {isPremium ? "PREMIUM" : "FREE"}
           </div>
           <p className="text-sm font-medium text-slate-400 dark:text-slate-500">
-            Current Plan
+            {t("plan")}
           </p>
         </div>
       </div>
@@ -252,26 +254,26 @@ export default function ProfilePage() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
             <History className="h-5 w-5 text-[#8B5CF6]" />
-            O‘tgan test natijalari
+            {t("history")}
           </h2>
           <button
             onClick={fetchResults}
             disabled={isFetchingResults}
             className="text-sm text-[#8B5CF6] hover:underline disabled:opacity-50"
           >
-            {isFetchingResults ? "Yuklanmoqda..." : "Yangilash"}
+            {isFetchingResults ? t("refreshing") : t("refresh")}
           </button>
         </div>
 
         {results.length === 0 && !isFetchingResults ? (
           <div className="py-10 text-center text-slate-400 dark:text-slate-500">
             <History className="mx-auto mb-3 h-12 w-12 opacity-50" />
-            <p>Hali birorta test ishlanmagan.</p>
+            <p>{t("noHistory")}</p>
             <a
               href="/dashboard/jlpt"
               className="mt-2 inline-block text-sm text-[#8B5CF6] hover:underline"
             >
-              Testlarni ko‘rish
+              {t("viewTests")}
             </a>
           </div>
         ) : (
@@ -332,17 +334,17 @@ export default function ProfilePage() {
         <div className="relative z-10 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
           <div>
             <h2 className="mb-2 flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white">
-              <Crown className="h-6 w-6 text-[#8B5CF6]" /> Premium Status
+              <Crown className="h-6 w-6 text-[#8B5CF6]" /> {t("premiumStatus")}
             </h2>
             <p className="text-sm font-medium text-slate-500 md:text-base dark:text-slate-400">
               {isPremium
-                ? "You are currently enjoying Premium features!"
-                : "Upgrade to Premium to get more devices and features!"}
+                ? t("premiumActive")
+                : t("premiumInactive")}
             </p>
           </div>
           {!isPremium && (
             <button className="w-full shrink-0 rounded-2xl bg-[#8B5CF6] px-8 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#7C3AED] md:w-auto">
-              Upgrade Now
+              {t("upgrade")}
             </button>
           )}
         </div>

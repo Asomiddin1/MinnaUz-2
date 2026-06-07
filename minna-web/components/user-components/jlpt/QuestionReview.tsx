@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import {
   CheckCircle2,
   XCircle,
@@ -36,6 +37,7 @@ export default function QuestionReview({ answers }: QuestionReviewProps) {
   const [activeAudio, setActiveAudio] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const t = useTranslations("QuestionReview");
 
   const wrongAnswers = answers.filter((a) => !a.is_correct);
   const displayAnswers = showAll ? answers : wrongAnswers;
@@ -86,15 +88,15 @@ export default function QuestionReview({ answers }: QuestionReviewProps) {
       {/* Toggle tugma */}
       <div className="flex items-center justify-between px-2">
         <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-          {showAll ? "Barcha savollar" : "Xatolar ustida ishlash"}
+          {showAll ? t("allQuestions") : t("errorWork")}
           {!showAll && (
             <Badge variant="secondary" className="text-xs">
-              {wrongAnswers.length} ta xato
+              {wrongAnswers.length} {t("errors")}
             </Badge>
           )}
         </h3>
         <Button variant="outline" size="sm" onClick={() => setShowAll(!showAll)}>
-          {showAll ? "Faqat xatolarni ko'rish" : "Barcha savollarni ko'rish"}
+          {showAll ? t("showErrors") : t("showAll")}
         </Button>
       </div>
 
@@ -160,8 +162,8 @@ export default function QuestionReview({ answers }: QuestionReviewProps) {
                 </div>
                 <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
                   {activeAudio === q.question_id && isPlaying
-                    ? "To'xtatish"
-                    : "Tinglash"}
+                    ? t("stop")
+                    : t("listen")}
                 </span>
                 <Volume2 className="w-5 h-5 text-blue-400 ml-auto" />
               </button>
