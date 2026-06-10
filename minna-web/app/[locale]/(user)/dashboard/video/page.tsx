@@ -2,20 +2,29 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-// Papkalar ierarxiyasiga mos import yo'llari (o'zingiznikini tekshirib oling)
+import { useTranslations } from 'next-intl'; // i18n kutubxonasi ulangan deb faraz qilamiz
 import VideoCard from '@/components/user-components/video-app/video-card';
-import { userAPI } from "@/lib/api/user"; // API ni import qildik
+import { userAPI } from "@/lib/api/user";
 import { PlayCircle, Sparkles, Eye, Clock, Loader2 } from 'lucide-react';
 
 export default function VideoPage() {
+  const t = useTranslations('VideoPage'); // Tarjima obyektini chaqiramiz
   const [activeFilter, setActiveFilter] = useState("Barchasi");
   
-  // Backenddan keladigan ma'lumotlar uchun statelar
   const [allVideos, setAllVideos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const filters = ["Barchasi", "Anime tili", "Yaponiyada hayot", "Vloglar", "Madaniyat", "Qiziqarli faktlar", "Shorts"];
+  // Filtrlar ro'yxati (id qismi backenddagi ma'lumotni filtrlash uchun, label esa ekranda ko'rsatish uchun)
+  const filters = [
+    { id: "Barchasi", label: t('filters.all') },
+    { id: "Anime tili", label: t('filters.anime') },
+    { id: "Yaponiyada hayot", label: t('filters.life') },
+    { id: "Vloglar", label: t('filters.vlogs') },
+    { id: "Madaniyat", label: t('filters.culture') },
+    { id: "Qiziqarli faktlar", label: t('filters.facts') },
+    { id: "Shorts", label: t('filters.shorts') },
+  ];
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -24,12 +33,12 @@ export default function VideoPage() {
         const res = await userAPI.getVideos();
         const fetchedVideos = res.data?.data || res.data || [];
         
-        // Backenddagi created_at ni VideoCard tushunishi uchun postedAt ga o'zgartiramiz
         const mappedVideos = fetchedVideos.map((video: any) => {
           const date = new Date(video.created_at);
           return {
             ...video,
-            postedAt: `${date.getDate()}-${date.toLocaleString('uz-UZ', { month: 'short' })} ${date.getFullYear()}`, // Masalan: 15-Okt 2023
+            // Formatni ham xalqaro qilib qoldirish yaxshi, yoki next-intl formatidan foydalanish mumkin
+            postedAt: `${date.getDate()}-${date.toLocaleString('en-US', { month: 'short' })} ${date.getFullYear()}`, 
           };
         });
 
@@ -45,15 +54,12 @@ export default function VideoPage() {
     fetchVideos();
   }, []);
 
-  // Filtrlash mantiqi (Frontendda tezkor ishlashi uchun local filter ishlatamiz)
   const filteredVideos = activeFilter === "Barchasi" 
-    ? allVideos.slice(1) // Birinchisini Bannerga olib qolganimiz uchun 1 dan boshlaymiz
+    ? allVideos.slice(1) 
     : allVideos.filter((v: any) => v.category === activeFilter);
 
-  // Banner uchun eng oxirgi (yangi) birinchi video
   const featuredVideo = allVideos.length > 0 ? allVideos[0] : null;
 
-  // Yuklanish holati
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -62,11 +68,10 @@ export default function VideoPage() {
     );
   }
 
-  // Xatolik holati
   if (error) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p className="text-red-500 font-medium">Videolarni yuklashda xatolik yuz berdi. Iltimos qayta urinib ko'ring.</p>
+        <p className="text-red-500 font-medium">{t('errorMsg')}</p>
       </div>
     );
   }
@@ -87,8 +92,10 @@ export default function VideoPage() {
           <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-3/4 lg:w-2/3 flex flex-col justify-end h-full">
             <div className="flex items-center gap-2 mb-4">
               <span className="bg-blue-600/90 backdrop-blur-md text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Yangi Dars
+                <Sparkles className="w-3.5 h-3.5" /> {t('newLesson')}
               </span>
+              {/* Agar kategoriyani o'zini ham tarjima qilmoqchi bo'lsangiz: 
+                  t(`filters.${Object.keys(t.raw('filters')).find(key => filters.find(f => f.id === featuredVideo.category)?.id === featuredVideo.category)}`) kabi qiyinroq yozish kerak, shuning uchun asl holicha qoldirilgani ma'qul */}
               <span className="text-gray-300 text-sm font-medium">{featuredVideo.category}</span>
             </div>
             
@@ -96,7 +103,6 @@ export default function VideoPage() {
               {featuredVideo.title}
             </h1>
 
-            {/* Backend ma'lumotlari: Ko'rishlar va Vaqt */}
             <div className="flex items-center gap-4 mb-6 text-gray-300 text-sm font-medium">
               <span className="flex items-center gap-1.5 bg-black/20 backdrop-blur-sm px-3 py-1 rounded-full">
                 <Eye className="w-4 h-4" /> {featuredVideo.views}
@@ -110,7 +116,7 @@ export default function VideoPage() {
               <Link href={`/dashboard/video/${featuredVideo.id}`} 
                     className="inline-flex items-center justify-center gap-2 bg-white text-gray-900 px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors duration-300 w-full sm:w-auto">
                 <PlayCircle className="w-5 h-5" fill="currentColor" />
-                Tomosha qilish
+                {t('watch')}
               </Link>
             </div>
           </div>
@@ -123,15 +129,15 @@ export default function VideoPage() {
           {filters.map((filter, index) => (
             <button 
               key={index}
-              onClick={() => setActiveFilter(filter)}
+              onClick={() => setActiveFilter(filter.id)} // id ni saqlaymiz (backend bilan solishtirish uchun)
               className={`snap-start whitespace-nowrap py-4 text-[14px] md:text-[15px] font-semibold transition-all duration-300 relative ${
-                activeFilter === filter 
+                activeFilter === filter.id 
                 ? "text-blue-600 dark:text-blue-400" 
                 : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               }`}
             >
-              {filter}
-              {activeFilter === filter && (
+              {filter.label} {/* Ekranda tarjimani ko'rsatamiz */}
+              {activeFilter === filter.id && (
                 <span className="absolute bottom-0 left-0 w-full h-[3px] bg-blue-600 dark:bg-blue-400 rounded-t-full shadow-[0_-2px_10px_rgba(37,99,235,0.5)]"></span>
               )}
             </button>
@@ -139,10 +145,14 @@ export default function VideoPage() {
         </div>
       </div>
 
-      {/* 3. VIDEOLAR RO'YXATI */}
+{/* 3. VIDEOLAR RO'YXATI */}
       <div className="pb-10">
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          {activeFilter === "Barchasi" ? "Tavsiya etilgan videolar" : `${activeFilter} videolari`}
+          {activeFilter === "Barchasi" 
+            ? t('recommended') 
+            : t('categoryVideos', { 
+                category: filters.find(f => f.id === activeFilter)?.label || activeFilter 
+              })}
         </h2>
 
         {filteredVideos.length > 0 ? (
@@ -153,7 +163,7 @@ export default function VideoPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 px-4 text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-3xl">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Bu bo'limda hozircha videolar yo'q</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('noVideos')}</h3>
           </div>
         )}
       </div>
