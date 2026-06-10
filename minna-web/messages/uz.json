@@ -253,7 +253,9 @@
         "searchPlaceholder": "Matn qidirish...",
         "all": "Barchasi",
         "noArticles": "Hozircha maqolalar topilmadi.",
-        "views": "marta"
+        "views": "marta",
+        "read":"O'qildi",
+        "loading": "Yuklanmoqda..."
     },
     "Lugat": {
         "loading": "Lug'at tayyorlanmoqda...",
@@ -297,5 +299,22 @@
         "passed": "Tabriklaymiz! Siz testdan o'tdingiz!",
         "failed": "Afsuski, {score} balldan kam to'pladingiz",
         "passLine": "O'tish:"
-    }
+    },
+  "VideoPage": {
+    "filters": {
+      "all": "Barchasi",
+      "anime": "Anime tili",
+      "life": "Yaponiyada hayot",
+      "vlogs": "Vloglar",
+      "culture": "Madaniyat",
+      "facts": "Qiziqarli faktlar",
+      "shorts": "Shorts"
+    },
+    "newLesson": "Yangi Dars",
+    "watch": "Tomosha qilish",
+    "recommended": "Tavsiya etilgan videolar",
+    "categoryVideos": "{category} videolari",
+    "noVideos": "Bu bo'limda hozircha videolar yo'q",
+    "errorMsg": "Videolarni yuklashda xatolik yuz berdi. Iltimos qayta urinib ko'ring."
+  }
 }

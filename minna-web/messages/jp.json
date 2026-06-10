@@ -253,7 +253,9 @@
         "searchPlaceholder": "テキストを検索...",
         "all": "すべて",
         "noArticles": "記事が見つかりませんでした。",
-        "views": "回"
+        "views": "回",
+        "read":"読まれた",
+        "loading": "読み込み中..."
     },
     "Lugat": {
         "loading": "辞書を準備中...",
@@ -297,5 +299,22 @@
         "passed": "おめでとうございます！合格です！",
         "failed": "残念、{score}点未満でした",
         "passLine": "合格点："
-    }
+    },
+    "VideoPage": {
+    "filters": {
+      "all": "すべて",
+      "anime": "アニメ言語",
+      "life": "日本での生活",
+      "vlogs": "Vlog",
+      "culture": "文化",
+      "facts": "豆知識",
+      "shorts": "ショート"
+    },
+    "newLesson": "新しいレッスン",
+    "watch": "視聴する",
+    "recommended": "おすすめの動画",
+    "categoryVideos": "{category} の動画",
+    "noVideos": "このセクションにはまだ動画がありません",
+    "errorMsg": "動画の読み込み中にエラーが発生しました。もう一度お試しください。"
+  }
 }

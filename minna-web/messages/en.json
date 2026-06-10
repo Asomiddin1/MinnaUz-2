@@ -254,7 +254,9 @@
         "searchPlaceholder": "Search text...",
         "all": "All",
         "noArticles": "No articles found.",
-        "views": "times"
+        "views": "times",
+        "read":"read",
+        "loading": "Loading..."
     },
     "Lugat": {
         "loading": "Preparing dictionary...",
@@ -298,5 +300,22 @@
         "passed": "Congratulations! You passed the test!",
         "failed": "Unfortunately, you scored less than {score} points",
         "passLine": "Passing score:"
-    }
+    },
+    "VideoPage": {
+    "filters": {
+      "all": "All",
+      "anime": "Anime Language",
+      "life": "Life in Japan",
+      "vlogs": "Vlogs",
+      "culture": "Culture",
+      "facts": "Fun Facts",
+      "shorts": "Shorts"
+    },
+    "newLesson": "New Lesson",
+    "watch": "Watch",
+    "recommended": "Recommended Videos",
+    "categoryVideos": "{category} Videos",
+    "noVideos": "There are no videos in this section yet",
+    "errorMsg": "An error occurred while loading videos. Please try again."
+  }
 }
