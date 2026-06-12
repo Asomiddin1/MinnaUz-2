@@ -113,4 +113,58 @@ class UserController extends Controller
             'data' => $dates
         ]);
     }
+
+    // =========================
+    // DEVICE MANAGER (SANCTUM)
+    // =========================
+
+    // 1. Faol qurilmalar (tokenlar) ro'yxatini olish
+    public function getDevices(Request $request)
+    {
+        $user = $request->user();
+        $currentTokenId = $user->currentAccessToken()->id;
+
+        $devices = $user->tokens->map(function ($token) use ($currentTokenId) {
+            return [
+                'id' => $token->id,
+                // Token yaratilayotganda nomi User-Agent bilan saqlangan deb faraz qilamiz
+                'name' => $token->name, 
+                'last_used_at' => $token->last_used_at,
+                'created_at' => $token->created_at,
+                'is_current' => $token->id === $currentTokenId,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $devices
+        ]);
+    }
+
+    // 2. Aniq bitta qurilmadan (tokendan) chiqish
+    public function logoutDevice(Request $request, $tokenId)
+    {
+        // Faqat o'ziga tegishli tokenni o'chiradi
+        $request->user()->tokens()->where('id', $tokenId)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Qurilmadan muvaffaqiyatli chiqildi'
+        ]);
+    }
+
+    // 3. Hozirgi qurilmadan tashqari boshqa barcha qurilmalardan chiqish
+    public function logoutOtherDevices(Request $request)
+    {
+        $currentTokenId = $request->user()->currentAccessToken()->id;
+
+        // Joriy tokendan tashqari barcha tokenlarni o'chirish
+        $request->user()->tokens()->where('id', '!=', $currentTokenId)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Boshqa barcha qurilmalardan chiqildi'
+        ]);
+    }
+    
 }
