@@ -1,20 +1,20 @@
-import Navbar from "@/components/minna-uz/Navbar";
-import Hero from "@/components/minna-uz/Hero";
-import Herotap from "@/components/minna-uz/Herotap";
-import LanguageStrip from "@/components/minna-uz/LanguageStrip";
-import Features from "@/components/minna-uz/Features";
-import SuperDuolingo from "@/components/minna-uz/SuperDuolingo";
-import EnglishTest from "@/components/minna-uz/EnglishTest";
-import DuolingoABC from "@/components/minna-uz/DuolingoABC";
-import AppDownload from "@/components/minna-uz/AppDownload";
-import Footer from "@/components/minna-uz/Footer";
-import Mentors from "@/components/minna-uz/Mentors";
+import Navbar from "@/components/minna-uz/Navbar"
+import Hero from "@/components/minna-uz/Hero"
+import Herotap from "@/components/minna-uz/Herotap"
+import LanguageStrip from "@/components/minna-uz/LanguageStrip"
+import Features from "@/components/minna-uz/Features"
+import SuperDuolingo from "@/components/minna-uz/SuperDuolingo"
+import EnglishTest from "@/components/minna-uz/EnglishTest"
+import DuolingoABC from "@/components/minna-uz/DuolingoABC"
+import AppDownload from "@/components/minna-uz/AppDownload"
+import Footer from "@/components/minna-uz/Footer"
+import Mentors from "@/components/minna-uz/Mentors"
 
 export const metadata = {
   title: "MinnaUz - JLPT | Yapon tili o'rganish platformasi",
   description:
     "MinnaUz orqali yapon tili va JLPT (N5-N2) imtihonlariga interaktiv testlar, lug'atlar va darslar bilan tayyorlaning.",
-};
+}
 
 export default function Home() {
   return (
@@ -55,5 +55,5 @@ export default function Home() {
 
       <Footer />
     </div>
-  );
+  )
 }
