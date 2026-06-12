@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\LoginHistory; // <-- 1. MANA SHU QO'SHILDI
+use App\Models\LoginHistory;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Hash;
@@ -32,7 +32,11 @@ class AuthController extends Controller
     // ==========================================
     public function googleLogin(Request $request)
     {
-        $request->validate(['token' => 'required|string']);
+        $request->validate([
+            'token' => 'required|string',
+            // device_name qabul qilishi uchun ixtiyoriy (sometimes) validate qildik
+            'device_name' => 'sometimes|string|max:150' 
+        ]);
 
         try {
             $googleUser = Socialite::driver('google')
@@ -90,10 +94,10 @@ class AuthController extends Controller
             $user->last_login_at = $now;
             $user->save();
 
-            // 2. MANA SHU YERDA KALENDAR UCHUN BAZAGA YOZAMIZ
+            // KALENDAR UCHUN BAZAGA YOZAMIZ
             LoginHistory::firstOrCreate([
                 'user_id' => $user->id,
-                'login_date' => Carbon::today() // Faqat sanani o'zi (2026-05-18 00:00:00) yoziladi
+                'login_date' => Carbon::today()
             ]);
 
             // Device limit
@@ -102,7 +106,11 @@ class AuthController extends Controller
                 $user->tokens()->orderBy('created_at', 'asc')->first()->delete();
             }
 
-            $device = substr($request->header('User-Agent'), 0, 100) ?? 'unknown-device';
+            // ==========================================
+            // QURILMA NOMINI OLISH QISMI O'ZGARTIRILDI
+            // ==========================================
+            // Agar requestda 'device_name' kelsa shuni oladi, aks holda standart User-Agent ni ishlatadi
+            $device = substr($request->input('device_name', $request->header('User-Agent')), 0, 150) ?: 'unknown-device';
             $token = $user->createToken($device)->plainTextToken;
 
             return response()->json([
@@ -149,8 +157,10 @@ class AuthController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
-            'otp_code' => 'required',
+            'email'       => 'required|email',
+            'otp_code'    => 'required',
+            // device_name qabul qilishi uchun ixtiyoriy (sometimes) validate qildik
+            'device_name' => 'sometimes|string|max:150'
         ]);
 
         $cachedOtp = Cache::get('otp_' . $request->email);
@@ -198,7 +208,7 @@ class AuthController extends Controller
         $user->last_login_at = $now;
         $user->save();
 
-        // 3. MANA SHU YERDA HAM KALENDAR UCHUN BAZAGA YOZAMIZ
+        // KALENDAR UCHUN BAZAGA YOZAMIZ
         LoginHistory::firstOrCreate([
             'user_id' => $user->id,
             'login_date' => Carbon::today()
@@ -210,7 +220,11 @@ class AuthController extends Controller
             $user->tokens()->orderBy('created_at', 'asc')->first()->delete();
         }
 
-        $device = substr($request->header('User-Agent'), 0, 100) ?? 'unknown-device';
+        // ==========================================
+        // QURILMA NOMINI OLISH QISMI O'ZGARTIRILDI
+        // ==========================================
+        // Agar requestda 'device_name' kelsa shuni oladi, aks holda standart User-Agent ni ishlatadi
+        $device = substr($request->input('device_name', $request->header('User-Agent')), 0, 150) ?: 'unknown-device';
         $token = $user->createToken($device)->plainTextToken;
 
         return response()->json([

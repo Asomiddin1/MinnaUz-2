@@ -2,6 +2,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { headers } from "next/headers" // 👈 Qo'shildi: Brauzer ma'lumotlarini olish uchun
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -11,7 +12,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       authorization: {
         params: {
-          prompt: "select_account", 
+          prompt: "select_account",
         },
       },
     }),
@@ -23,8 +24,11 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         otp_code: { label: "OTP Code", type: "text" },
       },
-      async authorize(credentials) {
+      // req orqali brauzer nomini xavfsiz olamiz (OTP uchun)
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.otp_code) return null
+
+        const userAgent = req?.headers?.["user-agent"] || "Noma'lum qurilma"
 
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`,
@@ -37,6 +41,7 @@ export const authOptions: NextAuthOptions = {
             body: JSON.stringify({
               email: credentials.email,
               otp_code: String(credentials.otp_code),
+              device_name: userAgent, // Laravelga yuboramiz
             }),
           }
         )
@@ -49,7 +54,7 @@ export const authOptions: NextAuthOptions = {
             name: data.user.name,
             email: data.user.email,
             role: data.user.role,
-            is_premium: data.user.is_premium, // 👈 QO'SHILDI
+            is_premium: data.user.is_premium,
             token: data.access_token,
             image: data.user?.avatar || null,
           }
@@ -62,8 +67,20 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, account }) {
       if (account && user) {
+        // ===================================
+        // GOOGLE UCHUN QISMI
+        // ===================================
         if (account.provider === "google") {
           try {
+            // 👈 Google uchun ham haqiqiy brauzer ma'lumotini xavfsiz olamiz
+            let userAgent = "Noma'lum qurilma"
+            try {
+              const hdrs = await headers()
+              userAgent = hdrs.get("user-agent") || "Noma'lum qurilma"
+            } catch (err) {
+              console.error("User-Agent olishda xatolik")
+            }
+
             const res = await fetch(
               `${process.env.NEXT_PUBLIC_API_URL}/auth/google`,
               {
@@ -74,6 +91,7 @@ export const authOptions: NextAuthOptions = {
                 },
                 body: JSON.stringify({
                   token: account.id_token,
+                  device_name: userAgent, // 👈 Endi "Google Login" emas, haqiqiy brauzer nomi ketadi
                 }),
               }
             )
@@ -83,43 +101,46 @@ export const authOptions: NextAuthOptions = {
             if (res.ok && data.access_token) {
               token.accessToken = data.access_token
               token.role = data.user?.role || "user"
-              token.is_premium = data.user?.is_premium || false; // 👈 QO'SHILDI
+              token.is_premium = data.user?.is_premium || false
               token.user = {
                 name: data.user?.name || user.name,
                 email: data.user?.email || user.email,
                 image: data.user?.avatar || user.image,
                 role: data.user?.role || "user",
-                is_premium: data.user?.is_premium || false, // 👈 QO'SHILDI
+                is_premium: data.user?.is_premium || false,
               }
             } else {
               token.role = "user"
-              token.is_premium = false; // 👈 QO'SHILDI
+              token.is_premium = false
               token.user = {
                 name: user.name,
                 email: user.email,
                 image: user.image,
                 role: "user",
-                is_premium: false, // 👈 QO'SHILDI
+                is_premium: false,
               }
             }
           } catch (error) {
             console.error("Google login error:", error)
             token.role = "user"
-            token.is_premium = false; // 👈 QO'SHILDI
+            token.is_premium = false
             token.user = {
               name: user.name,
               email: user.email,
               image: user.image,
               role: "user",
-              is_premium: false, // 👈 QO'SHILDI
+              is_premium: false,
             }
           }
         }
 
+        // ===================================
+        // OTP UCHUN QISMI
+        // ===================================
         if (account.provider === "credentials") {
           token.accessToken = (user as any).token
           token.role = (user as any).role
-          token.is_premium = (user as any).is_premium // 👈 QO'SHILDI
+          token.is_premium = (user as any).is_premium
           token.user = user
         }
       }
@@ -129,18 +150,18 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.user = token.user as any
       ;(session as any).accessToken = token.accessToken
-      // token dagi ma'lumotni session ga yozib qo'yamiz (TypeScript ga qulay bo'lishi uchun)
+
       if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).is_premium = token.is_premium; // 👈 QO'SHILDI
+        ;(session.user as any).role = token.role
+        ;(session.user as any).is_premium = token.is_premium
       }
-      
+
       return session
     },
   },
 
   pages: {
-    signIn: "/auth/login", 
+    signIn: "/auth/login",
   },
 
   session: {

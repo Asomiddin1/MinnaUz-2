@@ -2,9 +2,6 @@ import { AxiosResponse } from "axios"
 import apiClient from "./axios" // Asosiy axios sozlamasini chaqiramiz
 
 export const userAPI = {
-  // ==========================================
-  // MAVJUD PROFIL VA TEST API LARI
-  // ==========================================
   getProfile: (): Promise<AxiosResponse> => apiClient.get("/user"),
 
   getStreaks: (year?: number, month?: number): Promise<AxiosResponse> =>
@@ -30,6 +27,21 @@ export const userAPI = {
     apiClient.get(`/user/results/${resultId}`),
 
   getMyResults: (): Promise<AxiosResponse> => apiClient.get("/user/results"),
+
+  // ==========================================
+  // QURILMALARNI BOSHQRISH (DEVICE MANAGER)
+  // ==========================================
+
+  // Faol qurilmalar ro'yxatini olish
+  getDevices: (): Promise<AxiosResponse> => apiClient.get("/user/devices"),
+
+  // Aniq bitta qurilmadan chiqish (id = token id)
+  logoutDevice: (tokenId: number): Promise<AxiosResponse> =>
+    apiClient.delete(`/user/devices/${tokenId}`),
+
+  // Boshqa barcha qurilmalardan chiqish
+  logoutOtherDevices: (): Promise<AxiosResponse> =>
+    apiClient.delete("/user/devices/logout-others"),
 
   // ==========================================
   // YANGI L.M.S (O'QUV KURS) API LARI
@@ -88,15 +100,20 @@ export const userAPI = {
     comment: string
   ): Promise<AxiosResponse> =>
     apiClient.post(`/user/lessons/${lessonId}/comments`, { comment }),
-  // Article dokkai
+
+  // ==========================================
+  // DOKKAI (MAQOLALAR) API LARI
+  // ==========================================
+
+  // Article dokkai ro'yxati
   getArticles: (page = 1, search = "", level = ""): Promise<AxiosResponse> =>
     apiClient.get("/articles", { params: { page, search, level } }),
 
-  // 1. Bitta maqolani to'liq ma'lumoti bilan ochish (Views oshadi)
+  // Bitta maqolani to'liq ma'lumoti bilan ochish (Views oshadi)
   getArticleById: (id: string | number): Promise<AxiosResponse> =>
     apiClient.get(`/articles/${id}`),
 
-  // 2. Maqola oxiridagi Dokkai testini ishlagach, javoblarni jo'natish
+  // Maqola oxiridagi Dokkai testini ishlagach, javoblarni jo'natish
   submitArticleQuiz: (
     id: string | number,
     data: { answers: any[] }

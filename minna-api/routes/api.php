@@ -90,9 +90,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // DOKKAI / MAQOLALAR (USER QISMI)
     Route::prefix('articles')->group(function () {
-        Route::get('/', [UserArticleController::class, 'index']); // Barcha maqolalarni qidiruv/filtr bilan olish
-        Route::get('/{id}', [UserArticleController::class, 'show']); // Bitta maqolani o'qish (va views oshirish)
-        Route::post('/{id}/submit-quiz', [UserArticleController::class, 'submitQuiz']); // Test javoblarini yuborish
+        Route::get('/', [UserArticleController::class, 'index']); 
+        Route::get('/{id}', [UserArticleController::class, 'show']); 
+        Route::post('/{id}/submit-quiz', [UserArticleController::class, 'submitQuiz']); 
     });
     
     Route::get('/user/streaks', [UserProfileController::class, 'getStreaks']);
@@ -109,6 +109,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User harakatlari va Test qismi
     Route::prefix('user')->group(function () {
+        
+        // ===== DEVICE MANAGER =====
+        Route::get('/devices', [UserProfileController::class, 'getDevices']);
+        Route::delete('/devices/logout-others', [UserProfileController::class, 'logoutOtherDevices']); 
+        Route::delete('/devices/{id}', [UserProfileController::class, 'logoutDevice']); 
+        // ==========================
+
         Route::get('/tests', [UserExamController::class, 'index']);
         Route::get('/tests/{id}', [UserExamController::class, 'show']);
         Route::post('/tests/{id}/submit', [UserExamController::class, 'submit']);
@@ -156,5 +163,5 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::post('/groq/grammar', [GroqController::class, 'fillGrammar']);  
     Route::post('/groq/grammar/examples', [GroqController::class, 'getExamples']);  
     Route::post('/groq/grammar/fill', [GroqController::class, 'fillGrammarInfo']); 
-    Route::post('/groq/dokkai-generate', [GroqController::class, 'generateDokkaiContent']); // AI orqali matnni parchalash
+    Route::post('/groq/dokkai-generate', [GroqController::class, 'generateDokkaiContent']); 
 });
