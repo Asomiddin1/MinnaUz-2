@@ -25,7 +25,9 @@ class AiController extends Controller
             // Frontenddan kelayotgan parametrlar
             $topic = $request->input('topic', 'Erkin');
             $level = $request->input('level', 'N5');
-            $history = $request->input('history', []);
+            // $history = $request->input('history', []);
+            // Yaxshiroq:
+            $history = is_array($request->input('history')) ? $request->input('history') : [];
 
             // Darajaga qarab qoidalar
             $levelInstructions = "";
@@ -53,54 +55,57 @@ class AiController extends Controller
                 'message' => $userMessage
             ]);
 
-            // MAVZU QOIDASI
-            $topicRule = ($topic === 'Erkin') 
-                ? "Foydalanuvchi 'Erkin mavzu' ni tanlagan. Hech qanday qoliplarsiz, u nimani xohlasa shu haqida tabiiy, qiziqarli suhbat qur."
-                : "Suhbatni aynan '{$topic}' mavzusiga yo'naltir va foydalanuvchini shu haqda gapirishga unda.";
+           // MAVZU QOIDASI
+            $topicRule = "";
+            switch($topic) {
+                case 'Tanishtiruv':
+                    $topicRule = "Mavzu: Tanishtiruv. Foydalanuvchi bilan yaqindan tanishishga harakat qil. Ismini oldin aytgan bo'lsa qayta so'rama, lekin uning yoshi, qayerdanligi, kasbi, hobbilari va qiziqishlari haqida so'rab, suhbatni chuqurlashtir.";
+                    break;
+                case 'Oila':
+                    $topicRule = "Mavzu: Oila. Suhbatni faqat oila haqida olib bor. Oila a'zolari nechta, ota-onasi, aka-ukalari bormi, ularning kasbi nima kabi savollar ber.";
+                    break;
+                case 'Ish':
+                    $topicRule = "Mavzu: Ish va O'qish. Foydalanuvchining ishi yoki o'qishi, kasbi, ish joyidagi holati yoki kelajakdagi maqsadlari haqida gaplash.";
+                    break;
+                case 'Ko\'cha':
+                    $topicRule = "Mavzu: Ko'cha. Ko'chada manzil so'rash, transportlar (avtobus, metro) va yo'nalishlarni tushuntirish bilan bog'liq vaziyatli suhbat qur.";
+                    break;
+                default: // Erkin
+                    $topicRule = "Foydalanuvchi 'Erkin mavzu' ni tanlagan. Hech qanday qoliplarsiz, u nimani xohlasa shu haqida tabiiy, qiziqarli suhbat qur.";
+            }
                 
             // ASOSIY SYSTEM PROMPT (Qoidalar to'plami) - Sintaksis xatosi to'g'rilandi
-            $systemPrompt = ($language === 'ja-JP') 
-                ? "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. O'zbek tilida gapirasan.
+            // ASOSIY SYSTEM PROMPT
+            $systemPrompt = "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen o'zbek tilida gapirasan.
                    
-                   MULOQOT VA XOTIRA:
-                   1. Agar tarixda foydalanuvchi ismini aytgan bo'lsa, uni qayta so'rama va o'zingni qayta tanishtirma! To'g'ridan-to'g'ri mavzuga o't: {$topicRule}
-                   2. Agar foydalanuvchi ismini umuman aytmagan bo'lsa, avval tanishib ol.
-                   
-                   YAPONCHA SO'ZLARNI YOZISH UCHUN QAT'IY TEMIR QOIDA (BUNI BUZISH TAQIQLANADI!):
-                   1. Yaponcha so'zni FAKAT VA FAKAT asl yapon alifbosida (Hiragana, Katakana yoki Kanji) yozishdan boshlashing SHART! 
-                   2. Qavsdan oldin lotin harflaridan (Romaji) foydalanish QAT'IYAN TAQIQLANADI!
-                   3. FORMAT ANDOZASI: [Yaponcha_Belgilar] ([Romaji] - [O'zbekcha tarjima])
-                   4. TO'G'RI MISOL: こんにちは (Konnichiwa - Salom)
-                   5. XATO MISOL: Konnichiwa (Konnichiwa - Salom) -> Bu mutlaqo xato, chunki boshida yaponcha belgilar (こんにちは) yo'q!
-                   6. Yana bir TO'G'RI misol: 先生 (Sensei - O'qituvchi).
-                   
-                   Sen faqat {$level} darajasiga oid qoidalardan foydalanib o'rgatasan. Qoidalar: {$levelInstructions}"
-                   
-                : "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen o'zbek tilida gapirasan.
-                   
-                   SUHBAT QOIDALARI:
-                   1. XOTIRANI TEKSHIR: Suhbat tarixida (history) foydalanuvchi o'z ismini aytgan bo'lsa, ASLO o'zingni qayta tanishtirma va ismini qayta so'rama! To'g'ridan-to'g'ri mavzuga o't.
-                   2. TANISHUV: Agar foydalanuvchi ismini hali umuman aytmagan bo'lsagina, o'zingni tanishtir va ismini so'ra.
-                   3. MAVZU: Foydalanuvchi o'z ismini aytgach, {$topicRule}
-                   4. MULOQOT: Yapon tilini o'rgatuvchi mehribon o'qituvchi kabi muloqot qil.
-                   
-                   DARAJA QOIDASI:
-                   1. {$level} darajasi tushunchalari asosida javob ber. {$levelInstructions}
-                   2. Yaponcha so'z ishlatsang: 'Yozuv (O'qilishi - Tarjimasi)' formatida yoz.";
+SUHBAT VA XOTIRA QOIDALARI:
+1. XOTIRANI TEKSHIR: Suhbat tarixida (history) foydalanuvchi o'z ismini aytgan bo'lsa, ASLO o'zingni qayta tanishtirma va ismini qayta so'rama! To'g'ridan-to'g'ri mavzuga o't: {$topicRule}
+2. TANISHUV: Agar foydalanuvchi ismini hali umuman aytmagan bo'lsagina, o'zingни tanishtir va ismini so'ra.
+3. MULOQOT: Yapon tilini o'rgatuvchi mehribon o'qituvchi kabi muloqot qil.
 
+YAPONCHA SO'ZLARNI YOZISH UCHUN QAT'IY TEMIR QOIDA (BUNI BUZISH TAQIQLANADI!):
+1. Yaponcha so'zlarni FAKAT VA FAKAT asl yapon alifbosida (Hiragana, Katakana yoki Kanji) yozishing SHART! 
+2. Hech qanday qavslar, Romaji (lotin harflari) yoki o'zbekcha tarjimalarni ishlata ko'rma! Yaponcha so'zlar faqat toza yaponcha yozuvda bo'lsin.
+3. TO'G'RI MISOL: こんにちは！お元気ですか？
+4. XATO MISOL: こんにちは (Konnichiwa - Salom) -> Bu mutlaqo xato, chunki qavslar, romaji va tarjima aralashtirilgan! Faqat yaponchasini qoldir.
+
+DARAJA QOIDASI:
+1. {$level} darajasi tushunchalari asosida javob ber. {$levelInstructions}";
             // Xabarlar ro'yxatini yig'ish
             $messagesArray = [
                 ["role" => "system", "content" => $systemPrompt]
             ];
 
             // Frontenddan kelgan tarixni qo'shish
+            // Frontenddan kelgan tarixni qo'shish
             $hasCurrentMessage = false;
             if (is_array($history) && count($history) > 0) {
                 foreach ($history as $msg) {
-                    if (isset($msg['role']) && isset($msg['content'])) {
+                    $msgText = $msg['content'] ?? $msg['text'] ?? null;
+                    if (isset($msg['role']) && $msgText) {
                         $role = ($msg['role'] === 'ai' || $msg['role'] === 'assistant') ? 'assistant' : 'user';
-                        $messagesArray[] = ["role" => $role, "content" => $msg['content']];
-                        if ($msg['content'] === $userMessage) {
+                        $messagesArray[] = ["role" => $role, "content" => $msgText];
+                        if ($msgText === $userMessage) {
                             $hasCurrentMessage = true;
                         }
                     }
