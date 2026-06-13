@@ -14,6 +14,12 @@ class AiController extends Controller
         try {
             $userMessage = $request->input('message');
             $user = $request->user(); 
+            
+            // Foydalanuvchi tizimga kirmagan bo'lsa, xatolik qaytarish
+            if (!$user) {
+                return response()->json(['reply' => "Foydalanuvchi avtorizatsiyadan o'tmagan."], 401);
+            }
+
             $language = $request->input('lang', 'uz-UZ');
             
             // Frontenddan kelayotgan parametrlar
@@ -52,10 +58,9 @@ class AiController extends Controller
                 ? "Foydalanuvchi 'Erkin mavzu' ni tanlagan. Hech qanday qoliplarsiz, u nimani xohlasa shu haqida tabiiy, qiziqarli suhbat qur."
                 : "Suhbatni aynan '{$topic}' mavzusiga yo'naltir va foydalanuvchini shu haqda gapirishga unda.";
                 
-            // ASOSIY SYSTEM PROMPT (Qoidalar to'plami)
-
+            // ASOSIY SYSTEM PROMPT (Qoidalar to'plami) - Sintaksis xatosi to'g'rilandi
             $systemPrompt = ($language === 'ja-JP') 
-                ?: "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. O'zbek tilida gapirasan.
+                ? "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. O'zbek tilida gapirasan.
                    
                    MULOQOT VA XOTIRA:
                    1. Agar tarixda foydalanuvchi ismini aytgan bo'lsa, uni qayta so'rama va o'zingni qayta tanishtirma! To'g'ridan-to'g'ri mavzuga o't: {$topicRule}
@@ -69,9 +74,9 @@ class AiController extends Controller
                    5. XATO MISOL: Konnichiwa (Konnichiwa - Salom) -> Bu mutlaqo xato, chunki boshida yaponcha belgilar (こんにちは) yo'q!
                    6. Yana bir TO'G'RI misol: 先生 (Sensei - O'qituvchi).
                    
-                   Sen faqat {$level} darajasiga oid qoidalardan foydalanib o'rgatasan.";
-
-                  "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen o'zbek tilida gapirasan.
+                   Sen faqat {$level} darajasiga oid qoidalardan foydalanib o'rgatasan. Qoidalar: {$levelInstructions}"
+                   
+                : "Sen 'Kitsune-sensei' ismli yapon tili o'qituvchisisan. Sen o'zbek tilida gapirasan.
                    
                    SUHBAT QOIDALARI:
                    1. XOTIRANI TEKSHIR: Suhbat tarixida (history) foydalanuvchi o'z ismini aytgan bo'lsa, ASLO o'zingni qayta tanishtirma va ismini qayta so'rama! To'g'ridan-to'g'ri mavzuga o't.
@@ -80,8 +85,9 @@ class AiController extends Controller
                    4. MULOQOT: Yapon tilini o'rgatuvchi mehribon o'qituvchi kabi muloqot qil.
                    
                    DARAJA QOIDASI:
-                   1. {$level} darajasi tushunchalari asosida javob ber.
+                   1. {$level} darajasi tushunchalari asosida javob ber. {$levelInstructions}
                    2. Yaponcha so'z ishlatsang: 'Yozuv (O'qilishi - Tarjimasi)' formatida yoz.";
+
             // Xabarlar ro'yxatini yig'ish
             $messagesArray = [
                 ["role" => "system", "content" => $systemPrompt]
@@ -108,13 +114,18 @@ class AiController extends Controller
 
             $groqApiKey = env('GROQ_API_KEY'); 
             
+            if (!$groqApiKey) {
+                 Log::error("Groq API kaliti topilmadi.");
+                 return response()->json(['reply' => "Server sozlamalarida xatolik."], 500);
+            }
+            
             // Groq API ga yuborish
             $response = Http::withoutVerifying()
                 ->withToken($groqApiKey)
                 ->post("https://api.groq.com/openai/v1/chat/completions", [
                     "model" => "llama-3.3-70b-versatile",
                     "messages" => $messagesArray,
-                    "temperature" => 0.6, // Mantiqni yaxshi ushlab turishi uchun biroz ko'tarildi
+                    "temperature" => 0.6,
                 ]);
 
             if ($response->successful()) {
@@ -123,7 +134,7 @@ class AiController extends Controller
                 // Bazaga saqlash
                 ChatMessage::create([
                     'user_id' => $user->id, 
-                    'role' => 'ai', 
+                    'role' => 'assistant', // Odatda 'ai' o'rniga standard 'assistant' ishlatiladi 
                     'message' => $reply
                 ]);
 
@@ -132,22 +143,22 @@ class AiController extends Controller
                 $audioBase64 = null;
 
                 // Google Translate TTS
-                if (!$audioBase64) {
-                    $langCode = ($language === 'ja-JP') ? 'ja' : 'uz';
-                    $textToSpeech = urlencode(mb_substr($cleanText, 0, 180));
-                    $tts = Http::withoutVerifying()->get("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q={$textToSpeech}&tl={$langCode}");
-                    
-                    if ($tts->successful()) {
-                        $audioBase64 = base64_encode($tts->body());
-                    }
+                $langCode = ($language === 'ja-JP') ? 'ja' : 'uz';
+                $textToSpeech = urlencode(mb_substr($cleanText, 0, 180));
+                $tts = Http::withoutVerifying()->get("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q={$textToSpeech}&tl={$langCode}");
+                
+                if ($tts->successful()) {
+                    $audioBase64 = base64_encode($tts->body());
                 }
 
                 return response()->json(['reply' => $reply, 'audio' => $audioBase64]);
             }
             
-            return response()->json(['reply' => "Xatolik yuz berdi. Iltimos qayta urinib ko'ring."], 500);
+            Log::error("Groq API xatosi: " . $response->body());
+            return response()->json(['reply' => "AI xizmati xatolik qaytardi. Iltimos qayta urinib ko'ring."], 500);
+            
         } catch (\Exception $e) {
-            Log::error("AiController Xatosi: " . $e->getMessage());
+            Log::error("AiController Xatosi: " . $e->getMessage() . " Line: " . $e->getLine());
             return response()->json(['reply' => "Server xatosi yuz berdi."], 500);
         }
     }
