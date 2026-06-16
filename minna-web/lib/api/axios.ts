@@ -12,17 +12,25 @@ const apiClient = axios.create({
 });
 
 /* =========================================================
-    🔐 REQUEST INTERCEPTOR (NEXTAUTH TOKEN)
+    🔐 REQUEST INTERCEPTOR (NEXTAUTH TOKEN — CACHED)
 ========================================================= */
+let cachedToken: string | null = null;
+let cacheTimestamp = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 daqiqa
+
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      const session = await getSession();
-      // NextAuth'da accessToken deb saqlaganmiz
-      const token = (session as any)?.accessToken;
+      const now = Date.now();
+      // Keshdan foydalanish: har safar getSession() chaqirmasdan
+      if (!cachedToken || now - cacheTimestamp > CACHE_TTL) {
+        const session = await getSession();
+        cachedToken = (session as any)?.accessToken || null;
+        cacheTimestamp = now;
+      }
 
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+      if (cachedToken && config.headers) {
+        config.headers.Authorization = `Bearer ${cachedToken}`;
       }
     } catch (err) {
       console.error("Token interceptor xatoligi:", err);
@@ -42,6 +50,8 @@ apiClient.interceptors.response.use(
 
     // 401 - Token eskirgan yoki noto'g'ri
     if (status === 401) {
+      cachedToken = null;
+      cacheTimestamp = 0;
       await signOut({ callbackUrl: "/auth/login" });
     }
 

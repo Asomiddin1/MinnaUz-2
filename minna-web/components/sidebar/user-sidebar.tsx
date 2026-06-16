@@ -1,7 +1,6 @@
 "use client"
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Link, usePathname } from "@/src/i18n/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +25,7 @@ import {
 import { useTheme } from "next-themes"
 import { signOut, useSession } from "next-auth/react"
 import Image from "next/image"
+import logoImg from "./logo.png"
 import { useTranslations } from "next-intl"
 
 export function UserSidebar() {
@@ -62,7 +62,7 @@ export function UserSidebar() {
           {!collapsed ? (
             <div className="flex items-center gap-3">
               <Image
-                src={require("./logo.png")}
+                src={logoImg}
                 alt="Logo"
                 width={32}
                 height={32}
@@ -74,7 +74,7 @@ export function UserSidebar() {
           ) : (
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400">
               <Image
-                src={require("./logo.png")}
+                src={logoImg}
                 alt="Logo"
                 width={32}
                 height={32}

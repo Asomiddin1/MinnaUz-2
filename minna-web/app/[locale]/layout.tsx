@@ -1,25 +1,25 @@
-import { Space_Grotesk, Geist_Mono } from "next/font/google";
-import "../globals.css";
+import { Space_Grotesk, Geist_Mono } from "next/font/google"
+import "../globals.css"
 
-import { ThemeProvider } from "@/components/theme-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { AuthProvider } from "@/components/providers/AuthProvider";
-import { Metadata } from "next";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { routing } from "@/src/i18n/routing";
+import { ThemeProvider } from "@/components/theme-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+import { AuthProvider } from "@/components/providers/AuthProvider"
+import { Metadata } from "next"
+import { NextIntlClientProvider, hasLocale } from "next-intl"
+import { getMessages } from "next-intl/server"
+import { notFound } from "next/navigation"
+import { routing } from "@/src/i18n/routing"
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-sans",
-});
+})
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-});
+})
 
 export const metadata: Metadata = {
   title: {
@@ -42,8 +42,7 @@ export const metadata: Metadata = {
 
   openGraph: {
     title: "MinnaUz - Til o'rganish platformasi",
-    description:
-      "JLPT testlar, lug'at va interaktiv darslar bilan o'rganing",
+    description: "JLPT testlar, lug'at va interaktiv darslar bilan o'rganing",
     url: "https://minna.uz",
     siteName: "MinnaUz",
     type: "website",
@@ -66,28 +65,28 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-};
+}
 
 export default async function LocaleLayout({
   children,
   params,
 }: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
-  const { locale } = await params;
+  const { locale } = await params
 
   if (!hasLocale(routing.locales, locale)) {
-    notFound();
+    notFound()
   }
 
-  const messages = await getMessages();
+  const messages = await getMessages()
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
-          "antialiased font-sans scroll-smooth",
+          "scroll-smooth font-sans antialiased",
           spaceGrotesk.variable,
           fontMono.variable
         )}
@@ -120,5 +119,5 @@ export default async function LocaleLayout({
         />
       </body>
     </html>
-  );
+  )
 }

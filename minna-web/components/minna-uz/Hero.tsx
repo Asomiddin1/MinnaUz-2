@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
+import Image from "next/image";
 
 interface HeroProps {
   isBottom?: boolean;
@@ -25,10 +26,13 @@ export default function Hero({ isBottom = false }: HeroProps) {
 
       <div className="z-20 flex w-full max-w-5xl flex-col items-center justify-center gap-10 px-6 md:flex-row md:gap-20">
         <div className="h-64 w-64 md:h-[400px] md:w-[400px]">
-          <img
-            src="./images/minna.png"
+          <Image
+            src="/images/minna.png"
             alt="MINNA logo"
+            width={400}
+            height={400}
             className="w-full h-full object-contain"
+            priority
           />
         </div>
 

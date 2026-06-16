@@ -1,6 +1,5 @@
 "use client"
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Copy,
@@ -14,21 +13,24 @@ import {
   Layers,
   Maximize,
 } from "lucide-react"
+import { Link, useRouter } from "@/src/i18n/navigation"
 import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 
 // Komponentlarni import qilish
+import dynamic from "next/dynamic"
 import BannerCarousel from "@/components/user-components/banner/banner-carousel"
 import JlptLevels from "@/components/user-components/home-fuctions/jlpt-levels/jlpt-levels"
-import GamesList from "@/components/user-components/home-fuctions/games/games"
-import Lugat from "@/components/user-components/home-fuctions/lugat/lugat"
-import Dokkai from "@/components/user-components/home-fuctions/dokkai/dokkai"
-import Shop from "@/components/user-components/home-fuctions/shop/shop"
-import Translate from "@/components/user-components/home-fuctions/translate/translate"
-import AiComponent from "@/components/user-components/home-fuctions/ai/ai"
-import Kanji from "@/components/user-components/home-fuctions/kanji/kanji"
-import Premium from "@/components/user-components/home-fuctions/premium/premium"
+
+// Lazy-loaded tab components — загружаются только при клике на вкладку
+const GamesList = dynamic(() => import("@/components/user-components/home-fuctions/games/games"), { ssr: false })
+const Lugat = dynamic(() => import("@/components/user-components/home-fuctions/lugat/lugat"), { ssr: false })
+const Dokkai = dynamic(() => import("@/components/user-components/home-fuctions/dokkai/dokkai"), { ssr: false })
+const Shop = dynamic(() => import("@/components/user-components/home-fuctions/shop/shop"), { ssr: false })
+const Translate = dynamic(() => import("@/components/user-components/home-fuctions/translate/translate"), { ssr: false })
+const AiComponent = dynamic(() => import("@/components/user-components/home-fuctions/ai/ai"), { ssr: false })
+const Kanji = dynamic(() => import("@/components/user-components/home-fuctions/kanji/kanji"), { ssr: false })
+const Premium = dynamic(() => import("@/components/user-components/home-fuctions/premium/premium"), { ssr: false })
 
 export default function DashboardPage() {
   const router = useRouter()

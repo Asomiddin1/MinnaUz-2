@@ -18,7 +18,7 @@ export async function middleware(req: NextRequest) {
   const intlResponse = intlMiddleware(req);
 
   // Auth tekshiruvlari — locale prefixdan keyin yo'lni aniqlash
-  const localePattern = /^\/(uz|ja)/;
+  const localePattern = /^\/(uz|jp|ru|en)/;
   const pathWithoutLocale = path.replace(localePattern, "") || "/";
 
   const isAuthPage = pathWithoutLocale.startsWith("/auth");

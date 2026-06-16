@@ -42,8 +42,7 @@ export default function InteractiveLoginPage() {
     };
   }, []);
 
-  const moveX = dimensions.width > 0 ? (mousePos.x / dimensions.width - 0.5) * 20 : 0;
-  const moveY = dimensions.height > 0 ? (mousePos.y / dimensions.height - 0.5) * 20 : 0;
+
 
   // --- Mantiqiy Funksiyalar ---
   // 1. Google orqali kirish
@@ -84,26 +83,31 @@ export default function InteractiveLoginPage() {
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      email: email,
-      otp_code: otp,
-    });
+    try {
+      const res = await signIn("credentials", {
+        redirect: false,
+        email: email,
+        otp_code: otp,
+      });
 
-    if (res?.error) {
-      setError(t("errorOtp"));
-      setLoading(false);
-    } else {
-      const session = await getSession();
-      
-      // Rolga qarab yo'naltirish
-      if ((session?.user as any)?.role === "admin") {
-        router.push("/admin");
+      if (res?.error) {
+        setError(t("errorOtp"));
+        setLoading(false);
       } else {
-        router.push("/dashboard");
+        const session = await getSession();
+        
+        // Rolga qarab yo'naltirish
+        if ((session?.user as any)?.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
+        
+        router.refresh();
       }
-      
-      router.refresh();
+    } catch (err) {
+      setError(t("errorServer"));
+      setLoading(false);
     }
   };
 

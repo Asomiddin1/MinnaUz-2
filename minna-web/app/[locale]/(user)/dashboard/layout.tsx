@@ -2,8 +2,7 @@
 
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { UserSidebar } from "@/components/sidebar/user-sidebar"
-import { usePathname } from "next/navigation"
-import Link from "next/link"
+import { Link, usePathname } from "@/src/i18n/navigation"
 import {
   Home,
   PlaySquare,
