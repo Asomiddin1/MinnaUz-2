@@ -25,7 +25,6 @@ export default function Flashcard({
 
   return (
     <div 
-      // BU YER O'ZGARDI: max-w-2xl qilib qo'yildi, shu orqali u kompyuterda haddan tashqari cho'zilib ketmaydi
       className="relative h-[400px] sm:h-[450px] md:h-[500px] w-full max-w-2xl mx-auto cursor-pointer group perspective-1000" 
       onClick={onFlip}
       onTouchStart={onTouchStart}
@@ -35,7 +34,11 @@ export default function Flashcard({
       <div className={`relative w-full h-full transition-transform duration-700 ease-out [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
         
         {/* ================= OLD TOMONI (Kanji) ================= */}
-        <div className="absolute w-full h-full [backface-visibility:hidden] bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-gray-800 rounded-[2.5rem] flex flex-col items-center justify-between p-6 sm:p-8 shadow-sm">
+        <div className="absolute w-full h-full [backface-visibility:hidden] bg-white dark:bg-[#1E293B] border border-gray-100 dark:border-slate-700 rounded-[2.5rem] flex flex-col items-center justify-between p-6 sm:p-8 shadow-sm">
+          
+          <div className="absolute top-6 right-6 w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-200 dark:border-slate-600 flex items-center justify-center text-[10px] sm:text-xs font-bold text-gray-400 bg-white dark:bg-[#1E293B]">
+            0%
+          </div>
 
           <div className="flex-1 flex flex-col items-center justify-center w-full">
             <span className="text-[7rem] sm:text-[9rem] md:text-[11rem] font-normal text-[#141d2f] dark:text-white leading-none">
@@ -49,13 +52,13 @@ export default function Flashcard({
               <span>音:0</span>
               <span>訓:0</span>
             </div>
-            <div className="w-16 sm:w-20 h-[2px] sm:h-[3px] bg-gray-200 dark:bg-gray-700 rounded-full mb-3"></div>
+            <div className="w-16 sm:w-20 h-[2px] sm:h-[3px] bg-gray-200 dark:bg-slate-700 rounded-full mb-3"></div>
             
             <div className="flex items-center gap-2 sm:gap-3">
-              <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded uppercase">
+              <span className="bg-gray-100 dark:bg-slate-800 text-gray-500 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded uppercase">
                 {word.level || "N5"}
               </span>
-              <span className="bg-gray-50 dark:bg-slate-800 text-gray-400 border border-gray-100 dark:border-gray-700 text-[10px] sm:text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5">
+              <span className="bg-gray-50 dark:bg-slate-800 text-gray-400 border border-gray-100 dark:border-slate-600 text-[10px] sm:text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5">
                 <RotateCw className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> 
                 <span className="hidden sm:inline">Bosing yoki Space</span>
                 <span className="sm:hidden">Bosish</span>
@@ -66,9 +69,9 @@ export default function Flashcard({
         </div>
 
         {/* ================= ORQA TOMONI (Tarjima va Romaji) ================= */}
-        <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-gray-800 rounded-[2.5rem] flex flex-col items-center justify-between p-6 sm:p-8 shadow-sm">
+        <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-white dark:bg-[#1E293B] border border-gray-100 dark:border-slate-700 rounded-[2.5rem] flex flex-col items-center justify-between p-6 sm:p-8 shadow-sm">
            
-           <div className="absolute top-6 right-6 text-gray-300 dark:text-gray-600">
+           <div className="absolute top-6 right-6 text-gray-300 dark:text-gray-500">
              <RotateCw className="w-6 h-6 sm:w-8 sm:h-8" />
            </div>
 
@@ -87,13 +90,13 @@ export default function Flashcard({
               <span>音:0</span>
               <span>訓:0</span>
             </div>
-            <div className="w-16 sm:w-20 h-[2px] sm:h-[3px] bg-gray-200 dark:bg-gray-700 rounded-full mb-3"></div>
+            <div className="w-16 sm:w-20 h-[2px] sm:h-[3px] bg-gray-200 dark:bg-slate-700 rounded-full mb-3"></div>
             
             <div className="flex items-center gap-2 sm:gap-3">
-              <span className="bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded uppercase">
+              <span className="bg-gray-100 dark:bg-slate-800 text-gray-500 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded uppercase">
                 {word.level || "N5"}
               </span>
-              <span className="bg-gray-50 dark:bg-slate-800 text-gray-400 border border-gray-100 dark:border-gray-700 text-[10px] sm:text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5">
+              <span className="bg-gray-50 dark:bg-slate-800 text-gray-400 border border-gray-100 dark:border-slate-600 text-[10px] sm:text-xs px-3 py-1.5 rounded-full font-medium flex items-center gap-1.5">
                 <RotateCw className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> 
                 <span className="hidden sm:inline">Bosing yoki Space</span>
                 <span className="sm:hidden">Bosish</span>

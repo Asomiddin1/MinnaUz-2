@@ -1,4 +1,4 @@
-"use client"; // <-- MANA SHU QATOR JUDAYAM MUHIM, TUSHIB QOLMASIN!
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { Word, MOCK_WORDS } from '../../../../app/constants/dictionary-data';
@@ -94,7 +94,7 @@ export default function Lugat() {
         <div className="relative w-12 h-12">
           <div className="absolute inset-0 rounded-full border-t-4 border-indigo-500 animate-spin"></div>
         </div>
-        <p className="text-gray-500 font-medium">Lug'at yuklanmoqda...</p>
+        <p className="text-gray-500 dark:text-gray-400 font-medium">Lug'at yuklanmoqda...</p>
       </div>
     );
   }
@@ -102,14 +102,14 @@ export default function Lugat() {
   return (
     <div className="relative w-full max-w-[1200px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
       
-      {/* ================= TABS VA QO'SHIMCHA TUGMALAR (Faqat mashq bo'lmayotganda ko'rinadi) ================= */}
+      {/* ================= TABS VA QO'SHIMCHA TUGMALAR ================= */}
       {!isPracticing && (
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex items-center bg-gray-100 dark:bg-slate-800 p-1 rounded-[14px] w-full sm:w-auto shrink-0">
+          <div className="flex items-center bg-gray-100 dark:bg-[#1E293B] p-1 rounded-[14px] w-full sm:w-auto shrink-0 border border-transparent dark:border-slate-800">
             <button 
               onClick={() => setActiveTab("lugat")}
               className={`flex-1 sm:flex-none py-2.5 px-5 sm:px-6 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                activeTab === "lugat" ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                activeTab === "lugat" ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <BookOpen className="w-4 h-4" /> Lug'at
@@ -117,7 +117,7 @@ export default function Lugat() {
             <button 
               onClick={() => setActiveTab("kartalar")}
               className={`flex-1 sm:flex-none py-2.5 px-5 sm:px-6 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
-                activeTab === "kartalar" ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                activeTab === "kartalar" ? "bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
               }`}
             >
               <Layers className="w-4 h-4" /> Kartochkalar
@@ -134,7 +134,7 @@ export default function Lugat() {
                 placeholder="Yaponcha, Romaji yoki O'zbekcha yozing..." 
                 value={searchQuery} 
                 onChange={(e) => setSearchQuery(e.target.value)} 
-                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-gray-800 rounded-[14px] outline-none transition-all text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20" 
+                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-[#1E293B] border border-gray-200 dark:border-slate-700 rounded-[14px] outline-none transition-all text-sm font-medium text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50" 
               />
             </div>
           )}
@@ -159,9 +159,9 @@ export default function Lugat() {
             {filteredWords.map((word) => (
               <div 
                 key={word.id} 
-                className="bg-white dark:bg-[#1a1d27] border border-gray-100 dark:border-gray-800 rounded-2xl p-4 sm:p-5 flex items-center gap-4 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 transition-all group"
+                className="bg-white dark:bg-[#1E293B] border border-gray-100 dark:border-slate-700 rounded-2xl p-4 sm:p-5 flex items-center gap-4 hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 transition-all group"
               >
-                <button className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors shrink-0 border border-gray-100 dark:border-gray-800 group-hover:border-indigo-100 dark:group-hover:border-indigo-500/30">
+                <button className="w-12 h-12 rounded-full bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 transition-colors shrink-0 border border-gray-100 dark:border-slate-700 group-hover:border-indigo-100 dark:group-hover:border-indigo-500/50">
                   <Volume2 className="w-5 h-5" />
                 </button>
                 <div className="flex flex-col min-w-0 flex-1">
@@ -181,13 +181,13 @@ export default function Lugat() {
                 <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <button 
                     onClick={() => openEditModal(word)}
-                    className="p-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl transition-colors"
+                    className="p-2.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/20 rounded-xl transition-colors"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button 
                     onClick={() => handleDeleteKanji(word.id)}
-                    className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors"
+                    className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/20 rounded-xl transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -197,7 +197,7 @@ export default function Lugat() {
           </div>
           {filteredWords.length === 0 && (
             <div className="w-full text-center py-16 text-gray-500">
-              <Search className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+              <Search className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-slate-600" />
               <p>Bunday so'z topilmadi...</p>
             </div>
           )}
@@ -214,10 +214,10 @@ export default function Lugat() {
 
       {/* ================= MODAL ================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#1E293B] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-transparent dark:border-slate-700">
             
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-700">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                 {editingId ? "Kanji'ni Tahrirlash" : "Yangi Kanji Qo'shish"}
               </h3>
@@ -237,7 +237,7 @@ export default function Lugat() {
                   placeholder="Masalan: 水" 
                   value={newKanji}
                   onChange={(e) => setNewKanji(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:border-indigo-500 transition-colors dark:text-white"
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 transition-colors dark:text-white placeholder-gray-400 dark:placeholder-slate-500"
                 />
               </div>
               <div>
@@ -247,7 +247,7 @@ export default function Lugat() {
                   placeholder="Masalan: mizu" 
                   value={newKana}
                   onChange={(e) => setNewKana(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:border-indigo-500 transition-colors dark:text-white"
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 transition-colors dark:text-white placeholder-gray-400 dark:placeholder-slate-500"
                 />
               </div>
               <div>
@@ -257,12 +257,12 @@ export default function Lugat() {
                   placeholder="Masalan: Suv" 
                   value={newUzbek}
                   onChange={(e) => setNewUzbek(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:border-indigo-500 transition-colors dark:text-white"
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-500 transition-colors dark:text-white placeholder-gray-400 dark:placeholder-slate-500"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-5 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-gray-700">
+            <div className="flex items-center gap-3 p-5 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-700">
               <button 
                 onClick={() => setIsModalOpen(false)}
                 className="flex-1 py-2.5 px-4 rounded-xl font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
