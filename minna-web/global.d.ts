@@ -4,5 +4,5 @@ declare module "*.css" {
 }
 
 // next-intl type safety
-type Messages = typeof import("./messages/uz.json");
+type Messages = typeof import("./translations/uz.json");
 declare interface IntlMessages extends Messages {}

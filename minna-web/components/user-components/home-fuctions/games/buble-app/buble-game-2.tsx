@@ -211,7 +211,7 @@ export default function PopTheWordStage2() {
   }
 
   return (
-    <div className="absolute inset-0 z-40 bg_buble_level2 bg-cover bg-center bg-no-repeat overflow-hidden bg-slate-900">
+    <div className="absolute inset-0 z-40 bg_buble_level bg-cover bg-center bg-no-repeat overflow-hidden bg-slate-900">
       <FloatingClouds />
 
       <div className="absolute top-4 sm:top-6 left-4 sm:left-6 right-4 sm:right-6 
