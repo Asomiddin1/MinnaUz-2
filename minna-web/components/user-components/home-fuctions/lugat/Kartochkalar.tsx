@@ -1,0 +1,306 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Word } from '../../../../app/constants/dictionary-data';
+import { BookOpen, ArrowLeft, ChevronLeft, ChevronRight, CheckCircle2, Brain, LayoutGrid } from 'lucide-react';
+import Flashcard from './Flashcard';
+
+interface KartochkalarProps {
+  words: Word[];
+  onPracticeStateChange?: (isPracticing: boolean) => void;
+}
+
+export default function Kartochkalar({ words = [], onPracticeStateChange }: KartochkalarProps) {
+  // Mashq qilish uchun navbat (qaysi ro'yxatni aylanayotganimiz)
+  const [practiceQueue, setPracticeQueue] = useState<Word[] | null>(null);
+  const [practiceIndex, setPracticeIndex] = useState<number>(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  // Kanjilarning yodlanish darajasini saqlaydigan State
+  const [cardStatuses, setCardStatuses] = useState<Record<number, 'oson' | 'qiyin'>>({});
+  
+  // Filtr holati: Barchasi, Qiyin, Oson
+  const [filter, setFilter] = useState<'barchasi' | 'qiyin' | 'oson'>('barchasi');
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (onPracticeStateChange) {
+      onPracticeStateChange(practiceQueue !== null);
+    }
+  }, [practiceQueue, onPracticeStateChange]);
+
+  // Filtrga qarab so'zlarni ajratib olish
+  const filteredWords = words.filter(word => {
+    const status = cardStatuses[word.id];
+    if (filter === 'oson') return status === 'oson';
+    if (filter === 'qiyin') return status === 'qiyin';
+    return true; // 'barchasi'
+  });
+
+  // Statistikani hisoblash (Tablar ustida sonini ko'rsatish uchun)
+  const stats = {
+    barchasi: words.length,
+    qiyin: words.filter(w => cardStatuses[w.id] === 'qiyin').length,
+    oson: words.filter(w => cardStatuses[w.id] === 'oson').length,
+  };
+
+  const nextCard = () => {
+    if (practiceQueue && practiceIndex < practiceQueue.length - 1) {
+      setIsFlipped(false);
+      setTimeout(() => setPracticeIndex(prev => prev + 1), 150);
+    }
+  };
+
+  const prevCard = () => {
+    if (practiceQueue && practiceIndex > 0) {
+      setIsFlipped(false);
+      setTimeout(() => setPracticeIndex(prev => prev - 1), 150);
+    }
+  };
+
+  const handleRate = (status: 'oson' | 'qiyin') => {
+    if (!practiceQueue) return;
+    
+    const currentWord = practiceQueue[practiceIndex];
+    
+    setCardStatuses(prev => ({
+      ...prev,
+      [currentWord.id]: status
+    }));
+
+    if (practiceIndex < practiceQueue.length - 1) {
+      nextCard();
+    } else {
+      setIsFlipped(false);
+      setTimeout(() => setPracticeQueue(null), 300);
+    }
+  };
+
+  useEffect(() => {
+    if (!practiceQueue || practiceQueue.length === 0) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") nextCard();
+      else if (e.key === "ArrowLeft") prevCard();
+      else if (e.key === " " || e.key === "Enter") {
+        e.preventDefault(); 
+        setIsFlipped(prev => !prev);
+      } else if (e.key === "Escape") {
+        setPracticeQueue(null); 
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [practiceQueue, practiceIndex]);
+
+  const minSwipeDistance = 50;
+  const onTouchStartEvent = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  const onTouchMoveEvent = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchEndEvent = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) nextCard();
+    else if (distance < -minSwipeDistance) prevCard();
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  if (!words || words.length === 0) {
+    return (
+      <div className="w-full flex flex-col items-center justify-center py-20 text-gray-500">
+        <BookOpen className="w-12 h-12 mb-4 text-gray-300 dark:text-slate-600" />
+        <p className="text-lg">Hozircha kanji so'zlar yo'q.</p>
+      </div>
+    );
+  }
+
+  // ===============================================
+  // 1. MASHQ REJIMI
+  // ===============================================
+  if (practiceQueue !== null) {
+    const currentWord = practiceQueue[practiceIndex];
+
+    return (
+      <div className="w-full max-w-[900px] mx-auto space-y-4 animate-in fade-in zoom-in-95 duration-500 mt-2">
+        
+        <div className="flex items-center justify-between px-1">
+          <button 
+            onClick={() => setPracticeQueue(null)}
+            className="flex items-center gap-1.5 sm:gap-2 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 font-semibold transition-colors bg-gray-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-500/10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> 
+            <span>Ro'yxatga qaytish</span>
+          </button>
+          <div className="text-xs sm:text-sm font-bold text-gray-400 dark:text-gray-500">
+            {practiceIndex + 1} <span className="opacity-60">/ {practiceQueue.length}</span>
+          </div>
+        </div>
+
+        <div className="w-full bg-gray-200 dark:bg-slate-800 rounded-full h-1.5 sm:h-2 overflow-hidden">
+          <div className="h-1.5 sm:h-2 rounded-full transition-all duration-500 bg-indigo-500" style={{ width: `${((practiceIndex + 1) / practiceQueue.length) * 100}%` }}></div>
+        </div>
+
+        <div className="flex flex-col w-full mt-4">
+          
+          <div className="relative flex items-center justify-center w-full">
+            <button 
+              onClick={prevCard} 
+              disabled={practiceIndex === 0} 
+              className="absolute left-0 sm:left-4 z-20 shrink-0 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-white/80 dark:bg-slate-800/80 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-0 transition-all shadow-md backdrop-blur-md"
+            >
+              <ChevronLeft className="w-5 h-5 md:w-7 md:h-7" />
+            </button>
+
+            <div className="w-full px-0 sm:px-16 md:px-24 flex justify-center">
+               <Flashcard 
+                 word={currentWord} 
+                 isFlipped={isFlipped} 
+                 onFlip={() => setIsFlipped(!isFlipped)}
+                 onTouchStart={onTouchStartEvent}
+                 onTouchMove={onTouchMoveEvent}
+                 onTouchEnd={onTouchEndEvent}
+               />
+            </div>
+
+            <button 
+              onClick={nextCard} 
+              disabled={practiceIndex === practiceQueue.length - 1} 
+              className="absolute right-0 sm:right-4 z-20 shrink-0 w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-full bg-white/80 dark:bg-slate-800/80 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-0 transition-all shadow-md backdrop-blur-md"
+            >
+              <ChevronRight className="w-5 h-5 md:w-7 md:h-7" />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 sm:gap-6 mt-6 sm:mt-8 px-2 w-full max-w-2xl mx-auto">
+            <button 
+              onClick={() => handleRate('qiyin')}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 sm:py-4 bg-white dark:bg-[#1E293B] text-orange-600 dark:text-orange-400 font-bold rounded-2xl hover:-translate-y-1 hover:shadow-lg transition-all border-2 border-orange-100 dark:border-orange-500/20 active:scale-95"
+            >
+              <Brain className="w-5 h-5 sm:w-6 sm:h-6" /> 
+              <span className="text-sm sm:text-base">Qiyin</span>
+            </button>
+            <button 
+              onClick={() => handleRate('oson')}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 sm:py-4 bg-white dark:bg-[#1E293B] text-emerald-600 dark:text-emerald-400 font-bold rounded-2xl hover:-translate-y-1 hover:shadow-lg transition-all border-2 border-emerald-100 dark:border-emerald-500/20 active:scale-95"
+            >
+              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> 
+              <span className="text-sm sm:text-base">Oson</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  // ===============================================
+  // 2. RO'YXAT REJIMI (Guruhlar tizeri)
+  // ===============================================
+  return (
+    <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+      
+      {/* FILTR (Guruhlash) TUGMALARI */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <button 
+          onClick={() => setFilter('barchasi')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all border ${filter === 'barchasi' ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30' : 'bg-white dark:bg-[#1E293B] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+        >
+          <LayoutGrid className="w-4 h-4" />
+          Barchasi
+          <span className={`ml-1 px-2 py-0.5 rounded-md text-[10px] ${filter === 'barchasi' ? 'bg-indigo-100 dark:bg-indigo-500/20' : 'bg-gray-100 dark:bg-slate-800'}`}>
+            {stats.barchasi}
+          </span>
+        </button>
+        
+        <button 
+          onClick={() => setFilter('qiyin')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all border ${filter === 'qiyin' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' : 'bg-white dark:bg-[#1E293B] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+        >
+          <Brain className="w-4 h-4" />
+          Qiyinlar
+          <span className={`ml-1 px-2 py-0.5 rounded-md text-[10px] ${filter === 'qiyin' ? 'bg-orange-100 dark:bg-orange-500/20' : 'bg-gray-100 dark:bg-slate-800'}`}>
+            {stats.qiyin}
+          </span>
+        </button>
+
+        <button 
+          onClick={() => setFilter('oson')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all border ${filter === 'oson' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30' : 'bg-white dark:bg-[#1E293B] text-gray-500 dark:text-gray-400 border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}
+        >
+          <CheckCircle2 className="w-4 h-4" />
+          Osonlar
+          <span className={`ml-1 px-2 py-0.5 rounded-md text-[10px] ${filter === 'oson' ? 'bg-emerald-100 dark:bg-emerald-500/20' : 'bg-gray-100 dark:bg-slate-800'}`}>
+            {stats.oson}
+          </span>
+        </button>
+      </div>
+
+      {filteredWords.length === 0 ? (
+        <div className="w-full text-center py-12 text-gray-400 dark:text-slate-500">
+          Ushbu guruhda hozircha kanjilar yo'q.
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 md:gap-8">
+          {filteredWords.map((word, index) => {
+            
+            const status = cardStatuses[word.id];
+            let percentage = "0%";
+            let circleColorClass = "text-gray-400 bg-white dark:bg-[#1E293B] border-gray-200 dark:border-slate-600";
+            
+            if (status === 'oson') {
+              percentage = "100%";
+              circleColorClass = "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30";
+            } else if (status === 'qiyin') {
+              percentage = "25%";
+              circleColorClass = "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30";
+            }
+
+            return (
+              <div 
+                key={word.id} 
+                onClick={() => {
+                  // Bosilganda aynan shu hozirgi filtrdagi ro'yxatni yuklaydi
+                  setPracticeQueue(filteredWords);
+                  setPracticeIndex(index);
+                  setIsFlipped(false);
+                }}
+                className="relative bg-white dark:bg-[#1E293B] rounded-xl p-3 sm:p-4 flex flex-col shadow-sm border border-gray-100 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer aspect-square overflow-hidden group"
+              >
+                <div className={`absolute top-2 right-2 sm:top-3 sm:right-3 w-7 h-7 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center text-[9px] sm:text-[10px] font-bold z-10 transition-colors ${circleColorClass}`}>
+                  {percentage}
+                </div>
+
+                <div className="flex-1 flex items-center justify-center w-full min-h-0">
+                  <span className="text-3xl sm:text-6xl font-normal text-[#141d2f] dark:text-white leading-none text-center transition-transform duration-300 group-hover:scale-110">
+                    {word.kanji}
+                  </span>
+                </div>
+
+                <div className="w-full flex flex-col items-center justify-end shrink-0 pb-1 z-10 bg-white dark:bg-[#1E293B]">
+                  <p className="text-xs sm:text-[16px] font-medium text-gray-500 dark:text-gray-400 truncate w-full text-center px-1 mb-2.5 sm:mb-4">
+                    {word.uzbek}
+                  </p>
+                  <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-[8px] sm:text-[9px] text-gray-300 dark:text-gray-500 font-medium mb-1 sm:mb-1.5">
+                    <span>W:0</span>
+                    <span>音:0</span>
+                    <span>訓:0</span>
+                  </div>
+                  <div className="w-8 sm:w-10 h-[2px] bg-gray-200 dark:bg-slate-700 rounded-full mb-1 sm:mb-1.5"></div>
+                  <span className="bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-gray-400 text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded">
+                    N5
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

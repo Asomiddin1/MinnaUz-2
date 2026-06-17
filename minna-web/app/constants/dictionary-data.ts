@@ -1,134 +1,69 @@
 // app/constants/dictionary-data.ts
 
 // === TYPESCRIPT TIPLARI ===
-export type WordCategory = "Asosiy" | "Murakkab"; // Yangi toifalar
-
 export interface Word {
   id: number;
   kanji: string;
   kana: string;
   romaji: string;
   uzbek: string;
-  level: string;
-  category: WordCategory; // So'z asosiymi yoki murakkab?
-  image?: string;
+  level: string; // N5, N4, N3, N2, N1
 }
 
-export interface Deck {
-  id: number;
-  title: string;
-  category: WordCategory; // To'plam qaysi toifaga tegishli?
-  count: number; // Masalan: 10 ta yoki 15 ta
-  progress: number;
-  color: string;
-  words: Word[];
-}
-
-// === DIFOLT MA'LUMOTLAR (KENGAYTIRILGAN) ===
+// === DIFOLT MA'LUMOTLAR (KO'PAYTIRILGAN) ===
 export const MOCK_WORDS: Word[] = [
-  // --- ASOSIY SO'ZLAR ---
-  { 
-    id: 1, kanji: "学生", kana: "がくせい", romaji: "gakusei", uzbek: "Talaba", level: "N5",
-    category: "Asosiy",
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 2, kanji: "学校", kana: "がっこう", romaji: "gakkou", uzbek: "Maktab", level: "N5",
-    category: "Asosiy",
-    image: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 4, kanji: "先生", kana: "せんせい", romaji: "sensei", uzbek: "O'qituvchi", level: "N5",
-    category: "Asosiy",
-    image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 5, kanji: "家族", kana: "かぞく", romaji: "kazoku", uzbek: "Oila", level: "N5",
-    category: "Asosiy",
-    image: "https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 6, kanji: "食べる", kana: "たべる", romaji: "taberu", uzbek: "Yemoq", level: "N5",
-    category: "Asosiy",
-    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 7, kanji: "水", kana: "みず", romaji: "mizu", uzbek: "Suv", level: "N5",
-    category: "Asosiy",
-    image: "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&q=80&w=800"
-  },
+  // --- N5 (Boshlang'ich) ---
+  { id: 1, kanji: "一", kana: "いち", romaji: "ichi", uzbek: "Bir", level: "N5" },
+  { id: 2, kanji: "二", kana: "に", romaji: "ni", uzbek: "Ikki", level: "N5" },
+  { id: 3, kanji: "三", kana: "さん", romaji: "san", uzbek: "Uch", level: "N5" },
+  { id: 4, kanji: "人", kana: "ひと", romaji: "hito", uzbek: "Odam", level: "N5" },
+  { id: 5, kanji: "日", kana: "ひ", romaji: "hi", uzbek: "Kun / Quyosh", level: "N5" },
+  { id: 6, kanji: "月", kana: "つき", romaji: "tsuki", uzbek: "Oy", level: "N5" },
+  { id: 7, kanji: "水", kana: "みず", romaji: "mizu", uzbek: "Suv", level: "N5" },
+  { id: 8, kanji: "木", kana: "き", romaji: "ki", uzbek: "Daraxt", level: "N5" },
+  { id: 9, kanji: "金", kana: "かね", romaji: "kane", uzbek: "Oltin / Pul", level: "N5" },
+  { id: 10, kanji: "土", kana: "つち", romaji: "tsuchi", uzbek: "Tuproq", level: "N5" },
+  { id: 11, kanji: "本", kana: "ほん", romaji: "hon", uzbek: "Kitob", level: "N5" },
+  { id: 12, kanji: "学", kana: "まなぶ", romaji: "manabu", uzbek: "O'rganmoq", level: "N5" },
+  { id: 13, kanji: "生", kana: "いきる", romaji: "ikiru", uzbek: "Yashamoq", level: "N5" },
+  { id: 14, kanji: "大", kana: "おおきい", romaji: "ookii", uzbek: "Katta", level: "N5" },
+  { id: 15, kanji: "小", kana: "ちいさい", romaji: "chiisai", uzbek: "Kichik", level: "N5" },
 
-  // --- MURAKKAB SO'ZLAR ---
-  { 
-    id: 3, kanji: "憂鬱", kana: "ゆううつ", romaji: "yuuutsu", uzbek: "Tushkunlik, depressiya", level: "N1",
-    category: "Murakkab",
-    image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 8, kanji: "挨拶", kana: "あいさつ", romaji: "aisatsu", uzbek: "Salomlashish", level: "N3",
-    category: "Murakkab",
-    image: "https://images.unsplash.com/photo-1455849318743-b2233052fcff?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 9, kanji: "完璧", kana: "かんぺき", romaji: "kanpeki", uzbek: "Mukammal", level: "N3",
-    category: "Murakkab",
-    image: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&q=80&w=800"
-  },
-  { 
-    id: 10, kanji: "躊躇", kana: "ちゅうちょ", romaji: "chuucho", uzbek: "Ikkilanish", level: "N1",
-    category: "Murakkab",
-    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800"
-  },
+  // --- N4 (O'rta-Boshlang'ich) ---
+  { id: 16, kanji: "家", kana: "いえ", romaji: "ie", uzbek: "Uy", level: "N4" },
+  { id: 17, kanji: "族", kana: "ぞく", romaji: "zoku", uzbek: "Oila / Qabila", level: "N4" },
+  { id: 18, kanji: "友", kana: "とも", romaji: "tomo", uzbek: "Do'st", level: "N4" },
+  { id: 19, kanji: "話", kana: "はなす", romaji: "hanasu", uzbek: "Gapirmoq", level: "N4" },
+  { id: 20, kanji: "読", kana: "よむ", romaji: "yomu", uzbek: "O'qimoq", level: "N4" },
+  { id: 21, kanji: "書", kana: "かく", romaji: "kaku", uzbek: "Yozmoq", level: "N4" },
+  { id: 22, kanji: "買", kana: "かう", romaji: "kau", uzbek: "Sotib olmoq", level: "N4" },
+
+  // --- N3 (O'rta) ---
+  { id: 23, kanji: "愛", kana: "あい", romaji: "ai", uzbek: "Sevgi", level: "N3" },
+  { id: 24, kanji: "心", kana: "こころ", romaji: "kokoro", uzbek: "Yurak / Qalb", level: "N3" },
+  { id: 25, kanji: "思", kana: "おもう", romaji: "omou", uzbek: "O'ylamoq", level: "N3" },
+  { id: 26, kanji: "信", kana: "しんじる", romaji: "shinjiru", uzbek: "Ishonmoq", level: "N3" },
+  { id: 27, kanji: "幸", kana: "しあわせ", romaji: "shiawase", uzbek: "Baxt", level: "N3" },
+  
+  // --- N2 (Oliy-O'rta) ---
+  { id: 28, kanji: "夢", kana: "ゆめ", romaji: "yume", uzbek: "Orzu / Tush", level: "N2" },
+  { id: 29, kanji: "希", kana: "まれ", romaji: "mare", uzbek: "Umid / Noyob", level: "N2" },
+  { id: 30, kanji: "望", kana: "のぞむ", romaji: "nozomu", uzbek: "Umid qilmoq", level: "N2" },
+
+  // --- N1 (Murakkab/Oliy) ---
+  { id: 31, kanji: "憂鬱", kana: "ゆううつ", romaji: "yuuutsu", uzbek: "Tushkunlik", level: "N1" },
+  { id: 32, kanji: "躊躇", kana: "ちゅうちょ", romaji: "chuucho", uzbek: "Ikkilanish", level: "N1" },
+  { id: 33, kanji: "完璧", kana: "かんぺき", romaji: "kanpeki", uzbek: "Mukammal", level: "N1" },
+  { id: 34, kanji: "挨拶", kana: "あいさつ", romaji: "aisatsu", uzbek: "Salomlashish", level: "N1" },
+  { id: 35, kanji: "曖昧", kana: "あいまい", romaji: "aimai", uzbek: "Noaniq / Mavhum", level: "N1" }
 ];
 
+// Asosiy sahifa (Kun so'zi vidjeti yoki boshqa joy uchun kerak bo'lib qolsa)
 export const MOCK_WORD_OF_THE_DAY: Word = { 
   id: 99, 
   kanji: "頑張る", 
   kana: "がんばる", 
   romaji: "ganbaru", 
   uzbek: "Harakat qilmoq", 
-  level: "N5",
-  category: "Asosiy",
+  level: "N5"
 };
-
-// TO'PLAMLAR (10-15 TALIK BO'LIMLAR)
-export const MOCK_DECKS: Deck[] = [
-  { 
-    id: 1, 
-    title: "1-bo'lim (Kundalik hayot)", 
-    category: "Asosiy",
-    count: 15, 
-    progress: 10, 
-    color: "from-blue-500 to-indigo-500", 
-    // Boshida faqat id=1 (Talaba) va id=2 (Maktab) kiritilgan. Qolganlarini o'zingiz qo'shib sinab ko'rasiz.
-    words: MOCK_WORDS.filter(w => w.category === "Asosiy" && (w.id === 1 || w.id === 2)) 
-  },
-  { 
-    id: 2, 
-    title: "2-bo'lim (Oila va uy)", 
-    category: "Asosiy",
-    count: 15, 
-    progress: 0, 
-    color: "from-blue-500 to-indigo-500", 
-    words: [] // Hozircha bo'sh!
-  },
-  { 
-    id: 3, 
-    title: "1-bo'lim (Qiyin iyerogliflar)", 
-    category: "Murakkab",
-    count: 10, 
-    progress: 12, 
-    color: "from-rose-500 to-red-500", 
-    // Boshida faqat id=3 (Depressiya) bor.
-    words: MOCK_WORDS.filter(w => w.category === "Murakkab" && w.id === 3) 
-  },
-  { 
-    id: 4, 
-    title: "2-bo'lim (O'xshash so'zlar)", 
-    category: "Murakkab",
-    count: 10, 
-    progress: 0, 
-    color: "from-rose-500 to-red-500", 
-    words: [] // Hozircha bo'sh!
-  },
-];

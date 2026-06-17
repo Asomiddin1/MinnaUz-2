@@ -168,41 +168,59 @@ export default function DashboardPage() {
           </header>
         </div>
 
+  
         {/* MOBIL KONTENT */}
-        <div className="w-full max-w-[100vw] space-y-4 overflow-hidden px-2 pt-4 pb-10">
-          <div className="w-full">
-            <BannerCarousel />
-          </div>
+         <div className="w-full max-w-[100vw] space-y-4 overflow-hidden px-2 pt-4 pb-10">
+  {/* 🚀 YANGILANGAN PREMIUM BANNER QISMI (Dark Mode bilan) */}
+  <div className="w-full px-2">
+    <div className="relative overflow-hidden rounded-[32px] border border-white/60 dark:border-slate-800 bg-white/40 dark:bg-slate-900/50 shadow-[0_20px_40px_rgba(0,0,0,0.08)] backdrop-blur-sm transition-all hover:shadow-[0_25px_50px_rgba(0,0,0,0.12)]">
+      <div className="absolute inset-0 rounded-[32px] ring-1 ring-inset ring-white/30 dark:ring-white/5 pointer-events-none z-10" />
+      <BannerCarousel />
+    </div>
+  </div>
 
-          <div className="grid grid-cols-4 gap-x-2 gap-y-4">
-            {MENU_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => router.push(item.href)}
-                className="group flex cursor-pointer flex-col items-center gap-1.5 border-none bg-transparent p-0 transition-transform active:scale-95"
-              >
-                <div className="flex h-[60px] w-[60px] items-center justify-center rounded-[16px] border border-slate-50 bg-white shadow-[0_4px_15px_rgba(0,0,0,0.03)] transition-colors dark:border-slate-800/50 dark:bg-slate-900 dark:shadow-none">
-                  <item.icon
-                    className={`h-6 w-6 ${item.color ? item.color : "text-slate-800 dark:text-slate-300"}`}
-                    strokeWidth={1.5}
-                  />
-                </div>
-                <span className="w-full text-center text-[10px] leading-none font-medium break-words text-slate-700 dark:text-slate-400">
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </div>
+  {/* Tugmalar menyusi */}
+  <div className="relative w-full p-4">
+    {/* Orqa tarafdagi "blob" - dark rejimda kamroq ko'rinadi */}
+    <div className="absolute right-0 top-0 h-48 w-48 rounded-full bg-indigo-500/20 blur-3xl -z-10" />
 
-          <div className="flex flex-col gap-3">
-            <div className="px-2">
-              <h1 className="text-[20px] font-semibold dark:text-white">
-                Jlpt darajalari
-              </h1>
-            </div>
-            <JlptLevels />
+    <div className="grid grid-cols-4 gap-x-3 gap-y-6">
+      {MENU_ITEMS.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => router.push(item.href)}
+          className="group flex flex-col items-center gap-2"
+        >
+          {/* Tugmaning DARK MODE'ga moslashuvchan uslubi */}
+          <div className="flex h-[72px] w-[72px] items-center justify-center rounded-[24px] 
+                          bg-white dark:bg-slate-900 
+                          border border-slate-200/50 dark:border-slate-800 
+                          shadow-[5px_5px_10px_rgba(0,0,0,0.05),-5px_-5px_10px_rgba(255,255,255,0.8)] 
+                          dark:shadow-[5px_5px_10px_rgba(0,0,0,0.4),-5px_-5px_10px_rgba(255,255,255,0.02)]
+                          transition-all active:scale-95">
+            <item.icon
+              className={`h-8 w-8 ${item.color ? item.color : "text-slate-800 dark:text-slate-200"}`}
+              strokeWidth={1.5}
+            />
           </div>
-        </div>
+          <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-300 text-center leading-tight">
+            {item.label}
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
+
+  {/* JLPT Darajalari qismi */}
+  <div className="flex flex-col gap-3">
+    <div className="px-2">
+      <h1 className="text-[20px] font-semibold text-slate-900 dark:text-white">
+        Jlpt darajalari
+      </h1>
+    </div>
+    <JlptLevels />
+  </div>
+  </div>
       </div>
 
       {/* =======================
