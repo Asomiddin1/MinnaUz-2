@@ -116,6 +116,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/devices/{id}', [UserProfileController::class, 'logoutDevice']); 
         // ==========================
 
+        // ===== DAILY CHECK-IN =====
+        Route::post('/check-in', [UserProfileController::class, 'checkIn']);
+        // ==========================
+
         Route::get('/tests', [UserExamController::class, 'index']);
         Route::get('/tests/{id}', [UserExamController::class, 'show']);
         Route::post('/tests/{id}/submit', [UserExamController::class, 'submit']);
