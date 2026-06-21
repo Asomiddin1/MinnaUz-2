@@ -91,6 +91,47 @@ class UserController extends Controller
     }
     
 
+    // =========================
+    // DAILY CHECK-IN
+    // =========================
+    public function checkIn(Request $request)
+    {
+        $user = $request->user();
+        $today = Carbon::today();
+
+        // Bugun allaqachon check-in qilinganmi?
+        $alreadyCheckedIn = LoginHistory::where('user_id', $user->id)
+            ->where('login_date', $today)
+            ->exists();
+
+        if (!$alreadyCheckedIn) {
+            // LoginHistory ga yozamiz
+            LoginHistory::create([
+                'user_id' => $user->id,
+                'login_date' => $today,
+            ]);
+
+            // Streak logikasi (AuthController dagi bilan bir xil)
+            if ($user->last_login_at) {
+                if ($user->last_login_at->isYesterday()) {
+                    $user->streak += 1;
+                } elseif (!$user->last_login_at->isToday()) {
+                    $user->streak = 1;
+                }
+            } else {
+                $user->streak = 1;
+            }
+            $user->last_login_at = Carbon::now();
+            $user->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'streak' => $user->streak,
+            'checked_in' => !$alreadyCheckedIn,
+        ]);
+    }
+
     public function getStreaks(Request $request)
     {
         // 1. Frontenddan kelayotgan yil va oyni olamiz (jo'natilmasa joriy yil/oy ishlatiladi)
